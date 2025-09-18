@@ -1,0 +1,17 @@
+version: '3'
+
+volumes:
+  arl_db:
+    external: true
+
+services:
+    web:
+        image: centos:latest
+        container_name: arl
+        restart: unless-stopped
+        ports:
+          - "5003:5003"
+        entrypoint: ["curl", "https://raw.githubusercontent.com/adysec/ARL/master/misc/setup-arl.sh > install.sh && bash install.sh"]
+        environment:
+          - LANG=en_US.UTF-8
+          - TZ=Asia/Shanghai
