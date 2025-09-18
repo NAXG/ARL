@@ -7,6 +7,16 @@ ARL资产侦察灯塔系统备份项目，**已跑通**
 
 本项目基于 [https://github.com/adysec/ARL](https://github.com/adysec/ARL) 的二次修改
 
+### 二次修改说明
+
+本次修改采用 [subfinder](https://github.com/projectdiscovery/subfinder) 替代原来的 API 查询请求进行子域名收集，提升子域名发现的效率和准确性。
+
+**subfinder 文件路径：** `/opt/ARL/app/services/dns_query_plugin/subfinder`
+
+**subfinder 配置文件路径：** `/opt/ARL/app/services/dns_query_plugin/provider-config.yaml`
+
+**API 配置说明：** 详细的 API 配置方法请参考 [subfinder 官方文档](https://docs.projectdiscovery.io/opensource/subfinder/install#post-install-configuration)
+
 ### 简介
 旨在快速侦察与目标关联的互联网资产，构建基础资产信息库。
 协助甲方安全团队或者渗透测试人员有效侦察和检索资产，发现存在的薄弱点和攻击面。
