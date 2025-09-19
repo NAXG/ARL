@@ -1,5 +1,4 @@
 from app import utils
-from collections import Counter
 from pymongo import UpdateOne
 
 def update_domain_prefix_counts_bulk(domains: list):
@@ -20,12 +19,10 @@ def update_domain_prefix_counts_bulk(domains: list):
     if not prefix_list:
         return
 
-    prefix_counts = Counter(prefix_list)
-
     operations = [
-        UpdateOne({"prefix": prefix}, {"$inc": {"count": count}}, upsert=True)
-        for prefix, count in prefix_counts.items()
+        UpdateOne({"prefix": prefix}, {"$inc": {"count": 1}}, upsert=True)
+        for prefix in prefix_list
     ]
 
-    if operations:
-        utils.conn_db('domain_prefix_stat').bulk_write(operations, ordered=False)
+    # a redundant safety check.
+    utils.conn_db('domain_prefix_stat').bulk_write(operations, ordered=False)
