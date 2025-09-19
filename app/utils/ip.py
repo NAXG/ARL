@@ -30,15 +30,16 @@ def not_in_black_ips(target):
     from . import get_logger
     logger = get_logger()
     try:
-        for ip in Config.BLACK_IPS:
-            if "-" in target:
-                target = target.split("-")[0]
+        if Config.BLACK_IPS:
+            for ip in Config.BLACK_IPS:
+                if "-" in target:
+                    target = target.split("-")[0]
 
-            if "/" in target:
-                target = target.split("/")[0]
+                if "/" in target:
+                    target = target.split("/")[0]
 
-            if IP(target) in IP(ip):
-                return False
+                if IP(target) in IP(ip):
+                    return False
     except Exception as e:
         logger.warn("error on check black ip {} {}".format(target, e))
 
