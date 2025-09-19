@@ -23,6 +23,7 @@ class GithubTaskTask(object):
 
     def save_content(self):
         self.update_status("fetch content-{}".format(len(self.results)))
+        items_to_insert = []
         for result in self.results:
             if not isinstance(result, GithubResult):
                 continue
@@ -31,8 +32,10 @@ class GithubTaskTask(object):
                 continue
 
             item = self.result_to_dict(result)
+            items_to_insert.append(item)
 
-            utils.conn_db("github_result").insert_one(item)
+        if items_to_insert:
+            utils.conn_db("github_result").insert_many(items_to_insert)
 
     def result_to_dict(self, result):
         item = result.to_dict()
@@ -114,8 +117,9 @@ class GithubTaskMonitor(GithubTaskTask):
                 self.hash_md5_list.append(result["hash_md5"])
 
     def save_mongo(self):
-        cnt = 0
         self.update_status("fetch content")
+        hashes_to_insert = []
+        items_to_insert = []
         for result in self.results:
             if not isinstance(result, GithubResult):
                 continue
@@ -126,7 +130,7 @@ class GithubTaskMonitor(GithubTaskTask):
             # 保存md5, 直接在过滤前，避免重复过滤
             self.hash_md5_list.append(result.hash_md5)
             hash_data = {"hash_md5": result.hash_md5, "github_scheduler_id": self.scheduler_id}
-            utils.conn_db("github_hash").insert_one(hash_data)
+            hashes_to_insert.append(hash_data)
 
             if self.filter_result(result):
                 continue
@@ -134,11 +138,16 @@ class GithubTaskMonitor(GithubTaskTask):
             item = self.result_to_dict(result)
             item["github_scheduler_id"] = self.scheduler_id
             item["update_date"] = utils.curr_date_obj()
-            cnt += 1
             self.new_results.append(result)
-            utils.conn_db("github_monitor_result").insert_one(item)
+            items_to_insert.append(item)
 
-        logger.info("github_monitor save {} {}".format(self.keyword, cnt))
+        if hashes_to_insert:
+            utils.conn_db("github_hash").insert_many(hashes_to_insert)
+
+        if items_to_insert:
+            utils.conn_db("github_monitor_result").insert_many(items_to_insert)
+
+        logger.info("github_monitor save {} {}".format(self.keyword, len(items_to_insert)))
 
     def build_repo_map(self):
         repo_map = dict()
