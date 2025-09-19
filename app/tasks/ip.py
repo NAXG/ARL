@@ -91,6 +91,7 @@ class IPTask(CommonTask):
         if self.task_tag == 'monitor':
             self.set_asset_ip()
 
+        ip_info_to_insert = []
         for ip_info in ip_port_result:
             curr_ip = ip_info["ip"]
             self.ip_set.add(curr_ip)
@@ -108,7 +109,10 @@ class IPTask(CommonTask):
 
             # 仅仅资产发现任务将IP全部存储起来
             if self.task_tag == 'task':
-                utils.conn_db('ip').insert_one(ip_info)
+                ip_info_to_insert.append(ip_info)
+
+        if ip_info_to_insert:
+            utils.conn_db('ip').insert_many(ip_info_to_insert)
 
         # 监控任务同步IP信息
         if self.task_tag == 'monitor':
@@ -156,6 +160,7 @@ class IPTask(CommonTask):
         else:
             self.cert_map = ssl_cert(self.ip_set)
 
+        certs_to_insert = []
         for target in self.cert_map:
             if ":" not in target:
                 continue
@@ -167,35 +172,39 @@ class IPTask(CommonTask):
                 "cert": self.cert_map[target],
                 "task_id": self.task_id,
             }
-            utils.conn_db('cert').insert_one(item)
+            certs_to_insert.append(item)
+
+        if certs_to_insert:
+            utils.conn_db('cert').insert_many(certs_to_insert)
 
     def save_service_info(self):
-        self.service_info_list = []
-        services_list = set()
+        service_map = {}  # Use a dictionary for efficient lookups
         for _data in self.ip_info_list:
-            port_info_lsit = _data.get("port_info")
-            for _info in port_info_lsit:
-                if _info.get("service_name"):
-                    if _info.get("service_name") not in services_list:
-                        _result = {}
-                        _result["service_name"] = _info.get("service_name")
-                        _result["service_info"] = []
-                        _result["service_info"].append({'ip': _data.get("ip"),
-                                                        'port_id': _info.get("port_id"),
-                                                        'product': _info.get("product"),
-                                                        'version': _info.get("version")})
-                        _result["task_id"] = self.task_id
-                        self.service_info_list.append(_result)
-                        services_list.add(_info.get("service_name"))
-                    else:
-                        for service_info in self.service_info_list:
-                            if service_info.get("service_name") == _info.get("service_name"):
-                                service_info['service_info'].append({'ip': _data.get("ip"),
-                                                                    'port_id': _info.get("port_id"),
-                                                                    'product': _info.get("product"),
-                                                                    'version': _info.get("version")})
+            port_info_list = _data.get("port_info")
+            for _info in port_info_list:
+                service_name = _info.get("service_name")
+                if not service_name:
+                    continue
+
+                service_details = {
+                    'ip': _data.get("ip"),
+                    'port_id': _info.get("port_id"),
+                    'product': _info.get("product"),
+                    'version': _info.get("version")
+                }
+
+                if service_name not in service_map:
+                    service_map[service_name] = {
+                        "service_name": service_name,
+                        "service_info": [service_details],
+                        "task_id": self.task_id
+                    }
+                else:
+                    service_map[service_name]['service_info'].append(service_details)
+
+        self.service_info_list = list(service_map.values())
         if self.service_info_list:
-            utils.conn_db('service').insert(self.service_info_list)
+            utils.conn_db('service').insert_many(self.service_info_list)
 
     def npoc_service_detection(self):
         targets = []
@@ -208,11 +217,15 @@ class IPTask(CommonTask):
                 targets.append("{}:{}".format(ip_info["ip"], port_info["port_id"]))
 
         result = run_sniffer(targets)
+        items_to_insert = []
         for item in result:
             self.npoc_service_target_set.add(item["target"])
             item["task_id"] = self.task_id
             item["save_date"] = utils.curr_date()
-            utils.conn_db('npoc_service').insert_one(item)
+            items_to_insert.append(item)
+
+        if items_to_insert:
+            utils.conn_db('npoc_service').insert_many(items_to_insert)
 
     def brute_config(self):
         plugins = []
@@ -227,10 +240,14 @@ class IPTask(CommonTask):
         targets = self.site_list.copy()
         targets += list(self.npoc_service_target_set)
         result = run_risk_cruising(targets=targets, plugins=plugins)
+        vulns_to_insert = []
         for item in result:
             item["task_id"] = self.task_id
             item["save_date"] = utils.curr_date()
-            utils.conn_db('vuln').insert_one(item)
+            vulns_to_insert.append(item)
+
+        if vulns_to_insert:
+            utils.conn_db('vuln').insert_many(vulns_to_insert)
 
     def run(self):
         base_update = self.base_update_task
