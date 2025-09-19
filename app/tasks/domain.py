@@ -522,6 +522,7 @@ class DomainTask(CommonTask):
         return self._not_found_domain_ips
 
     def save_domain_info_list(self, domain_info_list, source=CollectSource.DOMAIN_BRUTE):
+        domains_to_insert = []
         for domain_info_obj in domain_info_list:
             domain_info = domain_info_obj.dump_json(flag=False)
             domain_info["task_id"] = self.task_id
@@ -529,7 +530,10 @@ class DomainTask(CommonTask):
             domain_parsed = utils.domain_parsed(domain_info["domain"])
             if domain_parsed:
                 domain_info["fld"] = domain_parsed["fld"]
-            utils.conn_db('domain').insert_one(domain_info)
+            domains_to_insert.append(domain_info)
+
+        if domains_to_insert:
+            utils.conn_db('domain').insert_many(domains_to_insert)
 
     def domain_brute(self):
         # 调用工具去进行域名爆破，如果存在泛解析，会把包含泛解析的IP的域名给删除
@@ -666,11 +670,14 @@ class DomainTask(CommonTask):
     def port_scan(self):
         ip_info_list = scan_port(self.domain_info_list, self.scan_port_option)
 
+        ips_to_insert = []
         for ip_info_obj in ip_info_list:
             ip_info = ip_info_obj.dump_json(flag=False)
             ip_info["task_id"] = self.task_id
+            ips_to_insert.append(ip_info)
 
-            utils.conn_db('ip').insert_one(ip_info)
+        if ips_to_insert:
+            utils.conn_db('ip').insert_many(ips_to_insert)
 
         self.ip_info_list.extend(ip_info_list)
 
@@ -715,38 +722,42 @@ class DomainTask(CommonTask):
             if info_obj not in self.ip_info_list:
                 fake_ip_info_list.append(info_obj)
 
-        for ip_info_obj in fake_ip_info_list:
-            ip_info = ip_info_obj.dump_json(flag=False)
-            ip_info["task_id"] = self.task_id
-            utils.conn_db('ip').insert_one(ip_info)
-
+                    ips_to_insert = []
+                    for ip_info_obj in fake_ip_info_list:
+                        ip_info = ip_info_obj.dump_json(flag=False)
+                        ip_info["task_id"] = self.task_id
+                        ips_to_insert.append(ip_info)
+        
+                    if ips_to_insert:
+                        utils.conn_db('ip').insert_many(ips_to_insert)
     def save_service_info(self):
-        self.service_info_list = []
-        services_list = set()
+        service_map = {}  # Use a dictionary for efficient lookups
         for _data in self.ip_info_list:
             port_info_list = _data.port_info_list
             for _info in port_info_list:
-                if _info.service_name:
-                    if _info.service_name not in services_list:
-                        _result = {}
-                        _result["service_name"] = _info.service_name
-                        _result["service_info"] = []
-                        _result["service_info"].append({'ip': _data.ip,
-                                                        'port_id': _info.port_id,
-                                                        'product': _info.product,
-                                                        'version': _info.version})
-                        _result["task_id"] = self.task_id
-                        self.service_info_list.append(_result)
-                        services_list.add(_info.service_name)
-                    else:
-                        for service_info in self.service_info_list:
-                            if service_info.get("service_name") == _info.service_name:
-                                service_info['service_info'].append({'ip': _data.ip,
-                                                                     'port_id': _info.port_id,
-                                                                     'product': _info.product,
-                                                                     'version': _info.version})
+                service_name = _info.service_name
+                if not service_name:
+                    continue
+
+                service_details = {
+                    'ip': _data.ip,
+                    'port_id': _info.port_id,
+                    'product': _info.product,
+                    'version': _info.version
+                }
+
+                if service_name not in service_map:
+                    service_map[service_name] = {
+                        "service_name": service_name,
+                        "service_info": [service_details],
+                        "task_id": self.task_id
+                    }
+                else:
+                    service_map[service_name]['service_info'].append(service_details)
+
+        self.service_info_list = list(service_map.values())
         if self.service_info_list:
-            utils.conn_db('service').insert(self.service_info_list)
+            utils.conn_db('service').insert_many(self.service_info_list)
 
     def ssl_cert(self):
         if self.options.get("port_scan"):
@@ -754,6 +765,7 @@ class DomainTask(CommonTask):
         else:
             self.cert_map = ssl_cert(self.ip_set, self.base_domain)
 
+        certs_to_insert = []
         for target in self.cert_map:
             if ":" not in target:
                 continue
@@ -765,7 +777,10 @@ class DomainTask(CommonTask):
                 "cert": self.cert_map[target],
                 "task_id": self.task_id,
             }
-            utils.conn_db('cert').insert_one(item)
+            certs_to_insert.append(item)
+
+        if certs_to_insert:
+            utils.conn_db('cert').insert_many(certs_to_insert)
 
     def build_single_domain_info(self, domain):
         _type = "A"
@@ -913,11 +928,15 @@ class DomainTask(CommonTask):
                 targets.append("{}:{}".format(ip_info.ip, port_info.port_id))
 
         result = run_sniffer(targets)
+        items_to_insert = []
         for item in result:
             self.npoc_service_target_set.add(item["target"])
             item["task_id"] = self.task_id
             item["save_date"] = utils.curr_date()
-            utils.conn_db('npoc_service').insert_one(item)
+            items_to_insert.append(item)
+
+        if items_to_insert:
+            utils.conn_db('npoc_service').insert_many(items_to_insert)
 
     def start_poc_run(self):
         """poc run"""
@@ -958,10 +977,14 @@ class DomainTask(CommonTask):
         targets = self.site_list.copy()
         targets += list(self.npoc_service_target_set)
         result = run_risk_cruising(targets=targets, plugins=plugins)
+        vulns_to_insert = []
         for item in result:
             item["task_id"] = self.task_id
             item["save_date"] = utils.curr_date()
-            utils.conn_db('vuln').insert_one(item)
+            vulns_to_insert.append(item)
+
+        if vulns_to_insert:
+            utils.conn_db('vuln').insert_many(vulns_to_insert)
 
     def find_vhost_vuln(self):
         domains = find_private_domain_by_task_id(self.task_id)
@@ -970,6 +993,7 @@ class DomainTask(CommonTask):
 
         ips = find_public_ip_by_task_id(self.task_id)
         results = find_vhost(ips=ips, domains=domains)
+        vulns_to_insert = []
         for result in results:
             save_item = dict()
             save_item["plg_name"] = "FindVhost"
@@ -984,7 +1008,10 @@ class DomainTask(CommonTask):
             save_item["verify_obj"] = result
             save_item["task_id"] = self.task_id
             save_item["save_date"] = utils.curr_date()
-            utils.conn_db('vuln').insert_one(save_item)
+            vulns_to_insert.append(save_item)
+
+        if vulns_to_insert:
+            utils.conn_db('vuln').insert_many(vulns_to_insert)
 
     def start_find_vhost(self):
         if self.options.get("findvhost"):
@@ -1045,10 +1072,14 @@ class DomainTask(CommonTask):
         # 构建Page 信息
         if len(urls) > 0:
             page_map = services.page_fetch(urls)
+            urls_to_insert = []
             for url in page_map:
                 item = build_url_item(url, self.task_id, source=CollectSource.SEARCHENGINE)
                 item.update(page_map[url])
-                utils.conn_db('url').insert_one(item)
+                urls_to_insert.append(item)
+            
+            if urls_to_insert:
+                utils.conn_db('url').insert_many(urls_to_insert)
 
     def start_wih_domain_update(self):
         if self.wih_domain_set:
