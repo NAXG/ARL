@@ -15,7 +15,7 @@ from app.services.findVhost import find_vhost
 from app.services.dns_query import run_query_plugin
 from app.services.searchEngines import search_engines
 from app.services import domain_site_update
-from app.helpers.stat import update_domain_prefix_count
+from app.helpers.stat import update_domain_prefix_counts_bulk
 
 logger = utils.get_logger()
 
@@ -537,11 +537,11 @@ class DomainTask(CommonTask):
             utils.conn_db('domain').insert_many(domains_to_insert)
 
             # 更新域名前缀统计
-            for item in domains_to_insert:
-                try:
-                    update_domain_prefix_count(item["domain"])
-                except Exception as e:
-                    logger.exception(e)
+            try:
+                domain_strings = [item["domain"] for item in domains_to_insert]
+                update_domain_prefix_counts_bulk(domain_strings)
+            except Exception as e:
+                logger.error("Failed to bulk update domain prefix counts: {}".format(e))
 
     def domain_brute(self):
         # 调用工具去进行域名爆破，如果存在泛解析，会把包含泛解析的IP的域名给删除

@@ -1,15 +1,31 @@
 from app import utils
+from collections import Counter
+from pymongo import UpdateOne
 
-def update_domain_prefix_count(domain):
+def update_domain_prefix_counts_bulk(domains: list):
     """
-    从域名中提取前缀并更新计数
+    从域名列表中批量提取前缀并更新计数
     """
-    parts = domain.split('.')
-    # 域名由超过2部分组成时，才认为有前缀
-    # 例如 a.com 没有前缀, www.a.com 有前缀 www
-    if len(parts) > 2:
-        prefix = ".".join(parts[:-2])
-        # 使用 update_one 和 $inc 实现原子更新，如果前缀不存在则创建
-        query = {"prefix": prefix}
-        update = {"$inc": {"count": 1}}
-        utils.conn_db('domain_prefix_stat').update_one(query, update, upsert=True)
+    prefix_list = []
+    for domain in domains:
+        if not isinstance(domain, str):
+            continue
+
+        parts = domain.split('.')
+        if len(parts) > 2:
+            prefix = ".".join(parts[:-2])
+            if prefix:
+                prefix_list.append(prefix)
+
+    if not prefix_list:
+        return
+
+    prefix_counts = Counter(prefix_list)
+
+    operations = [
+        UpdateOne({"prefix": prefix}, {"$inc": {"count": count}}, upsert=True)
+        for prefix, count in prefix_counts.items()
+    ]
+
+    if operations:
+        utils.conn_db('domain_prefix_stat').bulk_write(operations, ordered=False)
