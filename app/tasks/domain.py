@@ -15,6 +15,7 @@ from app.services.findVhost import find_vhost
 from app.services.dns_query import run_query_plugin
 from app.services.searchEngines import search_engines
 from app.services import domain_site_update
+from app.helpers.stat import update_domain_prefix_count
 
 logger = utils.get_logger()
 
@@ -535,6 +536,13 @@ class DomainTask(CommonTask):
         if domains_to_insert:
             utils.conn_db('domain').insert_many(domains_to_insert)
 
+            # 更新域名前缀统计
+            for item in domains_to_insert:
+                try:
+                    update_domain_prefix_count(item["domain"])
+                except Exception as e:
+                    logger.exception(e)
+
     def domain_brute(self):
         # 调用工具去进行域名爆破，如果存在泛解析，会把包含泛解析的IP的域名给删除
         domain_info_list = domain_brute(self.base_domain, word_file=self.domain_word_file,
@@ -722,14 +730,14 @@ class DomainTask(CommonTask):
             if info_obj not in self.ip_info_list:
                 fake_ip_info_list.append(info_obj)
 
-                    ips_to_insert = []
-                    for ip_info_obj in fake_ip_info_list:
-                        ip_info = ip_info_obj.dump_json(flag=False)
-                        ip_info["task_id"] = self.task_id
-                        ips_to_insert.append(ip_info)
-        
-                    if ips_to_insert:
-                        utils.conn_db('ip').insert_many(ips_to_insert)
+        ips_to_insert = []
+        for ip_info_obj in fake_ip_info_list:
+            ip_info = ip_info_obj.dump_json(flag=False)
+            ip_info["task_id"] = self.task_id
+            ips_to_insert.append(ip_info)
+
+        if ips_to_insert:
+            utils.conn_db('ip').insert_many(ips_to_insert)
     def save_service_info(self):
         service_map = {}  # Use a dictionary for efficient lookups
         for _data in self.ip_info_list:
