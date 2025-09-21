@@ -82,7 +82,7 @@ yum update -y
 yum install epel-release -y
 yum install systemd -y
 yum install rabbitmq-server --nobest -y
-yum install python36 mongodb-org-server mongodb-org-shell python36-devel gcc-c++ git nginx fontconfig wqy-microhei-fonts unzip wget -y
+yum install python36 mongodb-org-server mongodb-mongosh python36-devel gcc-c++ git nginx fontconfig wqy-microhei-fonts unzip wget -y
 
 if [ ! -f /usr/bin/python3.6 ]; then
   echo "link python3.6"
@@ -107,7 +107,7 @@ fi
 if ! command -v nuclei &> /dev/null
 then
   echo "install nuclei"
-  wget -c https://github.com/naxg/ARL/raw/main/tools/nuclei.zip -O nuclei.zip
+  wget -c https://github.com/naxg/ARL/raw/feat/db-batch-optimization/tools/nuclei.zip -O nuclei.zip
   unzip nuclei.zip && mv nuclei /usr/bin/ && rm -f nuclei.zip
   nuclei -ut
   rm -rf /opt/*
@@ -118,7 +118,7 @@ if ! command -v wih &> /dev/null
 then
   echo "install wih ..."
   ## 安装 WIH
-  wget -c https://github.com/naxg/ARL/raw/main/tools/wih/wih_linux_amd64 -O /usr/bin/wih && chmod +x /usr/bin/wih
+  wget -c https://github.com/naxg/ARL/raw/feat/db-batch-optimization/tools/wih/wih_linux_amd64 -O /usr/bin/wih && chmod +x /usr/bin/wih
   wih --version
 fi
 
@@ -135,7 +135,7 @@ systemctl restart rabbitmq-server
 cd /opt
 if [ ! -d ARL ]; then
   echo "git clone ARL proj"
-  git clone https://github.com/naxg/ARL
+  git clone -b feat/db-batch-optimization https://github.com/naxg/ARL
 fi
 
 if [ ! -d "ARL-NPoC" ]; then
@@ -151,38 +151,38 @@ cd ../
 
 if [ ! -f /usr/local/bin/ncrack ]; then
   echo "Download ncrack ..."
-  wget -c https://github.com/naxg/ARL/raw/main/tools/ncrack -O /usr/local/bin/ncrack
+  wget -c https://github.com/naxg/ARL/raw/feat/db-batch-optimization/tools/ncrack -O /usr/local/bin/ncrack
   chmod +x /usr/local/bin/ncrack
 fi
 
 mkdir -p /usr/local/share/ncrack
 if [ ! -f /usr/local/share/ncrack/ncrack-services ]; then
   echo "Download ncrack-services ..."
-  wget -c https://github.com/naxg/ARL/raw/main/tools/ncrack-services -O /usr/local/share/ncrack/ncrack-services
+  wget -c https://github.com/naxg/ARL/raw/feat/db-batch-optimization/tools/ncrack-services -O /usr/local/share/ncrack/ncrack-services
 fi
 
 mkdir -p /data/GeoLite2
 if [ ! -f /data/GeoLite2/GeoLite2-ASN.mmdb ]; then
   echo "download GeoLite2-ASN.mmdb ..."
-  wget -c https://github.com/naxg/ARL/raw/main/tools/GeoLite2-ASN.mmdb -O /data/GeoLite2/GeoLite2-ASN.mmdb
+  wget -c https://github.com/naxg/ARL/raw/feat/db-batch-optimization/tools/GeoLite2-ASN.mmdb -O /data/GeoLite2/GeoLite2-ASN.mmdb
 fi
 
 if [ ! -f /data/GeoLite2/GeoLite2-City.mmdb ]; then
   echo "download GeoLite2-City.mmdb ..."
-  wget -c https://github.com/naxg/ARL/raw/main/tools/GeoLite2-City.mmdb -O /data/GeoLite2/GeoLite2-City.mmdb
+  wget -c https://github.com/naxg/ARL/raw/feat/db-batch-optimization/tools/GeoLite2-City.mmdb -O /data/GeoLite2/GeoLite2-City.mmdb
 fi
 
 cd /opt/ARL
 
 if [ ! -f rabbitmq_user ]; then
+  touch rabbitmq_user
   echo "add rabbitmq user"
   rabbitmqctl add_user arl arlpassword
   rabbitmqctl add_vhost arlv2host
   rabbitmqctl set_user_tags arl arltag
   rabbitmqctl set_permissions -p arlv2host arl ".*" ".*" ".*"
   echo "init arl user"
-  mongo 127.0.0.1:27017/arl docker/mongo-init.js
-  touch rabbitmq_user
+  mongosh 127.0.0.1:27017/arl docker/mongo-init.js
 fi
 
 echo "install arl requirements ..."
@@ -208,6 +208,7 @@ if [ ! -f /etc/ssl/certs/dhparam.pem ]; then
   echo "download dhparam.pem"
   curl https://ssl-config.mozilla.org/ffdhe2048.txt > /etc/ssl/certs/dhparam.pem
 fi
+
 
 
 echo "gen cert ..."
