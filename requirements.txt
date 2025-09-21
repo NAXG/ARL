@@ -18,3 +18,4 @@ gunicorn
 psutil
 crontab
 pyparsing
+pytest
