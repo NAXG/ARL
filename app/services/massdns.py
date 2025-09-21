@@ -51,7 +51,7 @@ class MassDNS:
                    ]
 
         logger.info(" ".join(command))
-        utils.exec_system(command, timeout=5*24*60*60)
+        utils.exec_system(command, timeout=3600)
 
     def parse_mass_dns_output(self):
         output = []

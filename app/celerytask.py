@@ -14,7 +14,7 @@ celery = Celery('task', broker=Config.CELERY_BROKER_URL)
 celery.conf.update(
     task_acks_late=False,
     worker_prefetch_multiplier=1,
-    broker_transport_options={"max_retries": 3, "interval_start": 0, "interval_step": 0.2, "interval_max": 0.5},
+    broker_transport_options={"max_retries": 3, "interval_start": 0, "interval_step": 0.2, "interval_max": 0.5, "consumer_timeout": 3600000}
 )
 platforms.C_FORCE_ROOT = True
 

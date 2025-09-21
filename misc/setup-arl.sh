@@ -2,8 +2,8 @@ set -e
 
 cd /etc/yum.repos.d/
 sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
-sed -i 's|baseurl=http://.*centos.org|baseurl=https://mirrors.adysec.com/system/centos|g' /etc/yum.repos.d/CentOS-*
-sed -i 's|#baseurl=https://mirrors.adysec.com/system/centos|baseurl=https://mirrors.adysec.com/system/centos|g' /etc/yum.repos.d/CentOS-*
+sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+sed -i 's|baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
 
 echo "cd /opt/"
 
@@ -17,13 +17,13 @@ nameserver 1.1.1.1
 EOF
 
 
-tee /etc/yum.repos.d/mongodb-org-4.0.repo <<"EOF"
-[mongodb-org-4.0]
+tee /etc/yum.repos.d/mongodb-org-6.0.repo <<"EOF"
+[mongodb-org-6.0]
 name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.0/x86_64/
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/6.0/x86_64/
 gpgcheck=1
 enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-4.0.asc
+gpgkey=https://www.mongodb.org/static/pgp/server-6.0.asc
 EOF
 
 tee //etc/yum.repos.d/rabbitmq.repo <<"EOF"
@@ -124,6 +124,9 @@ fi
 
 
 echo "start services ..."
+mkdir -p /etc/rabbitmq && \
+echo 'vm_memory_high_watermark.relative = 0.6' >> /etc/rabbitmq/rabbitmq.conf
+
 systemctl enable mongod
 systemctl restart mongod
 systemctl enable rabbitmq-server
