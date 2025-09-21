@@ -31,7 +31,7 @@ ARL资产侦察灯塔系统备份项目，**已跑通**
 ### Docker 内源码安装（最新版，需要为境外网络环境，且网络稳定）
 
 ```bass
-sudo docker run --privileged -it -d -p 5003:5003  --name=arl  --restart=always   rockylinux/rockylinux:9-ubi-init  /usr/sbin/init
+sudo docker run --privileged -it -d -p 5003:5003 --name=arl --restart=always rockylinux/rockylinux:9-ubi-init /usr/sbin/init
 docker exec -it arl bash
 # docker内运行，通过源码安装ARL
 curl https://raw.githubusercontent.com/naxg/ARL/2.6.7/misc/setup-arl.sh >install.sh

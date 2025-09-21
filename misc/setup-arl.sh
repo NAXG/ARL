@@ -101,7 +101,6 @@ then
   wget -c https://github.com/naxg/ARL/raw/2.6.7/tools/nuclei.zip -O nuclei.zip
   unzip nuclei.zip && mv nuclei /usr/bin/ && rm -f nuclei.zip
   nuclei -ut
-  rm -rf /opt/*
 fi
 
 
