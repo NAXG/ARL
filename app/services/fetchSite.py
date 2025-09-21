@@ -2,7 +2,6 @@ import time
 from pyquery import PyQuery as pq
 import binascii
 from urllib.parse import urljoin, urlparse
-from urllib3.util.url import parse_url, get_host
 import mmh3
 from app import utils
 from .baseThread import BaseThread
@@ -52,7 +51,8 @@ class FetchSite(BaseThread):
         if max_redirect <= 0:
             return
 
-        _, hostname, _ = get_host(site)
+        parsed = urlparse(site)
+        hostname = parsed.hostname or ""
 
         conn = utils.http_req(site, timeout=self.http_timeout)
         item = {
@@ -128,8 +128,8 @@ def finger_identify(content: bytes, header: str, title: str, favicon_hash: str):
 def same_netloc_and_scheme(u1, u2):
     u1 = normal_url(u1)
     u2 = normal_url(u2)
-    parsed1 = parse_url(u1)
-    parsed2 = parse_url(u2)
+    parsed1 = urlparse(u1)
+    parsed2 = urlparse(u2)
 
     if parsed1.scheme == parsed2.scheme and parsed1.netloc == parsed2.netloc:
         return True

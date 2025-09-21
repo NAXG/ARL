@@ -1,4 +1,4 @@
-vvar hexcase = 0;
+var hexcase = 0;
 function hex_md5(a) {
     if (a == "") return a;
     return rstr2hex(rstr_md5(str2rstr_utf8(a)))
