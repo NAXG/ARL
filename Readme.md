@@ -31,10 +31,10 @@ ARL资产侦察灯塔系统备份项目，**已跑通**
 ### Docker 内源码安装（最新版，需要为境外网络环境，且网络稳定）
 
 ```bass
-sudo docker run --privileged -it -d -p 5003:5003 --name=arl --restart=always centos /usr/sbin/init
+sudo docker run --privileged -it -d -p 5003:5003  --name=arl  --restart=always   rockylinux/rockylinux:9-ubi-init  /usr/sbin/init
 docker exec -it arl bash
 # docker内运行，通过源码安装ARL
-curl https://raw.githubusercontent.com/naxg/ARL/master/misc/setup-arl.sh >install.sh
+curl https://raw.githubusercontent.com/naxg/ARL/2.6.7/misc/setup-arl.sh >install.sh
 bash install.sh
 exit
 ```
@@ -45,7 +45,7 @@ Ubuntu 下可以直接执行 `apt-get install docker.io docker-compose -y` 安�
 
 ### 源码安装
 
-原版ARL仅适配centos 7，我更新至仅支持centos8（centos:latest）
+原版ARL仅适配centos 7，我更新至仅支持Rocky Linux 9.6
 如果在其他目录可以创建软连接，且安装了四个服务分别为`arl-web`, `arl-worker`, `arl-worker-github`, `arl-scheduler`
 
 ```
