@@ -33,8 +33,9 @@ def domain_executors(base_domain=None, job_id=None, scope_id=None, options=None,
 def wrap_domain_executors(base_domain=None, job_id=None, scope_id=None, options=None, name=""):
     celery_id = "celery_id_placeholder"
 
-    if current_task._get_current_object():
-        celery_id = current_task.request.id
+    request = getattr(current_task, "request", None)
+    if request:
+        celery_id = request.id
 
     task_data = {
         'name': name,
@@ -208,8 +209,9 @@ class IPExecutor(IPTask):
 
     def insert_task_data(self):
         celery_id = ""
-        if current_task._get_current_object():
-            celery_id = current_task.request.id
+        request = getattr(current_task, "request", None)
+        if request:
+            celery_id = request.id
 
         task_data = {
             'name': self.task_name,
