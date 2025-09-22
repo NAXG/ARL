@@ -1,6 +1,6 @@
 import datetime
 import dnslib
-from dnslib import *
+from dnslib import DNSRecord, QTYPE, RR, A
 from xing.core import PluginType
 from xing.core.BasePlugin import BasePlugin
 from xing.conf import Conf

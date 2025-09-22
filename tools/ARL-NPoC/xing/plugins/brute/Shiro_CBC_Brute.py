@@ -56,11 +56,15 @@ class Plugin(BasePlugin):
             return True
 
 
+def _pkcs7_pad(data_bytes: bytes, block_size: int) -> bytes:
+    pad_len = block_size - (len(data_bytes) % block_size)
+    return data_bytes + (chr(pad_len) * pad_len).encode()
+
+
 def shiro_cbc(key, data):
     BS = AES.block_size
-    pad = lambda s: s + ((BS - len(s) % BS) * chr(BS - len(s) % BS)).encode()
     mode = AES.MODE_CBC
     iv = uuid.uuid4().bytes
     encryptor = AES.new(base64.b64decode(key), mode, iv)
-    base64_ciphertext = base64.b64encode(iv + encryptor.encrypt(pad(base64.b64decode(data))))
+    base64_ciphertext = base64.b64encode(iv + encryptor.encrypt(_pkcs7_pad(base64.b64decode(data), BS)))
     return base64_ciphertext

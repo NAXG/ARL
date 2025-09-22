@@ -83,14 +83,15 @@ def get_scramble(packet):
     try:
         tmp = packet[15:]
         m = re.findall(rb"\x00?([\x01-\x7F]{7,})\x00", tmp)
-        if len(m) > 3: del m[0]
+        if len(m) > 3:
+            del m[0]
         scramble = m[0] + m[1]
-    except:
+    except Exception:
         return '', ''
     try:
         plugin = m[2]
-    except:
-        pass
+    except Exception:
+        plugin = b''
     return plugin, scramble
 
 

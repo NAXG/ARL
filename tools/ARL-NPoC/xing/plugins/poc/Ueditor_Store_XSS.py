@@ -15,7 +15,6 @@ class Plugin(BasePlugin):
 
     def verify(self, target):
         payload = "?action=uploadfile"
-        check = b"\\u94fe\\u63a5\\u4e0d\\u53ef\\u7528"
         paths = ["/ueditor/php/controller.php", "/Public/ueditor/php/controller.php"]
         paths.extend(["/js/ueditor/php/controller.php"])
         paths.extend(["/statics/ueditor/php/controller.php"])

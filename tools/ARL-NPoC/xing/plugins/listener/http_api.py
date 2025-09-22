@@ -1,5 +1,5 @@
 import base64
-from flask import *
+from flask import Flask, request, Response
 from xing.core import PluginType
 from xing.core.BasePlugin import BasePlugin
 from xing.conf import Conf
@@ -59,7 +59,7 @@ class Plugin(BasePlugin):
                 xml = xml % payload
                 return Response(xml, mimetype='application/xml')
 
-            except:
+            except Exception:
                 return Response(status=500, response='Error processing request')
 
 
@@ -109,7 +109,7 @@ class Plugin(BasePlugin):
 </linked-hash-set>""" % payload
                 return Response(xml, mimetype='application/xml')
 
-            except:
+            except Exception:
                 return Response(status=500, response='Error processing request')
 
         def run_query(cur, params):
