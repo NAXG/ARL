@@ -7,7 +7,7 @@ import json
 logger = utils.get_logger()
 
 
-class BaseAssetWebHook(object):
+class BaseAssetWebHook:
     def __init__(self, task_id: str, scope_id: str):
         self.task_id = task_id
         self.scope_id = scope_id

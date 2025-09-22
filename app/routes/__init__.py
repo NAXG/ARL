@@ -282,10 +282,10 @@ class ARLResource(Resource):
 
     def send_file(self, items_set, _type):
         response = make_response("\r\n".join(items_set))
-        filename = "{}_{}_{}.txt".format(_type, len(items_set), int(time.time()))
+        filename = f"{_type}_{len(items_set)}_{int(time.time())}.txt"
         response.headers['Content-Type'] = 'application/octet-stream'
         response.headers["Access-Control-Expose-Headers"] = "Content-Disposition"
-        response.headers["Content-Disposition"] = "attachment; filename={}".format(quote(filename))
+        response.headers["Content-Disposition"] = f"attachment; filename={quote(filename)}"
         return response
 
 

@@ -6,7 +6,7 @@ import socket
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.SNIFFER
         self.default_port = [1090]
         self.target_scheme = SchemeType.SOCKS5
@@ -26,7 +26,7 @@ class Plugin(BasePlugin):
         if len(data) != 2:
             return False
 
-        self.logger.debug("receive {}".format(data))
+        self.logger.debug(f"receive {data}")
 
         if data[0] == 5:
             return self.target_scheme

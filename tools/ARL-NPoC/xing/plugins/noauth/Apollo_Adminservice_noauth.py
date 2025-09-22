@@ -5,7 +5,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.POC
         self.vul_name = "apollo-adminservice 未授权访问"
         self.app_name = 'apollo-adminservice'
@@ -21,5 +21,5 @@ class Plugin(BasePlugin):
             return False
 
         if b'"ownerName"' in conn.content:
-            self.logger.success("found {} {}".format(self.app_name, url))
+            self.logger.success(f"found {self.app_name} {url}")
             return url

@@ -5,7 +5,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.POC
         self.vul_name = "发现帆软 FineReport V10"
         self.app_name = 'FineReport'
@@ -19,6 +19,6 @@ class Plugin(BasePlugin):
             conn = http_req(url)
 
             if b"frontSeed" in conn.content and b'name' in conn.content:
-                self.logger.success("found FineReport V10 {}".format(url))
+                self.logger.success(f"found FineReport V10 {url}")
                 return url
 

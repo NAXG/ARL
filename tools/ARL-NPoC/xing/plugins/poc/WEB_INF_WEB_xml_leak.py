@@ -5,7 +5,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.POC
         self.vul_name = "WEB-INF/web.xml 文件泄漏"
         self.app_name = 'Java'
@@ -27,6 +27,6 @@ class Plugin(BasePlugin):
             url_404 = target + path.replace("web", "web_not")
             conn_404 = http_req(url_404, disable_normal=True)
             if check not in conn_404.content:
-                self.logger.success("发现 WEB-INF/web.xml 文件泄漏 vuln {}".format(url))
+                self.logger.success(f"发现 WEB-INF/web.xml 文件泄漏 vuln {url}")
                 return url
 

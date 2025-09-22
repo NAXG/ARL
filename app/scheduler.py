@@ -28,7 +28,7 @@ ip_monitor_options = {
 
 
 def add_job(domain, scope_id, options=None, interval=60 * 1, name="", scope_type=AssetScopeType.DOMAIN):
-    logger.info("add {} job {} {} {}".format(scope_type, interval, domain, scope_id))
+    logger.info(f"add {scope_type} job {interval} {domain} {scope_id}")
     if options is None:
         if scope_type == AssetScopeType.DOMAIN:
             options = domain_monitor_options
@@ -177,7 +177,7 @@ def submit_job(domain, job_id, scope_id, options=None, name="", scope_type=Asset
             "data": task_data
         }
         celery_id = celerytask.arl_task.delay(options=task_options)
-        logger.info("submit domain job {} {} {}".format(celery_id, domain, scope_id))
+        logger.info(f"submit domain job {celery_id} {domain} {scope_id}")
 
     if scope_type == AssetScopeType.IP:
         task_options = {
@@ -185,7 +185,7 @@ def submit_job(domain, job_id, scope_id, options=None, name="", scope_type=Asset
             "data": task_data
         }
         celery_id = celerytask.arl_task.delay(options=task_options)
-        logger.info("submit ip job {} {} {}".format(celery_id, domain, scope_id))
+        logger.info(f"submit ip job {celery_id} {domain} {scope_id}")
 
 
 def update_job_run(job_id):

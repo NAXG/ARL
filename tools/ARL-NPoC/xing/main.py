@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import os
 import socket
 import sys
@@ -53,7 +52,7 @@ def scan(args):
     filter_plugins = load_plugin_by_filter(PluginType.POC,
                                            args.plugin_name)
 
-    logger.info("load plugin {} ".format(len(filter_plugins)))
+    logger.info(f"load plugin {len(filter_plugins)} ")
     plugin_runner(plugins=filter_plugins,
                   targets=load_targets(args.target), concurrency=args.concurrency_count)
 
@@ -63,7 +62,7 @@ def sniffer(args):
     filter_plugins = load_plugin_by_filter(PluginType.SNIFFER,
                                            args.plugin_name)
 
-    logger.info("load plugin {} ".format(len(filter_plugins)))
+    logger.info(f"load plugin {len(filter_plugins)} ")
     plugin_runner(plugins=filter_plugins,
                   targets=load_targets(args.target), concurrency=args.concurrency_count)
 
@@ -79,7 +78,7 @@ def exploit(args):
             continue
         plg_list.append(plg)
 
-    logger.info("load plugin {} ".format(len(plg_list)))
+    logger.info(f"load plugin {len(plg_list)} ")
     for plg in plg_list:
         utils.run_exploit_cmd(plg, args)
 
@@ -99,7 +98,7 @@ def shell(args):
             continue
         plg_list.append(plg)
 
-    logger.info("load plugin {} ".format(len(plg_list)))
+    logger.info(f"load plugin {len(plg_list)} ")
 
     check_sh = ShellManager()
     if not check_sh.check_service():
@@ -112,7 +111,7 @@ def shell(args):
         except ReadTimeout:
             logger.debug('ReadTimeOut')
 
-        except socket.timeout:
+        except TimeoutError:
             logger.debug('SocketTimeOut')
 
         except ConnectTimeout:
@@ -129,7 +128,7 @@ def shell(args):
 
         status = sh.check_connection()
         if status == "Connected":
-            logger.success("URL: {}".format(sh.conn_url))
+            logger.success(f"URL: {sh.conn_url}")
             return True
 
         return False
@@ -153,18 +152,18 @@ def brute(args):
     if username_file:
         username_file = os.path.abspath(username_file)
         if not os.path.isfile(username_file):
-            logger.warning("not found user file {}".format(username_file))
+            logger.warning(f"not found user file {username_file}")
             return
 
     password_file = args.password_file
     if password_file:
         password_file = os.path.abspath(password_file)
         if not os.path.isfile(password_file):
-            logger.warning("not found  password_file {}".format(password_file))
+            logger.warning(f"not found  password_file {password_file}")
             return
 
     filter_plugins = load_plugin_by_filter(PluginType.BRUTE, args.plugin_name)
-    logger.info("load plugin {} ".format(len(filter_plugins)))
+    logger.info(f"load plugin {len(filter_plugins)} ")
     for plg in filter_plugins:
         if username_file:
             plg.username_file = username_file

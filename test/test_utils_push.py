@@ -6,7 +6,7 @@ from app.config import Config
 
 class TestUtilsPush(unittest.TestCase):
     def __init__(self, *args, **kwargs):
-        super(TestUtilsPush, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._site_data = None
         self._domain_data = None
         self._ip_data = None

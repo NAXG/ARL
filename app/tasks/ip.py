@@ -125,17 +125,17 @@ class IPTask(CommonTask):
                 curr_ip = ip_info["ip"]
                 port_id = port_info["port_id"]
                 if port_id == 80:
-                    url_temp = "http://{}".format(curr_ip)
+                    url_temp = f"http://{curr_ip}"
                     url_temp_list.append(url_temp)
                     continue
 
                 if port_id == 443:
-                    url_temp = "https://{}".format(curr_ip)
+                    url_temp = f"https://{curr_ip}"
                     url_temp_list.append(url_temp)
                     continue
 
-                url_temp1 = "http://{}:{}".format(curr_ip, port_id)
-                url_temp2 = "https://{}:{}".format(curr_ip, port_id)
+                url_temp1 = f"http://{curr_ip}:{port_id}"
+                url_temp2 = f"https://{curr_ip}:{port_id}"
                 url_temp_list.append(url_temp1)
                 url_temp_list.append(url_temp2)
 

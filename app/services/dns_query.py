@@ -5,7 +5,7 @@ from app import utils
 from app.config import Config
 
 
-class DNSQueryBase(object):
+class DNSQueryBase:
     def __init__(self):
         self.source_name = None
         self.logger = utils.get_logger()
@@ -28,15 +28,15 @@ class DNSQueryBase(object):
 
     def query(self, target):
         t1 = time.time()
-        self.logger.info("start query {} on {}".format(target, self.source_name))
+        self.logger.info(f"start query {target} on {self.source_name}")
         try:
             domains = self.sub_domains(target)
         except Exception as e:
-            self.logger.error("{} error: {}".format(self.source_name, e))
+            self.logger.error(f"{self.source_name} error: {e}")
             return []
 
         if not isinstance(domains, list):
-            self.logger.warning("{} is not list".format(domains))
+            self.logger.warning(f"{domains} is not list")
             return []
 
         """下面是过滤掉不合法的数据"""
@@ -48,7 +48,7 @@ class DNSQueryBase(object):
             if not domain:
                 continue
 
-            if not domain.endswith(".{}".format(target)):
+            if not domain.endswith(f".{target}"):
                 continue
 
             # 删除掉过长的域名
@@ -159,5 +159,5 @@ def run_query_plugin(target, sources=None):
                 subdomains.add(result)
 
     t2 = time.time()
-    logger.info("{} subdomains result {} ({:.2f}s)".format(target, len(subdomains), t2 - t1))
+    logger.info(f"{target} subdomains result {len(subdomains)} ({t2 - t1:.2f}s)")
     return ret

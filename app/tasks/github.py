@@ -9,7 +9,7 @@ from app.utils import push
 logger = utils.get_logger()
 
 
-class GithubTaskTask(object):
+class GithubTaskTask:
     def __init__(self, task_id, keyword):
         self.task_id = task_id
         self.keyword = keyword
@@ -22,7 +22,7 @@ class GithubTaskTask(object):
         self.results.extend(results)
 
     def save_content(self):
-        self.update_status("fetch content-{}".format(len(self.results)))
+        self.update_status(f"fetch content-{len(self.results)}")
         items_to_insert = []
         for result in self.results:
             if not isinstance(result, GithubResult):
@@ -147,7 +147,7 @@ class GithubTaskMonitor(GithubTaskTask):
         if items_to_insert:
             utils.conn_db("github_monitor_result").insert_many(items_to_insert)
 
-        logger.info("github_monitor save {} {}".format(self.keyword, len(items_to_insert)))
+        logger.info(f"github_monitor save {self.keyword} {len(items_to_insert)}")
 
     def build_repo_map(self):
         repo_map = dict()
@@ -233,7 +233,7 @@ class GithubTaskMonitor(GithubTaskTask):
                 tr_cnt += 1
                 global_cnt += 1
                 url_text = item.repo_full_name + " " + item.path
-                markdown += "{}. [{}]({})  \n".format(global_cnt, url_text, item.html_url)
+                markdown += f"{global_cnt}. [{url_text}]({item.html_url})  \n"
                 if tr_cnt > 5:
                     break
 
@@ -244,7 +244,7 @@ class GithubTaskMonitor(GithubTaskTask):
         if not self.new_results:
             return
 
-        logger.info("found new result {} {}".format(self.keyword, len(self.new_results)))
+        logger.info(f"found new result {self.keyword} {len(self.new_results)}")
 
         self.push_dingding()
         self.push_email()
@@ -268,7 +268,7 @@ class GithubTaskMonitor(GithubTaskTask):
                 html_report = self.build_html_report()
                 push.send_email(host=Config.EMAIL_HOST, port=Config.EMAIL_PORT, mail=Config.EMAIL_USERNAME,
                                 password=Config.EMAIL_PASSWORD, to=Config.EMAIL_TO,
-                                title="[Github--{}] 灯塔消息推送".format(self.keyword), html=html_report)
+                                title=f"[Github--{self.keyword}] 灯塔消息推送", html=html_report)
                 logger.info("send email succ")
                 return True
         except Exception as e:

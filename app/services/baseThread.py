@@ -8,7 +8,7 @@ from app.modules import DomainInfo
 logger = utils.get_logger()
 
 
-class BaseThread(object):
+class BaseThread:
     def __init__(self, targets, concurrency=6):
         self.concurrency = concurrency
         self.semaphore = threading.Semaphore(concurrency)
@@ -27,11 +27,11 @@ class BaseThread(object):
             pass
 
         except Exception as e:
-            logger.warning("error on {}".format(url))
+            logger.warning(f"error on {url}")
             logger.exception(e)
 
         except BaseException as e:
-            logger.warning("BaseException on {}".format(url))
+            logger.warning(f"BaseException on {url}")
             raise e
         finally:
             self.semaphore.release()
@@ -45,7 +45,7 @@ class BaseThread(object):
                 target = target.strip()
 
             cnt += 1
-            logger.debug("[{}/{}] work on {}".format(cnt, len(self.targets), target))
+            logger.debug(f"[{cnt}/{len(self.targets)}] work on {target}")
 
             if not target:
                 continue
@@ -65,7 +65,7 @@ class BaseThread(object):
 
 class ThreadMap(BaseThread):
     def __init__(self, fun, items, arg=None, concurrency=6):
-        super(ThreadMap, self).__init__(targets=items, concurrency=concurrency)
+        super().__init__(targets=items, concurrency=concurrency)
         if not callable(fun):
             raise TypeError("fun must be callable.")
 

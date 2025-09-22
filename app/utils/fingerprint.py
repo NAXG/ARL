@@ -37,17 +37,17 @@ def parse_human_rule(rule):
         key = key.strip()
         if len(key_value) == 2:
             if key not in key_map:
-                logger.info("{} 不在指定关键字中".format(key))
+                logger.info(f"{key} 不在指定关键字中")
                 continue
 
             value = key_value[1]
             value = value.strip()
             if len(value) <= 6:
-                logger.info("{} 长度少于7".format(value))
+                logger.info(f"{value} 长度少于7")
                 continue
 
             if value[0] != '"' or value[-1] != '"':
-                logger.info("{} 没有在双引号内".format(value))
+                logger.info(f"{value} 没有在双引号内")
                 continue
 
             empty_flag = False
@@ -77,11 +77,11 @@ def transform_rule_map(rule):
     human_rule_list = []
     for key in rule:
         if key not in key_map:
-            logger.info("{} 不在指定关键字中".format(key))
+            logger.info(f"{key} 不在指定关键字中")
             continue
 
         for rule_item in rule[key]:
-            human_rule_list.append('{}="{}"'.format(key_map[key], rule_item))
+            human_rule_list.append(f'{key_map[key]}="{rule_item}"')
 
     return " || ".join(human_rule_list)
 
@@ -120,7 +120,7 @@ def fetch_fingerprint(content, headers, title, favicon_hash, finger_list):
                     match_flag = True
                     break
             except Exception as e:
-                logger.debug("error on fetch_fingerprint {} to gbk".format(html))
+                logger.debug(f"error on fetch_fingerprint {html} to gbk")
 
         if match_flag:
             continue

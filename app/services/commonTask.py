@@ -11,7 +11,7 @@ logger = utils.get_logger()
 
 
 # 任务类中一些相关公共类
-class CommonTask(object):
+class CommonTask:
     def __init__(self, task_id):
         self.task_id = task_id
 
@@ -30,7 +30,7 @@ class CommonTask(object):
 
     def insert_finger_stat(self):
         finger_stat_map = utils.arl.gen_stat_finger_map(self.task_id)
-        logger.info("insert finger stat {}".format(len(finger_stat_map)))
+        logger.info(f"insert finger stat {len(finger_stat_map)}")
 
         for key in finger_stat_map:
             data = finger_stat_map[key].copy()
@@ -39,7 +39,7 @@ class CommonTask(object):
 
     def insert_cip_stat(self):
         cip_map = utils.arl.gen_cip_map(self.task_id)
-        logger.info("insert cip stat {}".format(len(cip_map)))
+        logger.info(f"insert cip stat {len(cip_map)}")
 
         for cidr_ip in cip_map:
             item = cip_map[cidr_ip]
@@ -61,7 +61,7 @@ class CommonTask(object):
     def sync_asset(self):
         options = getattr(self, 'options', {})
         if not options:
-            logger.warning("not found options {}".format(self.task_id))
+            logger.warning(f"not found options {self.task_id}")
             return
 
         related_scope_id = options.get("related_scope_id", "")
@@ -69,7 +69,7 @@ class CommonTask(object):
             return
 
         if len(related_scope_id) != 24:
-            logger.warning("related_scope_id len not eq 24 {}".format(self.task_id, related_scope_id))
+            logger.warning(f"related_scope_id len not eq 24 {self.task_id}")
             return
 
         services.sync_asset(task_id=self.task_id, scope_id=related_scope_id)
@@ -82,7 +82,7 @@ class CommonTask(object):
 
 
 # *** 对用户提交的站点或者是发现的站点进行后续处理
-class WebSiteFetch(object):
+class WebSiteFetch:
     def __init__(self, task_id: str, sites: list, options: dict, scope_domain: list = None):
         self.task_id = task_id
         self.sites = sites  # ** 这个是用户提交的目标
@@ -123,7 +123,7 @@ class WebSiteFetch(object):
         for site_info in self.site_info_list:
             curr_site = site_info["site"]
             site_path = "/image/" + self.task_id
-            file_name = '{}/{}.jpg'.format(site_path, utils.gen_filename(curr_site))
+            file_name = f'{site_path}/{utils.gen_filename(curr_site)}.jpg'
             site_info["task_id"] = self.task_id
             site_info["screenshot"] = file_name
 
@@ -139,7 +139,7 @@ class WebSiteFetch(object):
                     if analyze_name not in known_finger_set:
                         site_info["finger"].append(analyze_finger)
 
-        logger.info("save_site_info site:{}, {}".format(len(self.site_info_list), self.__str__()))
+        logger.info(f"save_site_info site:{len(self.site_info_list)}, {self.__str__()}")
         if self.site_info_list:
             utils.conn_db('site').insert_many(self.site_info_list)
 
@@ -178,7 +178,7 @@ class WebSiteFetch(object):
             spider_urls.extend(new_target_urls)
 
         if len(spider_urls) > 0:
-            logger.info("spider_urls {} task_id:{}".format( len(spider_urls), self.task_id))
+            logger.info(f"spider_urls {len(spider_urls)} task_id:{self.task_id}")
             page_map = services.page_fetch(spider_urls)
             for url in page_map:
                 item = build_url_item(url, self.task_id, source=CollectSource.SITESPIDER)
@@ -233,24 +233,24 @@ class WebSiteFetch(object):
             utils.conn_db('vuln').insert_one(item)
 
     def nuclei_scan(self):
-        logger.info("start nuclei_scan， poc_sites:{}".format(len(self.poc_sites)))
+        logger.info(f"start nuclei_scan， poc_sites:{len(self.poc_sites)}")
         scan_results = nuclei_scan(list(self.poc_sites))
         for item in scan_results:
             item["task_id"] = self.task_id
             item["save_date"] = utils.curr_date()
             utils.conn_db('nuclei_result').insert_one(item)
 
-        logger.info("end nuclei_scan， result:{}".format(len(scan_results)))
+        logger.info(f"end nuclei_scan， result:{len(scan_results)}")
 
     def run_func(self, name: str, func: callable):
-        logger.info("start run {}, {}".format(name, self.__str__()))
+        logger.info(f"start run {name}, {self.__str__()}")
         self.base_update_task.update_task_field("status", name)
         t1 = time.time()
         func()
         elapse = time.time() - t1
         self.base_update_task.update_services(name, elapse)
 
-        logger.info("end run {} ({:.2f}s), {}".format(name, elapse, self.__str__()))
+        logger.info(f"end run {name} ({elapse:.2f}s), {self.__str__()}")
 
     def update_page_url_set(self):
         from app.helpers import get_url_by_task_id
@@ -260,7 +260,7 @@ class WebSiteFetch(object):
 
         for u in self.page_url_set:
             o = urlparse(u)
-            ret_url = "{}://{}".format(o.scheme, o.netloc)
+            ret_url = f"{o.scheme}://{o.netloc}"
             entry_urls = self.search_engines_result.get(ret_url, [])
             entry_urls.append(u)
             self.search_engines_result[ret_url] = entry_urls

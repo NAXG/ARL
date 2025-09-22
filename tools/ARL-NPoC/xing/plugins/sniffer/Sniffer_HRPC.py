@@ -6,7 +6,7 @@ import time
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.SNIFFER
         self.default_port = [8032]
         self.target_scheme = SchemeType.HRPC
@@ -20,7 +20,7 @@ class Plugin(BasePlugin):
         time.sleep(0.2)
         data = client.recv(256)
 
-        self.logger.debug("recv <<< {}".format(data))
+        self.logger.debug(f"recv <<< {data}")
 
         client.close()
         if len(data) >= len(check) and check in data:

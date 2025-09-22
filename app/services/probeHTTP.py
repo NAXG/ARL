@@ -18,8 +18,8 @@ class ProbeHTTP(BaseThread):
             if hasattr(item, 'domain'):
                 domain = item.domain
 
-            _targets.append("https://{}".format(domain))
-            _targets.append("http://{}".format(domain))
+            _targets.append(f"https://{domain}")
+            _targets.append(f"http://{domain}")
 
         return _targets
 
@@ -35,7 +35,7 @@ class ProbeHTTP(BaseThread):
 
     def run(self):
         t1 = time.time()
-        logger.info("start ProbeHTTP {}".format(len(self.targets)))
+        logger.info(f"start ProbeHTTP {len(self.targets)}")
         self._run()
         # 去除https和http相同的
         alive_site = []
@@ -49,7 +49,7 @@ class ProbeHTTP(BaseThread):
                     alive_site.append(x)
 
         elapse = time.time() - t1
-        logger.info("end ProbeHTTP {} elapse {}".format(len(alive_site), elapse))
+        logger.info(f"end ProbeHTTP {len(alive_site)} elapse {elapse}")
 
         return alive_site
 

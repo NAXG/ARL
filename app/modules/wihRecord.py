@@ -1,5 +1,3 @@
-
-
 class WihRecord:
     def __init__(self, record_type, content, source, site, fnv_hash):
         self.recordType = record_type
@@ -9,7 +7,7 @@ class WihRecord:
         self.fnv_hash = fnv_hash
 
     def __str__(self):
-        return "{} {} {} {}".format(self.recordType, self.content, self.source, self.site)
+        return f"{self.recordType} {self.content} {self.source} {self.site}"
 
     def __repr__(self):
         return "<WihRecord>" + self.__str__()

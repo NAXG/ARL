@@ -5,7 +5,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.POC
         self.vul_name = "发现 Swagger 文档接口"
         self.app_name = 'Swagger'
@@ -34,5 +34,5 @@ class Plugin(BasePlugin):
 
             if check_str[1] not in text:
                 continue
-            self.logger.success("Found swagger url {}".format(url))
+            self.logger.success(f"Found swagger url {url}")
             return url

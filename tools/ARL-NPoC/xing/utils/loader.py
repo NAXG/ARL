@@ -37,7 +37,7 @@ def load_plugins(path):
             setattr(plugin, '_plugin_name', name)
             plugins.append(plugin)
         except Exception as e:
-            logger.warning("load plugin error from {}".format(file_path))
+            logger.warning(f"load plugin error from {file_path}")
             logger.exception(e)
 
     return plugins

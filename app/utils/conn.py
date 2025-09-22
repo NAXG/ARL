@@ -75,10 +75,10 @@ def http_req(url, method='get', **kwargs):
     return conn
 
 
-class ConnMongo(object):
+class ConnMongo:
     def __new__(self):
         if not hasattr(self, 'instance'):
-            self.instance = super(ConnMongo, self).__new__(self)
+            self.instance = super().__new__(self)
             self.instance.conn = MongoClient(Config.MONGO_URL)
         return self.instance
 

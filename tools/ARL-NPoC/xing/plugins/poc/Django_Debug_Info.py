@@ -5,7 +5,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.POC
         self.vul_name = "Django 开启调试模式"
         self.app_name = 'Django'
@@ -25,5 +25,5 @@ class Plugin(BasePlugin):
                 continue
 
             if b"<title>Page not found at" in content and b"lljfafd</title>" in content:
-                self.logger.success("发现 Django 开启调试模式 {}".format(self.target))
+                self.logger.success(f"发现 Django 开启调试模式 {self.target}")
                 return url

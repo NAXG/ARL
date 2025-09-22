@@ -3,12 +3,12 @@ from app import utils
 
 
 # 用于更新任务状态
-class BaseUpdateTask(object):
+class BaseUpdateTask:
     def __init__(self, task_id: str):
         self.task_id = task_id
 
     def update_services(self, service_name: str, elapsed: float):
-        elapsed = "{:.2f}".format(elapsed)
+        elapsed = f"{elapsed:.2f}"
         self.update_task_field("status", service_name)
         query = {"_id": ObjectId(self.task_id)}
         update = {"$push": {"service": {"name": service_name, "elapsed": float(elapsed)}}}

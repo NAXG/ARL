@@ -6,7 +6,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.BRUTE
         self.vul_name = "Nexus Repository 弱口令"
         self.app_name = 'Nexus Repository'
@@ -22,7 +22,7 @@ class Plugin(BasePlugin):
 
     def login(self, target, user, passwd):
         url = target + self.path
-        auth = "username={}&password={}".format(b64encode(user.encode()).decode(), b64encode(passwd.encode()).decode())
+        auth = f"username={b64encode(user.encode()).decode()}&password={b64encode(passwd.encode()).decode()}"
         conn = http_req(url, "post", headers=self.headers, data=auth)
         if b'<' in conn.content:
             return False

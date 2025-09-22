@@ -37,10 +37,10 @@ class BuildDomainInfo(BaseThread):
 
     def run(self):
         t1 = time.time()
-        logger.info("start build Domain info {}".format(len(self.targets)))
+        logger.info(f"start build Domain info {len(self.targets)}")
         self._run()
         elapse = time.time() - t1
-        logger.info("end build Domain info {} elapse {}".format(len(self.domain_info_list), elapse))
+        logger.info(f"end build Domain info {len(self.domain_info_list)} elapse {elapse}")
 
         return self.domain_info_list
 

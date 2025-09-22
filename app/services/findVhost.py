@@ -9,7 +9,7 @@ logger = get_logger()
 bool_ratio = 0.9
 
 
-class Page(object):
+class Page:
     def __init__(self, url, domain, content, status_code, content_type):
         self.url = url
         self.domain = domain
@@ -45,7 +45,7 @@ class Page(object):
         return not self.__eq__(other)
 
     def __str__(self):
-        return "<Page>{}-----{}".format(self.url, self.domain)
+        return f"<Page>{self.url}-----{self.domain}"
 
     def __hash__(self):
         return hash(self.url)
@@ -73,10 +73,10 @@ class Page(object):
 
 class BruteVhost(BaseThread):
     def __init__(self, ip, domains, scheme, concurrency=6):
-        super(BruteVhost, self).__init__(targets=domains, concurrency=concurrency)
+        super().__init__(targets=domains, concurrency=concurrency)
         self.ip = ip
         self.scheme = scheme
-        self.url_ip = "{}://{}".format(self.scheme, self.ip)
+        self.url_ip = f"{self.scheme}://{self.ip}"
         self.domains = domains
         self.not_found_set = set()
         self.success_set = set()
@@ -88,7 +88,7 @@ class BruteVhost(BaseThread):
     def brute_domain(self, domain):
         try:
             headers = {
-                "Host": "{}".format(domain)
+                "Host": f"{domain}"
             }
             res = http_req(self.url_ip, headers=headers, timeout=(3, 6))
             content = res.content.replace(domain.encode(), b"")
@@ -97,14 +97,14 @@ class BruteVhost(BaseThread):
                         status_code=res.status_code, content_type=res_type)
             return page
         except Exception as e:
-            logger.debug("{} {} {}".format(self.url_ip, domain, str(e)))
+            logger.debug(f"{self.url_ip} {domain} {str(e)}")
             if isinstance(e, (ConnectTimeout, ReadTimeout)):
                 self.error_cnt += 1
 
     def work(self, domain):
         if self.error_cnt >= 10:
             if not self.print_skip_warning_flag:
-                logger.warning("skip {}".format(self.url_ip))
+                logger.warning(f"skip {self.url_ip}")
 
             self.print_skip_warning_flag = True
             return
@@ -140,12 +140,12 @@ class BruteVhost(BaseThread):
 
         if page not in self.success_set:
             success = page.dump_json()
-            logger.success("found {}".format(success))
+            logger.success(f"found {success}")
             self.success_set.add(page)
 
     def run(self):
         domain_404_list = [self.ip, "not123abc" + self.domains[0], "wfaz.zljhaz.com", "n0ta." + self.domains[0]]
-        logger.debug(">> build 404 page {}://{}".format(self.scheme, self.ip))
+        logger.debug(f">> build 404 page {self.scheme}://{self.ip}")
         for item in domain_404_list:
             page = self.brute_domain(item)
             if page:
@@ -153,14 +153,14 @@ class BruteVhost(BaseThread):
         self._run()
 
         if len(self.success_set) > 0:
-            logger.info("found {} {}".format(self.url_ip, len(self.success_set)))
+            logger.info(f"found {self.url_ip} {len(self.success_set)}")
 
         return self.success_set
 
 
 def brute_vhost(ip, args):
     domains, scheme = args
-    logger.info("brute_vhost >>> ip: {}, domain: {}, scheme: {}".format(ip, len(domains), scheme))
+    logger.info(f"brute_vhost >>> ip: {ip}, domain: {len(domains)}, scheme: {scheme}")
     brute = BruteVhost(ip=ip, domains=domains, scheme=scheme,
                        concurrency=8)
     return brute.run()
@@ -177,7 +177,7 @@ def find_vhost(ips, domains):
             page_set = result_map[ip]
             for page in page_set:
                 # 添加全局的去重逻辑，屏蔽CDN等原因
-                key = "{}-{}-{}".format(page.domain, page.title, page.status_code)
+                key = f"{page.domain}-{page.title}-{page.status_code}"
                 if key in same_set:
                     continue
 

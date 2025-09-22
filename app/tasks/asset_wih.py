@@ -23,7 +23,7 @@ class AssetWihUpdateTask(CommonTask):
         self._scope_sub_domains = None
 
     def run(self):
-        logger.info("run AssetWihUpdateTask, task_id:{} scope_id: {}".format(self.task_id, self.scope_id))
+        logger.info(f"run AssetWihUpdateTask, task_id:{self.task_id} scope_id: {self.scope_id}")
         self.run_wih_monitor()
 
         self.wih_results_save()
@@ -34,7 +34,7 @@ class AssetWihUpdateTask(CommonTask):
         # 插入统计信息
         self.insert_stat()
 
-        logger.info("end AssetWihUpdateTask, task_id:{} results: {}".format(self.task_id, len(self.wih_results)))
+        logger.info(f"end AssetWihUpdateTask, task_id:{self.task_id} results: {len(self.wih_results)}")
 
     def insert_stat(self):
         self.insert_finger_stat()

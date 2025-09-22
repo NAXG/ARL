@@ -15,15 +15,15 @@ class AssetSiteCompare(BaseThread):
     def __init__(self, scope_id):
         self._scope_id = scope_id
         sites = asset_site.find_site_by_scope_id(scope_id)
-        logger.info("load {}  site from {}".format(len(sites), self._scope_id))
-        super(AssetSiteCompare, self).__init__(targets=sites, concurrency=15)
+        logger.info(f"load {len(sites)}  site from {self._scope_id}")
+        super().__init__(targets=sites, concurrency=15)
         self.new_site_info_map = {}
         self.mutex = threading.Lock()
         self.site_change_map = {}
 
     def work(self, site):
         if is_black_asset_site(site):
-            logger.debug("{} in black asset site".format(site))
+            logger.debug(f"{site} in black asset site")
             return
 
         conn = utils.http_req(site)
@@ -66,7 +66,7 @@ class AssetSiteCompare(BaseThread):
         return self.site_change_map
 
 
-class AssetSiteMonitor(object):
+class AssetSiteMonitor:
     def __init__(self, scope_id):
         self.scope_id = scope_id
         self.status_change_list = []
@@ -74,7 +74,7 @@ class AssetSiteMonitor(object):
         self.site_change_info_list = []  # 保存变化了的站点信息，用于保存到任务中
         scope_data = get_scope_by_scope_id(self.scope_id)
         if not scope_data:
-            raise Exception("没有找到资产组 {}".format(self.scope_id))
+            raise Exception(f"没有找到资产组 {self.scope_id}")
 
         self.scope_name = scope_data["name"]
 
@@ -91,7 +91,7 @@ class AssetSiteMonitor(object):
                 "status": curr_status,
                 "old_status": old_status
             }
-            logger.info("{} status {} => {}".format(curr_site, old_status, curr_status))
+            logger.info(f"{curr_site} status {old_status} => {curr_status}")
 
             self.update_asset_site(asset_site_id, site_info)
             self.status_change_list.append(item)
@@ -111,7 +111,7 @@ class AssetSiteMonitor(object):
                 "old_title": old_title
             }
 
-            logger.info("{} title {} => {}".format(curr_site, old_title, curr_title))
+            logger.info(f"{curr_site} title {old_title} => {curr_title}")
 
             self.update_asset_site(asset_site_id, site_info)
 
@@ -125,10 +125,10 @@ class AssetSiteMonitor(object):
         sites = list(site_change_map.keys())
 
         if not sites:
-            logger.info("not found change ok site, scope_id: {}".format(self.scope_id))
+            logger.info(f"not found change ok site, scope_id: {self.scope_id}")
             return
 
-        logger.info("found scope site {}, scope_id: {}".format(len(sites), self.scope_id))
+        logger.info(f"found scope site {len(sites)}, scope_id: {self.scope_id}")
 
         site_info_list = fetch_site(sites)
 
@@ -277,7 +277,7 @@ class AssetSiteMonitor(object):
         return markdown
 
     def build_markdown_report(self):
-        markdown = "\n站点监控-{} 灯塔消息推送\n\n".format(self.scope_name)
+        markdown = f"\n站点监控-{self.scope_name} 灯塔消息推送\n\n"
 
         markdown += "\n 新发现标题变化 {}， 状态码变化 {} \n\n".format(
             len(self.title_change_list), len(self.status_change_list))
@@ -294,18 +294,18 @@ class AssetSiteMonitor(object):
     def run(self):
         self.build_change_list()
         if not self.status_change_list and not self.title_change_list:
-            logger.info("not found change by {}".format(self.scope_id))
+            logger.info(f"not found change by {self.scope_id}")
             return
 
         html_report = self.build_html_report()
-        html_title = "[站点监控-{}] 灯塔消息推送".format(self.scope_name)
+        html_title = f"[站点监控-{self.scope_name}] 灯塔消息推送"
         push_email(title=html_title, html_report=html_report)
 
         markdown_report = self.build_markdown_report()
         push_dingding(markdown_report=markdown_report)
 
 
-class Domain2SiteMonitor(object):
+class Domain2SiteMonitor:
     def __init__(self, scope_id):
         self.scope_id = scope_id
         self.site_info_list = []
@@ -319,7 +319,7 @@ class Domain2SiteMonitor(object):
         if len(domains) == 0:
             return ret
 
-        logger.info("load {} domain, scope_id:{}".format(len(domains), self.scope_id))
+        logger.info(f"load {len(domains)} domain, scope_id:{self.scope_id}")
 
         have_domain_site_list = []
         for site in sites:
@@ -329,9 +329,9 @@ class Domain2SiteMonitor(object):
 
         no_domain_site_list = set(domains) - set(have_domain_site_list)
         for domain in no_domain_site_list:
-            ret.append("https://{}".format(domain))
+            ret.append(f"https://{domain}")
 
-        logger.info("load {} no_domain_site_list, scope_id:{}".format(len(ret), self.scope_id))
+        logger.info(f"load {len(ret)} no_domain_site_list, scope_id:{self.scope_id}")
 
         return ret
 
@@ -368,7 +368,7 @@ class Domain2SiteMonitor(object):
             site_info["save_date"] = curr_date
             site_info["update_date"] = curr_date
             utils.conn_db('asset_site').insert_one(site_info)
-        logger.info("save asset_site {} to {}".format(len(self.site_info_list), self.scope_id))
+        logger.info(f"save asset_site {len(self.site_info_list)} to {self.scope_id}")
 
     def build_report(self):
         from app.utils.push import dict2table, dict2dingding_mark
@@ -392,7 +392,7 @@ class Domain2SiteMonitor(object):
 
         html += dict2table(info_list)
 
-        mark = "  新发现站点 {}  ".format(len(self.site_info_list))
+        mark = f"  新发现站点 {len(self.site_info_list)}  "
 
         mark += dict2dingding_mark(info_list)
 

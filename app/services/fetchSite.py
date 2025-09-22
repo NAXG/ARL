@@ -96,10 +96,10 @@ class FetchSite(BaseThread):
 
     def run(self):
         t1 = time.time()
-        logger.info("start fetch site {}".format(len(self.targets)))
+        logger.info(f"start fetch site {len(self.targets)}")
         self._run()
         elapse = time.time() - t1
-        logger.info("end fetch site elapse {}".format(elapse))
+        logger.info(f"end fetch site elapse {elapse}")
 
         # 对站点信息自动打标签
         auto_tag(self.site_info_list)
@@ -151,7 +151,7 @@ def fetch_site(sites, concurrency=15, http_timeout=None):
     return f.run()
 
 
-class FetchFavicon(object):
+class FetchFavicon:
     def __init__(self, url):
         self.url = url
         self.favicon_url = None
@@ -183,7 +183,7 @@ class FetchFavicon(object):
                 return self.build_result(data)
 
         except Exception as e:
-            logger.warning("error on {} {}".format(self.url, e))
+            logger.warning(f"error on {self.url} {e}")
 
         return result
 

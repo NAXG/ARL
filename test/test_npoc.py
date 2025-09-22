@@ -6,7 +6,7 @@ from app.config import Config
 
 class TestUtilsNpoc(unittest.TestCase):
     def __init__(self, *args, **kwargs):
-        super(TestUtilsNpoc, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def test_load_poc(self):
         n = npoc.NPoC(tmp_dir=Config.TMP_PATH)
@@ -36,12 +36,12 @@ class TestUtilsNpoc(unittest.TestCase):
     def run_all_poc(self, targets):
         n = npoc.NPoC(tmp_dir=Config.TMP_PATH, concurrency=6)
         run_total = len(n.plugin_name_list) * len(targets)
-        print("run total {}".format(run_total))
+        print(f"run total {run_total}")
         run_thread = Thread(target=n.run_all_poc, args=(targets,))
         run_thread.start()
         while run_thread.is_alive():
             time.sleep(0.6)
-            print("runner cnt {}/{}".format(n.runner.runner_cnt, run_total))
+            print(f"runner cnt {n.runner.runner_cnt}/{run_total}")
 
         if n.result:
             print(n.result)

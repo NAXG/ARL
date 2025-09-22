@@ -234,7 +234,7 @@ def update_conf(args):
         numeric_level = Conf.SUCCESS_LEVEL
 
     if not isinstance(numeric_level, int):
-        raise ValueError('Invalid log level:{0}'.format(loglevel))
+        raise ValueError(f'Invalid log level:{loglevel}')
 
     Conf.LOGGER_LEVEL = numeric_level
 

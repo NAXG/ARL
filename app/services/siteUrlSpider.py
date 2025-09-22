@@ -14,7 +14,7 @@ class URLTYPE:
     css = "css"
 
 
-class URLInfo(object):
+class URLInfo:
     def __init__(self, entry_url, crawl_url, url_type):
         self.entry_url = entry_url
         self.crawl_url = crawl_url
@@ -49,7 +49,7 @@ class URLInfo(object):
         return self._similar_hash
 
 
-class URLList(object):
+class URLList:
     def __init__(self):
         self.result = []
         self.similar_hash_pool = []
@@ -102,7 +102,7 @@ class URLSimilarList(URLList):
             self.similar_hash_pool.append(element.similar_hash())
 
 
-class SiteURLSpider(object):
+class SiteURLSpider:
     def __init__(self, entry_urls=None, deep_num=3):
         entry_url_list = URLSimilarList()
         for url in entry_urls:
@@ -130,7 +130,7 @@ class SiteURLSpider(object):
 
     def _work(self, entry_url):
         try:
-            logger.debug("[{}] req = > {}".format(len(self.done_url_list), entry_url))
+            logger.debug(f"[{len(self.done_url_list)}] req = > {entry_url}")
             if utils.url_ext(entry_url) in self.ignore_ext:
                 return URLSimilarList()
 
@@ -144,7 +144,7 @@ class SiteURLSpider(object):
                 url_info = URLInfo(entry_url, _url, URLTYPE.document)
                 if utils.same_netloc(entry_url, _url) and (url_info not in self.done_url_list):
                     entry_url = _url
-                    logger.info("[{}] req 302 = > {}".format(len(self.done_url_list), entry_url))
+                    logger.info(f"[{len(self.done_url_list)}] req 302 = > {entry_url}")
                     conn = utils.http_req(_url)
                     self.done_url_list.add(url_info)
                     self.all_url_list.add(url_info)
@@ -173,20 +173,20 @@ class SiteURLSpider(object):
                         self.all_url_list.add(url_info)
             return ret_url
         except Exception as e:
-            logger.error("error on {} {}".format(entry_url, e))
+            logger.error(f"error on {entry_url} {e}")
             return URLSimilarList()
 
     def run(self):
         tmp_urls = self.entry_url_list
         for num in range(0, self.deep_num):
             if len(tmp_urls) > 0:
-                logger.info("{} deep num {}, len {}".format(self.scope_url, num + 1, len(tmp_urls)))
+                logger.info(f"{self.scope_url} deep num {num + 1}, len {len(tmp_urls)}")
 
             new_url = URLSimilarList()
             for info in tmp_urls:
                 self.all_url_list.add(info)
                 if len(self.done_url_list) > self.max_url:
-                    logger.warning("exit on request max url {}".format(self.scope_url))
+                    logger.warning(f"exit on request max url {self.scope_url}")
                     return self.all_url_list
 
                 if info not in self.done_url_list:
@@ -213,10 +213,10 @@ class SiteURLSpiderThread(BaseThread):
 
     def run(self):
         t1 = time.time()
-        logger.info("start site url spider entry_urls_list:{}".format(len(self.targets)))
+        logger.info(f"start site url spider entry_urls_list:{len(self.targets)}")
         self._run()
         elapse = time.time() - t1
-        logger.info("end site url spider ({:.2f}s)".format(elapse))
+        logger.info(f"end site url spider ({elapse:.2f}s)")
         return self.site_url_map
 
 

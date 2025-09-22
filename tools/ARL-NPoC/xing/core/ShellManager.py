@@ -31,7 +31,7 @@ class ShellManager:
                 'port': port
             }
 
-            self.logger.debug("Session Created For Port {}".format(port))
+            self.logger.debug(f"Session Created For Port {port}")
 
             url = self.platform_url + '/create'
             req = http_req(url, method='post', data=data)

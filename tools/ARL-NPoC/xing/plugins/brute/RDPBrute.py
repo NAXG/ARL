@@ -9,7 +9,7 @@ Win 10 下有点问题
 
 class Plugin(ServiceBrutePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.BRUTE
         self.vul_name = "RDP 弱口令"
         self.app_name = 'rdp'

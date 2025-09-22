@@ -36,7 +36,7 @@ def do_login():
 def get_rule(token):
 	files = ['tools/finger.json','tools/finger2.json']
 	for filename in files:
-		file = open(filename, 'r',encoding='utf-8')
+		file = open(filename,encoding='utf-8')
 		data = json.load(file)
 		for i in data['fingerprint']:
 			for keyword in i['keyword']:

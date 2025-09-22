@@ -24,7 +24,7 @@ logger = utils.get_logger()
 '''
 
 
-class DomainBrute(object):
+class DomainBrute:
     def __init__(self, base_domain, word_file=Config.DOMAIN_DICT_2W, wildcard_domain_ip=None):
         if wildcard_domain_ip is None:
             wildcard_domain_ip = []
@@ -81,7 +81,7 @@ class DomainBrute(object):
                 domains.append(domain)
 
         start_time = time.time()
-        logger.info("start resolver {} {}".format(self.base_domain, len(domains)))
+        logger.info(f"start resolver {self.base_domain} {len(domains)}")
         self.resolver_map = services.resolver_domain(domains)
         elapse = time.time() - start_time
         logger.info("end resolver {} result {}, elapse {}".format(self.base_domain,
@@ -93,7 +93,7 @@ class DomainBrute(object):
 
     def run(self):
         start_time = time.time()
-        logger.info("start brute {} with dict {}".format(self.base_domain, len(self.dicts)))
+        logger.info(f"start brute {self.base_domain} with dict {len(self.dicts)}")
         self._brute_domain()
         elapse = time.time() - start_time
         logger.info("end brute {}, result {}, elapse {}".format(self.base_domain,
@@ -125,7 +125,7 @@ class DomainBrute(object):
 
 
 # 端口扫描
-class ScanPort(object):
+class ScanPort:
     def __init__(self, domain_info_list, option):
         self.domain_info_list = domain_info_list
         self.ipv4_map = {}
@@ -189,12 +189,12 @@ class ScanPort(object):
             all_ipv4_list = list(set(all_ipv4_list) - set(self.have_cdn_ip_list))
 
         start_time = time.time()
-        logger.info("start port_scan {}".format(len(all_ipv4_list)))
+        logger.info(f"start port_scan {len(all_ipv4_list)}")
         ip_port_result = []
         if all_ipv4_list:
             ip_port_result = services.port_scan(all_ipv4_list, **self.option)
             elapse = time.time() - start_time
-            logger.info("end port_scan result {}, elapse {}".format(len(ip_port_result), elapse))
+            logger.info(f"end port_scan result {len(ip_port_result)}, elapse {elapse}")
 
         ip_info_obj = []
         for result in ip_port_result:
@@ -260,7 +260,7 @@ class ScanPort(object):
 '''
 
 
-class FindSite(object):
+class FindSite:
     def __init__(self, ip_info_list):
         self.ip_info_list = ip_info_list
 
@@ -271,17 +271,17 @@ class FindSite(object):
                 for port_info in info.port_info_list:
                     port_id = port_info.port_id
                     if port_id == 80:
-                        url_temp = "http://{}".format(domain)
+                        url_temp = f"http://{domain}"
                         url_temp_list.append(url_temp)
                         continue
 
                     if port_id == 443:
-                        url_temp = "https://{}".format(domain)
+                        url_temp = f"https://{domain}"
                         url_temp_list.append(url_temp)
                         continue
 
-                    url_temp1 = "http://{}:{}".format(domain, port_id)
-                    url_temp2 = "https://{}:{}".format(domain, port_id)
+                    url_temp1 = f"http://{domain}:{port_id}"
+                    url_temp2 = f"https://{domain}:{port_id}"
                     url_temp_list.append(url_temp1)
                     url_temp_list.append(url_temp2)
 
@@ -304,7 +304,7 @@ class FindSite(object):
                     alive_site.append(x)
 
         elapse = time.time() - start_time
-        logger.info("end check_http result {}, elapse {}".format(len(alive_site), elapse))
+        logger.info(f"end check_http result {len(alive_site)}, elapse {elapse}")
 
         return alive_site
 
@@ -314,7 +314,7 @@ class FindSite(object):
 '''
 
 
-class AltDNS(object):
+class AltDNS:
     def __init__(self, domain_info_list, base_domain, wildcard_domain_ip=None):
         self.domain_info_list = domain_info_list
         self.base_domain = base_domain
@@ -371,7 +371,7 @@ class AltDNS(object):
                                self.dicts, wildcard_domain_ip=self.wildcard_domain_ip)
 
         elapse = time.time() - t1
-        logger.info("end AltDNS result {}, elapse {}".format(len(out), elapse))
+        logger.info(f"end AltDNS result {len(out)}, elapse {elapse}")
 
         return out
 
@@ -518,7 +518,7 @@ class DomainTask(CommonTask):
                 self._not_found_domain_ips.extend(utils.get_cname(fake_domain, log_flag=False))
 
             if self._not_found_domain_ips:
-                logger.info("not_found_domain_ips  {} {}".format(fake_domain, self._not_found_domain_ips))
+                logger.info(f"not_found_domain_ips  {fake_domain} {self._not_found_domain_ips}")
 
         return self._not_found_domain_ips
 
@@ -541,7 +541,7 @@ class DomainTask(CommonTask):
                 domain_strings = [item["domain"] for item in domains_to_insert]
                 update_domain_prefix_counts_bulk(domain_strings)
             except Exception as e:
-                logger.error("Failed to bulk update domain prefix counts: {}".format(e))
+                logger.error(f"Failed to bulk update domain prefix counts: {e}")
 
     def domain_brute(self):
         # 调用工具去进行域名爆破，如果存在泛解析，会把包含泛解析的IP的域名给删除
@@ -579,7 +579,7 @@ class DomainTask(CommonTask):
 
     def arl_search(self):
         arl_t1 = time.time()
-        logger.info("start arl fetch {}".format(self.base_domain))
+        logger.info(f"start arl fetch {self.base_domain}")
         arl_all_domains = utils.arl_domain(self.base_domain)
         domain_info_list = self.build_domain_info(arl_all_domains)
         if self.task_tag == "task":
@@ -639,14 +639,14 @@ class DomainTask(CommonTask):
         }
         fake_info = modules.DomainInfo(**fake)
 
-        logger.info("alt_dns_current {}, primary_domain:{}".format(self.base_domain, primary_domain))
+        logger.info(f"alt_dns_current {self.base_domain}, primary_domain:{primary_domain}")
         data = alt_dns([fake_info], primary_domain, wildcard_domain_ip=self.not_found_domain_ips)
 
         return data
 
     def alt_dns(self):
         if self.task_tag == "monitor" and len(self.domain_info_list) >= 800:
-            logger.info("skip alt_dns on monitor {}".format(self.base_domain))
+            logger.info(f"skip alt_dns on monitor {self.base_domain}")
             return
 
         if len(self.domain_info_list) > 300 and len(self.not_found_domain_ips) > 0:
@@ -667,7 +667,7 @@ class DomainTask(CommonTask):
         if self.task_tag == "task":
             alt_domain_info_list = self.clear_domain_info_by_record(alt_domain_info_list)
 
-            logger.info("alt_dns real result:{}".format(len(alt_domain_info_list)))
+            logger.info(f"alt_dns real result:{len(alt_domain_info_list)}")
 
             if len(alt_domain_info_list) > 0:
                 self.save_domain_info_list(alt_domain_info_list,
@@ -815,7 +815,7 @@ class DomainTask(CommonTask):
 
     # *** 执行域名查询插件
     def dns_query_plugin(self):
-        logger.info("start run dns_query_plugin {}".format(self.base_domain))
+        logger.info(f"start run dns_query_plugin {self.base_domain}")
         results = run_query_plugin(self.base_domain, [])
         sources_map = dict()
         for result in results:
@@ -830,7 +830,7 @@ class DomainTask(CommonTask):
             source_domains = sources_map[source]
             if not source_domains:
                 continue
-            logger.info("start build domain info, source:{}".format(source))
+            logger.info(f"start build domain info, source:{source}")
             domain_info_list = self.build_domain_info(source_domains)
             if self.task_tag == "task":
                 domain_info_list = self.clear_domain_info_by_record(domain_info_list)
@@ -933,7 +933,7 @@ class DomainTask(CommonTask):
                 if port_info.port_id in skip_port_list:
                     continue
 
-                targets.append("{}:{}".format(ip_info.ip, port_info.port_id))
+                targets.append(f"{ip_info.ip}:{port_info.port_id}")
 
         result = run_sniffer(targets)
         items_to_insert = []

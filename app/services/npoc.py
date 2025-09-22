@@ -10,11 +10,11 @@ from app.config import Config
 logger = utils.get_logger()
 
 
-class NPoC(object):
+class NPoC:
     """docstring for ClassName"""
 
     def __init__(self, concurrency=6, tmp_dir="./"):
-        super(NPoC, self).__init__()
+        super().__init__()
         self._plugins = None
         self._poc_info_list = None
         self.concurrency = concurrency
@@ -121,7 +121,7 @@ class NPoC(object):
             if plugin_name in self.db_plugin_name_list:
                 continue
 
-            logger.info("insert {} info to db".format(plugin_name))
+            logger.info(f"insert {plugin_name} info to db")
             utils.conn_db('poc').insert_one(new)
 
         return True
@@ -137,7 +137,7 @@ class NPoC(object):
     def run_poc(self, plugin_name_list, targets):
         self.result = []
         npoc_conf.SAVE_TEXT_RESULT_FILENAME = ""
-        random_file = os.path.join(self.tmp_dir, "npoc_result_{}.txt".format(utils.random_choices()))
+        random_file = os.path.join(self.tmp_dir, f"npoc_result_{utils.random_choices()}.txt")
         npoc_conf.SAVE_JSON_RESULT_FILENAME = random_file
         plugins = self.filter_plugin_by_name(plugin_name_list)
 

@@ -5,7 +5,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.POC
         self.vul_name = "发现 Apache Shiro"
         self.app_name = 'Shiro'
@@ -20,7 +20,7 @@ class Plugin(BasePlugin):
         set_cookie = http_req(url, headers=headers).headers.get('Set-Cookie', "")
 
         if "rememberMe=deleteMe" in set_cookie:
-            self.logger.success("found shiro {}".format(target))
+            self.logger.success(f"found shiro {target}")
             return True
         else:
             return False

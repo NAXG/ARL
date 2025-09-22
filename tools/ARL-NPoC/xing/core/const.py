@@ -1,5 +1,3 @@
-
-
 class PluginType:
     POC = "poc"
     SNIFFER = "sniffer"

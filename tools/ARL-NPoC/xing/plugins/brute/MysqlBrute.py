@@ -8,7 +8,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.BRUTE
         self.vul_name = "MySQL 弱口令"
         self.app_name = 'mysql'
@@ -25,7 +25,7 @@ class Plugin(BasePlugin):
 
         plugin, scramble = get_scramble(data)
         if scramble == "":
-            self.logger.info("not found scramble {}:{} {}".format(user, passwd, target))
+            self.logger.info(f"not found scramble {user}:{passwd} {target}")
             return False
 
         auth_data = get_auth_data(user_bytes, passwd_bytes, scramble, plugin)
@@ -34,7 +34,7 @@ class Plugin(BasePlugin):
         result = client.recv(1024)
         client.close()
 
-        self.logger.debug("recv <<< {}".format(result))
+        self.logger.debug(f"recv <<< {result}")
         if result == b"\x07\x00\x00\x02\x00\x00\x00\x02\x00\x00\x00":
             return True
 
@@ -42,12 +42,12 @@ class Plugin(BasePlugin):
         client = self.conn_target()
         data = client.recv(256)
         client.close()
-        self.logger.debug("recv <<< {}".format(data))
+        self.logger.debug(f"recv <<< {data}")
         pattern = rb'^.\x00\x00\x00.*?mysql|^.\x00\x00\x00\n|.*?MariaDB server'
         matches = re.findall(pattern, data)
 
         if not matches:
-            self.logger.debug("recv <<< {}".format(data))
+            self.logger.debug(f"recv <<< {data}")
             return False
 
         plugin, scramble = get_scramble(data)
@@ -57,7 +57,7 @@ class Plugin(BasePlugin):
 
         check = b'is not allowed to connect'
         if check in data:
-            self.logger.debug("recv <<< {}".format(data))
+            self.logger.debug(f"recv <<< {data}")
             return False
 
         return True

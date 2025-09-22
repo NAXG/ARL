@@ -11,7 +11,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.POC
         self.vul_name = "发现 Graphql 接口"
         self.app_name = 'Graphql'
@@ -31,6 +31,6 @@ class Plugin(BasePlugin):
                 continue
 
             if b"query missing" in conn.content and b"<" not in conn.content:
-                self.logger.success("Found Graphql url {}".format(url))
+                self.logger.success(f"Found Graphql url {url}")
                 return url
 

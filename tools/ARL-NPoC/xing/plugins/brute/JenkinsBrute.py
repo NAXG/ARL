@@ -6,7 +6,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.BRUTE
         self.vul_name = "Jenkins 弱口令"
         self.app_name = 'Jenkins'
@@ -18,9 +18,9 @@ class Plugin(BasePlugin):
 
     def login(self, target, user, passwd):
         url = target + "/api/json"
-        auth = base64.b64encode("{}:{}".format(user, passwd).encode()).decode()
+        auth = base64.b64encode(f"{user}:{passwd}".encode()).decode()
         headers = {
-            "Authorization": "Basic {}".format(auth)
+            "Authorization": f"Basic {auth}"
         }
         conn = http_req(url, "get", headers=headers)
         if b'jenkins' not in conn.content:

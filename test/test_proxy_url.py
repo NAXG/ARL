@@ -11,9 +11,9 @@ class TestProxyURL(unittest.TestCase):
         target = "https://www.baidu.com"
         conn = http_req(target)
         code = conn.status_code
-        logger.info("req:{} proxy:{}".format(target, Config.PROXY_URL))
+        logger.info(f"req:{target} proxy:{Config.PROXY_URL}")
         title = get_title(conn.content)
-        logger.info("status_code:{} title:{} body_length:{}".format(code, title, len(conn.content)))
+        logger.info(f"status_code:{code} title:{title} body_length:{len(conn.content)}")
 
         self.assertTrue(conn.status_code == 200)
 

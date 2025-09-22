@@ -108,10 +108,10 @@ def normal_url(url):
         path = "/"
 
     if o.port == scheme_map[o.scheme] or o.port is None:
-        ret_url = "{}://{}{}".format(scheme, hostname, path)
+        ret_url = f"{scheme}://{hostname}{path}"
 
     else:
-        ret_url = "{}://{}:{}{}".format(scheme, hostname, o.port, path)
+        ret_url = f"{scheme}://{hostname}:{o.port}{path}"
 
     if o.query:
         ret_url = ret_url + "?" + o.query
@@ -125,7 +125,7 @@ def cut_filename(url):
     dir_path = dir_path.rstrip("/")
     if not o.netloc:
         return ""
-    ret_url = "{}://{}{}".format(o.scheme, o.netloc, dir_path)
+    ret_url = f"{o.scheme}://{o.netloc}{dir_path}"
     return ret_url
 
 

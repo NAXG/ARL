@@ -7,7 +7,7 @@ import socket
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.SNIFFER
         self.default_port = [3306]
         self.target_scheme = SchemeType.MYSQL
@@ -23,7 +23,7 @@ class Plugin(BasePlugin):
         data = client.recv(256)
         client.close()
 
-        self.logger.debug("recv <<< {}".format(data))
+        self.logger.debug(f"recv <<< {data}")
 
         pattern = rb'^.\x00\x00\x00.*?mysql|^.\x00\x00\x00\n|.*?MariaDB server'
         matches = re.findall(pattern, data)

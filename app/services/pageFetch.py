@@ -23,10 +23,10 @@ class PageFetch(BaseThread):
 
     def run(self):
         t1 = time.time()
-        logger.info("start PageFetch {}".format(len(self.targets)))
+        logger.info(f"start PageFetch {len(self.targets)}")
         self._run()
         elapse = time.time() - t1
-        logger.info("end PageFetch elapse {}".format(elapse))
+        logger.info(f"end PageFetch elapse {elapse}")
         return self.page_map
 
 

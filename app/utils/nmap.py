@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 nmap.py - version and date, see below
@@ -72,7 +71,7 @@ __last_modification__ = '2018/09/23'
 ############################################################################
 
 
-class PortScanner(object):
+class PortScanner:
     """
     PortScanner class allows to use nmap from python
 
@@ -129,7 +128,7 @@ class PortScanner(object):
                 break
         else:
             raise PortScannerError(
-                'nmap program was not found in path. PATH is : {0}'.format(
+                'nmap program was not found in path. PATH is : {}'.format(
                     os.getenv('PATH')
                 )
             )
@@ -179,7 +178,7 @@ class PortScanner(object):
         """
         do not scan but interpret target hosts and return a list a hosts
         """
-        assert type(hosts) is str, 'Wrong type for [hosts], should be a string [was {0}]'.format(type(hosts))  # noqa
+        assert type(hosts) is str, f'Wrong type for [hosts], should be a string [was {type(hosts)}]'  # noqa
         output = self.scan(hosts, arguments='-sL')
         # Test if host was IPV6
         if 'scaninfo' in output['nmap'] \
@@ -208,13 +207,13 @@ class PortScanner(object):
         :returns: scan_result as dictionnary
         """
         if sys.version_info[0] == 2:
-            assert type(hosts) in (str, unicode), 'Wrong type for [hosts], should be a string [was {0}]'.format(type(hosts))  # noqa
-            assert type(ports) in (str, unicode, type(None)), 'Wrong type for [ports], should be a string [was {0}]'.format(type(ports))  # noqa
-            assert type(arguments) in (str, unicode), 'Wrong type for [arguments], should be a string [was {0}]'.format(type(arguments))  # noqa
+            assert type(hosts) in (str, unicode), f'Wrong type for [hosts], should be a string [was {type(hosts)}]'  # noqa
+            assert type(ports) in (str, unicode, type(None)), f'Wrong type for [ports], should be a string [was {type(ports)}]'  # noqa
+            assert type(arguments) in (str, unicode), f'Wrong type for [arguments], should be a string [was {type(arguments)}]'  # noqa
         else:
-            assert type(hosts) is str, 'Wrong type for [hosts], should be a string [was {0}]'.format(type(hosts))  # noqa
-            assert type(ports) in (str, type(None)), 'Wrong type for [ports], should be a string [was {0}]'.format(type(ports))  # noqa
-            assert type(arguments) is str, 'Wrong type for [arguments], should be a string [was {0}]'.format(type(arguments))  # noqa
+            assert type(hosts) is str, f'Wrong type for [hosts], should be a string [was {type(hosts)}]'  # noqa
+            assert type(ports) in (str, type(None)), f'Wrong type for [ports], should be a string [was {type(ports)}]'  # noqa
+            assert type(arguments) is str, f'Wrong type for [arguments], should be a string [was {type(arguments)}]'  # noqa
 
         for redirecting_output in ['-oX', '-oA']:
             assert redirecting_output not in arguments, 'Xml output can\'t be redirected from command line.\nYou can access it after a scan using:\nnmap.nm.get_nmap_last_output()'  # noqa
@@ -539,9 +538,9 @@ class PortScanner(object):
         returns a host detail
         """
         if sys.version_info[0] == 2:
-            assert type(host) in (str, unicode), 'Wrong type for [host], should be a string [was {0}]'.format(type(host))
+            assert type(host) in (str, unicode), f'Wrong type for [host], should be a string [was {type(host)}]'
         else:
-            assert type(host) is str, 'Wrong type for [host], should be a string [was {0}]'.format(type(host))
+            assert type(host) is str, f'Wrong type for [host], should be a string [was {type(host)}]'
         return self._scan_result['scan'][host]
 
     def all_hosts(self):
@@ -593,7 +592,7 @@ class PortScanner(object):
         """
         returns True if host has result, False otherwise
         """
-        assert type(host) is str, 'Wrong type for [host], should be a string [was {0}]'.format(type(host))
+        assert type(host) is str, f'Wrong type for [host], should be a string [was {type(host)}]'
         assert 'scan' in self._scan_result, 'Do a scan before trying to get result !'
 
         if host in list(self._scan_result['scan'].keys()):
@@ -613,10 +612,7 @@ class PortScanner(object):
         """
         assert 'scan' in self._scan_result, 'Do a scan before trying to get result !'
 
-        if sys.version_info < (3, 0):
-            fd = io.BytesIO()
-        else:
-            fd = io.StringIO()
+        fd = io.StringIO()
 
         csv_ouput = csv.writer(fd, delimiter=';')
         csv_header = [
@@ -684,7 +680,7 @@ def __scan_progressive__(self, hosts, ports, arguments, callback, sudo):
 ############################################################################
 
 
-class PortScannerAsync(object):
+class PortScannerAsync:
     """
     PortScannerAsync allows to use nmap from python asynchronously
     for each host scanned, callback is called with scan result for the host
@@ -733,15 +729,15 @@ class PortScannerAsync(object):
         """
 
         if sys.version_info[0] == 2:
-            assert type(hosts) in (str, unicode), 'Wrong type for [hosts], should be a string [was {0}]'.format(type(hosts))
-            assert type(ports) in (str, unicode, type(None)), 'Wrong type for [ports], should be a string [was {0}]'.format(type(ports))
-            assert type(arguments) in (str, unicode), 'Wrong type for [arguments], should be a string [was {0}]'.format(type(arguments))
+            assert type(hosts) in (str, unicode), f'Wrong type for [hosts], should be a string [was {type(hosts)}]'
+            assert type(ports) in (str, unicode, type(None)), f'Wrong type for [ports], should be a string [was {type(ports)}]'
+            assert type(arguments) in (str, unicode), f'Wrong type for [arguments], should be a string [was {type(arguments)}]'
         else:
-            assert type(hosts) is str, 'Wrong type for [hosts], should be a string [was {0}]'.format(type(hosts))
-            assert type(ports) in (str, type(None)), 'Wrong type for [ports], should be a string [was {0}]'.format(type(ports))
-            assert type(arguments) is str, 'Wrong type for [arguments], should be a string [was {0}]'.format(type(arguments))
+            assert type(hosts) is str, f'Wrong type for [hosts], should be a string [was {type(hosts)}]'
+            assert type(ports) in (str, type(None)), f'Wrong type for [ports], should be a string [was {type(ports)}]'
+            assert type(arguments) is str, f'Wrong type for [arguments], should be a string [was {type(arguments)}]'
 
-        assert callable(callback) or callback is None, 'The [callback] {0} should be callable or None.'.format(str(callback))
+        assert callable(callback) or callback is None, f'The [callback] {str(callback)} should be callable or None.'
 
         for redirecting_output in ['-oX', '-oA']:
             assert redirecting_output not in arguments, 'Xml output can\'t be redirected from command line.\nYou can access it after a scan using:\nnmap.nm.get_nmap_last_output()'
@@ -770,7 +766,7 @@ class PortScannerAsync(object):
         :param timeout: default = None, wait timeout seconds
 
         """
-        assert type(timeout) in (int, type(None)), 'Wrong type for [timeout], should be an int or None [was {0}]'.format(type(timeout))
+        assert type(timeout) in (int, type(None)), f'Wrong type for [timeout], should be an int or None [was {type(timeout)}]'
 
         self._process.join(timeout)
         return
@@ -821,9 +817,9 @@ class PortScannerYield(PortScannerAsync):
 
         """
 
-        assert type(hosts) is str, 'Wrong type for [hosts], should be a string [was {0}]'.format(type(hosts))
-        assert type(ports) in (str, type(None)), 'Wrong type for [ports], should be a string [was {0}]'.format(type(ports))
-        assert type(arguments) is str, 'Wrong type for [arguments], should be a string [was {0}]'.format(type(arguments))
+        assert type(hosts) is str, f'Wrong type for [hosts], should be a string [was {type(hosts)}]'
+        assert type(ports) in (str, type(None)), f'Wrong type for [ports], should be a string [was {type(ports)}]'
+        assert type(arguments) is str, f'Wrong type for [arguments], should be a string [was {type(arguments)}]'
 
         for redirecting_output in ['-oX', '-oA']:
             assert redirecting_output not in arguments, 'Xml output can\'t be redirected from command line.\nYou can access it after a scan using:\nnmap.nm.get_nmap_last_output()'
@@ -922,7 +918,7 @@ class PortScannerHostDict(dict):
         :returns: True if tcp port has info, False otherwise
 
         """
-        assert type(port) is int, 'Wrong type for [port], should be an int [was {0}]'.format(type(port))
+        assert type(port) is int, f'Wrong type for [port], should be an int [was {type(port)}]'
 
         if ('tcp' in list(self.keys())
             and port in list(self['tcp'].keys())):
@@ -935,7 +931,7 @@ class PortScannerHostDict(dict):
         :returns: info for tpc port
 
         """
-        assert type(port) is int, 'Wrong type for [port], should be an int [was {0}]'.format(type(port))
+        assert type(port) is int, f'Wrong type for [port], should be an int [was {type(port)}]'
         return self['tcp'][port]
 
     def all_udp(self):
@@ -955,7 +951,7 @@ class PortScannerHostDict(dict):
         :returns: True if udp port has info, False otherwise
 
         """
-        assert type(port) is int, 'Wrong type for [port], should be an int [was {0}]'.format(type(port))
+        assert type(port) is int, f'Wrong type for [port], should be an int [was {type(port)}]'
 
         if ('udp' in list(self.keys())
             and 'port' in list(self['udp'].keys())):
@@ -968,7 +964,7 @@ class PortScannerHostDict(dict):
         :returns: info for udp port
 
         """
-        assert type(port) is int, 'Wrong type for [port], should be an int [was {0}]'.format(type(port))
+        assert type(port) is int, f'Wrong type for [port], should be an int [was {type(port)}]'
 
         return self['udp'][port]
 
@@ -989,7 +985,7 @@ class PortScannerHostDict(dict):
         :returns: True if ip port has info, False otherwise
 
         """
-        assert type(port) is int, 'Wrong type for [port], should be an int [was {0}]'.format(type(port))
+        assert type(port) is int, f'Wrong type for [port], should be an int [was {type(port)}]'
 
         if ('ip' in list(self.keys())
             and port in list(self['ip'].keys())):
@@ -1002,7 +998,7 @@ class PortScannerHostDict(dict):
         :returns: info for ip port
 
         """
-        assert type(port) is int, 'Wrong type for [port], should be an int [was {0}]'.format(type(port))
+        assert type(port) is int, f'Wrong type for [port], should be an int [was {type(port)}]'
 
         return self['ip'][port]
 
@@ -1022,7 +1018,7 @@ class PortScannerHostDict(dict):
         :returns: True if sctp port has info, False otherwise
 
         """
-        assert type(port) is int, 'Wrong type for [port], should be an int [was {0}]'.format(type(port))
+        assert type(port) is int, f'Wrong type for [port], should be an int [was {type(port)}]'
 
         if ('sctp' in list(self.keys())
             and port in list(self['sctp'].keys())):
@@ -1034,7 +1030,7 @@ class PortScannerHostDict(dict):
         :returns: info for sctp port
 
         """
-        assert type(port) is int, 'Wrong type for [port], should be an int [was {0}]'.format(type(port))
+        assert type(port) is int, f'Wrong type for [port], should be an int [was {type(port)}]'
 
         return self['sctp'][port]
 
@@ -1053,7 +1049,7 @@ class PortScannerError(Exception):
         return repr(self.value)
 
     def __repr__(self):
-        return 'PortScannerError exception {0}'.format(self.value)
+        return f'PortScannerError exception {self.value}'
 
 
 ############################################################################

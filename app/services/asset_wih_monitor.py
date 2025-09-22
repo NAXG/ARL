@@ -7,7 +7,7 @@ from app import utils
 logger = get_logger()
 
 
-class AssetWihMonitor(object):
+class AssetWihMonitor:
     def __init__(self, scope_id: str):
         self.scope_id = scope_id
         self.scope_domains = []  # 资产分组中的域名范围
@@ -18,7 +18,7 @@ class AssetWihMonitor(object):
     def init_scope_data(self):
         scope_data = get_scope_by_scope_id(self.scope_id)
         if not scope_data:
-            raise Exception("没有找到资产组 {}".format(self.scope_id))
+            raise Exception(f"没有找到资产组 {self.scope_id}")
 
         self.scope_name = scope_data.get("name", "")
         scope_type = scope_data.get("scope_type", "")
@@ -69,7 +69,7 @@ class AssetWihMonitor(object):
         results = []
         self.init_scope_data()
 
-        logger.info("run AssetWihMonitor, scope_id: {} sites: {}".format(self.scope_id, len(self.sites)))
+        logger.info(f"run AssetWihMonitor, scope_id: {self.scope_id} sites: {len(self.sites)}")
 
         if len(self.sites) == 0:
             return results
@@ -101,7 +101,7 @@ class AssetWihMonitor(object):
             results.append(item)
             fnv_hash_set.add(item_fnv_hash)
 
-        logger.info("AssetWihMonitor, scope_id: {} results: {}".format(self.scope_id, len(results)))
+        logger.info(f"AssetWihMonitor, scope_id: {self.scope_id} results: {len(results)}")
 
         # 后面这个用不到了，清空，省内存
         self._wih_record_fnv_hash = None

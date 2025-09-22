@@ -9,7 +9,7 @@ import json
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.LISTENER
         self.app_name = 'HTTP API Server'
         self.vul_name = 'HTTP API Server'

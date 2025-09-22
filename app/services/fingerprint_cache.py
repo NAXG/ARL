@@ -46,7 +46,7 @@ def finger_db_identify(variables: dict) -> [str]:
             if finger.identify(variables):
                 finger_name_list.append(finger.app_name)
         except Exception as e:
-            logger.warning("error on identify {} {}".format(finger.app_name, e))
+            logger.warning(f"error on identify {finger.app_name} {e}")
 
     return finger_name_list
 

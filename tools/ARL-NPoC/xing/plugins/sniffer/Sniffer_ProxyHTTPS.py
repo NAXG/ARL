@@ -7,7 +7,7 @@ import socket
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.SNIFFER
         self.default_port = [10809, 3128, 80]
         self.target_scheme = SchemeType.PROXY_HTTPS

@@ -15,7 +15,7 @@ class TestCDNName(unittest.TestCase):
             task_id = sys.argv[1]
             scope_id = sys.argv[2]
 
-        print("task_id:{} scope_id: web_hook_url:{}".format(task_id, scope_id, Config.WEB_HOOK_URL))
+        print(f"task_id:{task_id} scope_id: web_hook_url:{scope_id}")
         ip_asset_web_hook(task_id=task_id, scope_id=scope_id)
 
     def test_domain_asset_web_hook(self):
@@ -28,7 +28,7 @@ class TestCDNName(unittest.TestCase):
             task_id = sys.argv[1]
             scope_id = sys.argv[2]
 
-        print("task_id:{} scope_id: web_hook_url:{}".format(task_id, scope_id, Config.WEB_HOOK_URL))
+        print(f"task_id:{task_id} scope_id: web_hook_url:{scope_id}")
         domain_asset_web_hook(task_id=task_id, scope_id=scope_id)
 
     def test_site_asset_web_hook(self):
@@ -41,7 +41,7 @@ class TestCDNName(unittest.TestCase):
             task_id = sys.argv[1]
             scope_id = sys.argv[2]
 
-        print("task_id:{} scope_id: web_hook_url:{}".format(task_id, scope_id, Config.WEB_HOOK_URL))
+        print(f"task_id:{task_id} scope_id: web_hook_url:{scope_id}")
         site_asset_web_hook(task_id=task_id, scope_id=scope_id)
 
 

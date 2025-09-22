@@ -7,7 +7,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.BRUTE
         self.vul_name = "Harbor 弱口令"
         self.app_name = 'Harbor'
@@ -18,10 +18,10 @@ class Plugin(BasePlugin):
         self.password_file = "password_harbor.txt"
 
     def login(self, target, user, passwd):
-        auth = b64encode("{}:{}".format(user, passwd).encode()).decode()
+        auth = b64encode(f"{user}:{passwd}".encode()).decode()
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Basic {}".format(auth),
+            "Authorization": f"Basic {auth}",
         }
         url = target + self.login_path
         req = http_req(url, "get", headers=headers)

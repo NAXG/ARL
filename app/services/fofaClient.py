@@ -1,4 +1,3 @@
-#  -*- coding:UTF-8 -*-
 import base64
 from app.config import Config
 from app import utils
@@ -61,7 +60,7 @@ class FofaClient:
         url = self.base_url + path
         conn = utils.http_req(url, 'get', params=params)
         if conn.status_code != 200:
-            raise Exception("{} http status code: {}".format(url, conn.status_code))
+            raise Exception(f"{url} http status code: {conn.status_code}")
 
         data = conn.json()
         if data.get("error") and data["errmsg"]:

@@ -13,7 +13,7 @@ from app.utils.push import send_email
 logger = get_logger()
 
 
-class GithubResult(object):
+class GithubResult:
     def __init__(self, item):
         self.raw_data = item
         self.git_url = item["git_url"]
@@ -24,7 +24,7 @@ class GithubResult(object):
         self._content = None
 
     def __str__(self):
-        return "{} {}".format(self.repo_full_name, self.path)
+        return f"{self.repo_full_name} {self.path}"
 
     def __hash__(self):
         return self.hash_md5
@@ -33,7 +33,7 @@ class GithubResult(object):
         return self.hash_md5 == other.hash_md5
 
     def __repr__(self):
-        return "<GithubResult>{} {}".format(self.hash_md5, str(self))
+        return f"<GithubResult>{self.hash_md5} {str(self)}"
 
     @property
     def content(self):
@@ -43,7 +43,7 @@ class GithubResult(object):
                 decode_bytes = base64.decodebytes(content_base64.encode("utf-8"))
                 self._content = decode_bytes.decode("utf-8", errors="replace")
             except Exception as e:
-                logger.info("error on {}".format(self.git_url))
+                logger.info(f"error on {self.git_url}")
                 logger.exception(e)
                 self._content = ""
 
@@ -88,7 +88,7 @@ def github_search_code(query, order="desc", sort="indexed", per_page=100, page=1
 
 def github_client(url, params=None):
     headers = {
-        "Authorization": "Bearer {}".format(Config.GITHUB_TOKEN),
+        "Authorization": f"Bearer {Config.GITHUB_TOKEN}",
         "Accept": "application/vnd.github.v3+json"
     }
     time.sleep(1)
@@ -101,7 +101,7 @@ def github_client(url, params=None):
     return data
 
 
-class GithubSearch(object):
+class GithubSearch:
     def __init__(self, query):
         self.results = []
         self.query = query
@@ -117,20 +117,20 @@ class GithubSearch(object):
     def search(self):
         try:
             for build_in in self.built_in_rules:
-                query = "{} {}".format(self.query, build_in)
+                query = f"{self.query} {build_in}"
                 results = github_search_code(query=query, per_page=100)
                 for result in results:
                     if result not in self.results:
                         self.results.append(result)
         except Exception as e:
-            logger.info("Error on {} {}".format(self.query, e))
+            logger.info(f"Error on {self.query} {e}")
             logger.exception(e)
 
-        logger.info("{} search result {}".format(self.query, len(self.results)))
+        logger.info(f"{self.query} search result {len(self.results)}")
         return self.results
 
 
-class HashManager(object):
+class HashManager:
     def __init__(self):
         self._hash_list = None
         self.hash_file = Config.GITHUB_HASH_FILE
@@ -152,13 +152,13 @@ class HashManager(object):
 
         self._hash_list.append(hash_str)
         with open(self.hash_file, "a", encoding="utf-8") as f:
-            f.write("{}\n".format(hash_str))
+            f.write(f"{hash_str}\n")
 
     def __contains__(self, value):
         return value in self.hash_list
 
 
-class GithubLeak(object):
+class GithubLeak:
     def __init__(self, query):
         self.hash_manager = HashManager()
         self.new_results = []
@@ -224,7 +224,7 @@ class GithubLeak(object):
             if self.filter_result(x):
                 continue
 
-            logger.info("found {}".format(x))
+            logger.info(f"found {x}")
             self.new_results.append(x)
 
         self.new_results = self.new_results
@@ -234,10 +234,10 @@ class GithubLeak(object):
         #     f.write(html)
 
         if self.new_results:
-            logger.info("found new result {} {}".format(self.query, len(self.new_results)))
+            logger.info(f"found new result {self.query} {len(self.new_results)}")
             send_email(host=Config.EMAIL_HOST, port=Config.EMAIL_PORT, mail=Config.EMAIL_USERNAME,
                        password=Config.EMAIL_PASSWORD, to=Config.EMAIL_TO,
-                       title="[Github-{}] 灯塔消息推送".format(self.query), html=html)
+                       title=f"[Github-{self.query}] 灯塔消息推送", html=html)
 
         return self.new_results
 

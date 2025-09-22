@@ -105,11 +105,11 @@ def get_ip(domain, log_flag=True):
             ips.append(rdata.address)
     except dns.resolver.NXDOMAIN as e:
         if log_flag:
-            logger.info("{} {}".format(domain, e))
+            logger.info(f"{domain} {e}")
 
     except Exception as e:
         if log_flag:
-            logger.warning("{} {}".format(domain, e))
+            logger.warning(f"{domain} {e}")
 
     return ips
 
@@ -125,7 +125,7 @@ def get_cname(domain, log_flag=True):
         if log_flag:
             logger.debug(e)
     except Exception as e:
-        logger.warning("{} {}".format(domain, e))
+        logger.warning(f"{domain} {e}")
 
     return cnames
 
@@ -177,7 +177,7 @@ def build_ret(error, data):
             if not data[k]:
                 continue
             if isinstance(data[k], str):
-                msg += " {}:{}".format(k, data[k])
+                msg += f" {k}:{data[k]}"
 
     ret["message"] = msg
     return ret
@@ -187,17 +187,17 @@ def kill_child_process(pid):
     logger = get_logger()
     parent = psutil.Process(pid)
     for child in parent.children(recursive=True):
-        logger.info("kill child_process {}".format(child))
+        logger.info(f"kill child_process {child}")
         child.kill()
 
 
 def exit_gracefully(signum, frame):
     logger = get_logger()
-    logger.info('Receive signal {} frame {}'.format(signum, frame))
+    logger.info(f'Receive signal {signum} frame {frame}')
     pid = os.getpid()
     kill_child_process(pid)
     parent = psutil.Process(pid)
-    logger.info("kill self {}".format(parent))
+    logger.info(f"kill self {parent}")
     parent.kill()
 
 

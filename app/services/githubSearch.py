@@ -9,7 +9,7 @@ import time
 logger = get_logger()
 
 
-class GithubResult(object):
+class GithubResult:
     def __init__(self, item):
         self.raw_data = item
         self.git_url = item["git_url"]
@@ -21,7 +21,7 @@ class GithubResult(object):
         self._content = None
 
     def __str__(self):
-        return "{} {}".format(self.repo_full_name, self.path)
+        return f"{self.repo_full_name} {self.path}"
 
     def __hash__(self):
         return self.hash_md5
@@ -30,7 +30,7 @@ class GithubResult(object):
         return self.hash_md5 == other.hash_md5
 
     def __repr__(self):
-        return "<GithubResult>{} {}".format(self.hash_md5, str(self))
+        return f"<GithubResult>{self.hash_md5} {str(self)}"
 
     @property
     def content(self):
@@ -40,7 +40,7 @@ class GithubResult(object):
                 decode_bytes = base64.decodebytes(content_base64.encode("utf-8"))
                 self._content = decode_bytes.decode("utf-8", errors="replace")
             except Exception as e:
-                logger.info("error on {}".format(self.git_url))
+                logger.info(f"error on {self.git_url}")
                 logger.exception(e)
                 self._content = ""
 
@@ -65,7 +65,7 @@ class GithubResult(object):
                 # 先保存为字符串吧
                 self._commit_date = str(parse_datetime(commit_info[0]["commit"]["author"]["date"]))
             except Exception as e:
-                logger.info("error on {}, {}".format(commit_url, self.path))
+                logger.info(f"error on {commit_url}, {self.path}")
                 logger.exception(e)
                 self._commit_date = ""
 
@@ -116,14 +116,14 @@ def github_search_code(query, order="desc", sort="indexed", per_page=100, page=1
 
     total_count = data["total_count"]
     if data["total_count"] > 0 and len(ret_list) == 0 and page == 1:
-        logger.warning("Query items empty {},  {}".format(total_count, query))
+        logger.warning(f"Query items empty {total_count},  {query}")
 
     return ret_list, total_count
 
 
 def github_client(url, params=None, cnt=0):
     headers = {
-        "Authorization": "Bearer {}".format(Config.GITHUB_TOKEN),
+        "Authorization": f"Bearer {Config.GITHUB_TOKEN}",
         "Accept": "application/vnd.github.v3+json"
     }
     time.sleep(2.5)
@@ -137,7 +137,7 @@ def github_client(url, params=None, cnt=0):
                     or "API rate limit exceeded for user ID" in message\
                     or "You have exceeded a secondary rate limit" in message:
                 sleep_time = 20 + 15*cnt
-                logger.info("rate-limit retry {} {}, time sleep {}".format(cnt, params, sleep_time))
+                logger.info(f"rate-limit retry {cnt} {params}, time sleep {sleep_time}")
                 time.sleep(sleep_time)
                 return github_client(url, params=params, cnt=cnt)
 
@@ -146,7 +146,7 @@ def github_client(url, params=None, cnt=0):
     return data
 
 
-class GithubSearch(object):
+class GithubSearch:
     def __init__(self, query):
         self.results = []
         self.query = query
@@ -182,7 +182,7 @@ class GithubSearch(object):
                     continue
 
                 curr_page = 1
-                query = "{} {}".format(self.query, build_in)
+                query = f"{self.query} {build_in}"
                 results, total_count = github_search_code(query=query, per_page=self.per_page, page=curr_page)
                 logger.info("[{}/{}] page:1 keyword:{} total:{}".format(search_cnt,
                                                                         total_search_cnt,  self.query, total_count))
@@ -194,17 +194,17 @@ class GithubSearch(object):
                     while (total_count / 100) > curr_page and curr_page < self.max_page:
                         curr_page += 1
                         next_results, total_count = github_search_code(query=query, per_page=self.per_page, page=curr_page)
-                        logger.info("page:{} keyword:{} total:{}".format(curr_page, self.query, total_count))
+                        logger.info(f"page:{curr_page} keyword:{self.query} total:{total_count}")
                         results.extend(next_results)
 
                 for result in results:
                     if result not in self.results:
                         self.results.append(result)
         except Exception as e:
-            logger.info("Error on {} {}".format(self.query, e))
+            logger.info(f"Error on {self.query} {e}")
             logger.exception(e)
 
-        logger.info("{} search result {}".format(self.query, len(self.results)))
+        logger.info(f"{self.query} search result {len(self.results)}")
         return self.results
 
 

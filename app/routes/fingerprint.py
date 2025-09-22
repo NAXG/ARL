@@ -120,10 +120,10 @@ class ExportARLFinger(ARLResource):
 
         data = yaml.dump(items, default_flow_style=False, sort_keys=False, allow_unicode=True)
         response = make_response(data)
-        filename = "fingerprint_{}_{}.yml".format(len(items), int(time.time()))
+        filename = f"fingerprint_{len(items)}_{int(time.time())}.yml"
         response.headers['Content-Type'] = 'application/octet-stream'
         response.headers["Access-Control-Expose-Headers"] = "Content-Disposition"
-        response.headers["Content-Disposition"] = "attachment; filename={}".format(quote(filename))
+        response.headers["Content-Disposition"] = f"attachment; filename={quote(filename)}"
 
         return response
 

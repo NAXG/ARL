@@ -83,7 +83,7 @@ class TestDomain(unittest.TestCase):
         }
         fake_info = modules.DomainInfo(**fake)
 
-        print("alt_dns_current {}, primary_domain:{}".format(subdomain, primary_domain))
+        print(f"alt_dns_current {subdomain}, primary_domain:{primary_domain}")
         data = domain.alt_dns([fake_info], primary_domain, wildcard_domain_ip=None)
 
         print(data)

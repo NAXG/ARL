@@ -7,7 +7,7 @@ from lxml import etree
 from xing.utils import get_logger
 
 
-class BaseThread(object):
+class BaseThread:
     def __init__(self, targets, concurrency=6):
         self.concurrency = concurrency
         self.semaphore = threading.Semaphore(concurrency)
@@ -22,18 +22,18 @@ class BaseThread(object):
         try:
             self.work(url)
         except requests.exceptions.RequestException as e:
-            self.logger.debug("error on {} {}".format(url, e))
+            self.logger.debug(f"error on {url} {e}")
             pass
 
         except etree.Error as e:
-            self.logger.debug("error on {} {}".format(url, e))
+            self.logger.debug(f"error on {url} {e}")
 
         except Exception as e:
-            self.logger.warning("error on {}".format(url))
+            self.logger.warning(f"error on {url}")
             self.logger.exception(e)
 
         except BaseException as e:
-            self.logger.warning("BaseException on {}".format(url))
+            self.logger.warning(f"BaseException on {url}")
             self.semaphore.release()
             raise e
 
@@ -51,7 +51,7 @@ class BaseThread(object):
                 target = target.strip()
 
             cnt += 1
-            self.logger.debug("[{}/{}] work on {}".format(cnt, len(self._targets), target))
+            self.logger.debug(f"[{cnt}/{len(self._targets)}] work on {target}")
 
             if not target:
                 continue

@@ -76,7 +76,7 @@ import threading
 import collections
 import  requests.exceptions
 
-class BaseThread(object):
+class BaseThread:
     def __init__(self, targets, concurrency=6):
         self.concurrency = concurrency
         self.semaphore = threading.Semaphore(concurrency)
@@ -92,7 +92,7 @@ class BaseThread(object):
             pass
 
         except BaseException as e:
-            logger("error on {}".format(url))
+            logger(f"error on {url}")
             self.semaphore.release()
             raise e
 
@@ -106,7 +106,7 @@ class BaseThread(object):
                 target = target.strip()
 
             cnt += 1
-            logger("[{}/{}] work on {}".format(cnt, len(self.targets), target))
+            logger(f"[{cnt}/{len(self.targets)}] work on {target}")
 
             if not target:
                 continue
@@ -174,7 +174,7 @@ class URL():
     def scope(self) -> str:
         if self._scope is None:
             parse = urlparse(self.url)
-            scope = "{}://{}".format(parse.scheme, parse.netloc)
+            scope = f"{parse.scheme}://{parse.netloc}"
             self._scope = scope
 
         return self._scope
@@ -344,7 +344,7 @@ class Page():
 
 
     def __str__(self):
-        msg = "[{}][{}][{}]{}".format(self.status_code, self.title, len(self.content), self.url)
+        msg = f"[{self.status_code}][{self.title}][{len(self.content)}]{self.url}"
         return msg
 
     def __repr__(self):
@@ -393,7 +393,7 @@ class FileLeak(BaseThread):
 
     def build_404_page(self):
         url_404 = URL(self.target + self.path_404, self.path_404)
-        logger("req => {}".format(url_404))
+        logger(f"req => {url_404}")
         page_404 = Page(self.http_req(url_404))
         self.page404_set.add(page_404)
         if self.record_page:
@@ -407,7 +407,7 @@ class FileLeak(BaseThread):
 
     def run(self):
         t1 = time.time()
-        logger("start fileleak {}".format(len(self.targets)))
+        logger(f"start fileleak {len(self.targets)}")
 
         self.build_404_page()
 
@@ -416,7 +416,7 @@ class FileLeak(BaseThread):
         self.check_page_200()
 
         elapse = time.time() - t1
-        logger("end fileleak elapse {}".format(elapse))
+        logger(f"end fileleak elapse {elapse}")
 
         return self.page200_set
 
@@ -426,7 +426,7 @@ class FileLeak(BaseThread):
             req.req()
             return req
         except Exception as e:
-            logger("error on {}".format(e))
+            logger(f"error on {e}")
             self.error_times += 1
             raise e
 
@@ -504,13 +504,13 @@ class FileLeak(BaseThread):
 
         if "." in url.path and "." in payload:
             path = url.path.replace(".", "a1337.")
-            check_url = "{}{}".format(url.scope, path)
+            check_url = f"{url.scope}{path}"
             payload = payload.replace(".", "a1337.")
             return [URL(check_url, payload), end_check_url]
 
         if url.path.endswith("/"):
             path = url.path[:-1] + "a1337/"
-            check_url = "{}{}".format(url.scope, path)
+            check_url = f"{url.scope}{path}"
             payload = payload + "a1337/"
             return [URL(check_url, payload)]
 
@@ -535,10 +535,10 @@ def normal_url(url):
 
 
     if o.port == scheme_map[o.scheme] or o.port is None:
-        ret_url = "{}://{}{}".format(scheme, hostname, path)
+        ret_url = f"{scheme}://{hostname}{path}"
 
     else:
-        ret_url = "{}://{}:{}{}".format(scheme, hostname, o.port, path)
+        ret_url = f"{scheme}://{hostname}:{o.port}{path}"
 
     if o.query:
         ret_url = ret_url + "?" + o.query
@@ -607,7 +607,7 @@ class GenURL():
     def build_urls(self):
         target = os.path.dirname(self.target)
         for d in self.dicts:
-            u = URL("{}/{}".format(target, d.strip()), d.strip())
+            u = URL(f"{target}/{d.strip()}", d.strip())
             self.urls.add(u)
 
     def gen(self, flag = True):
@@ -646,17 +646,17 @@ def file_leak(targets, dicts):
     total = len(map_url)
     for target in map_url:
         cnt += 1
-        print("file leak => [{}/{}] {}".format(cnt, total, target))
+        print(f"file leak => [{cnt}/{total}] {target}")
         try:
             f = FileLeak(target, map_url[target], settings.concurrency_count)
             pages = f.run()
             with open(settings.output, "a") as f:
                 for page in pages:
-                    logger("found => {}".format(page))
-                    f.write("{}\n".format(page))
+                    logger(f"found => {page}")
+                    f.write(f"{page}\n")
 
         except Exception as e:
-            logger("error on {}".format(e))
+            logger(f"error on {e}")
 
 class ArgumentDefaultsHelpFormatter(argparse.HelpFormatter):
     """Help message formatter which adds default values to argument help.

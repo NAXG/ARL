@@ -13,16 +13,16 @@ from app.services import webhook
 logger = utils.get_logger()
 
 def domain_executors(base_domain=None, job_id=None, scope_id=None, options=None, name=""):
-    logger.info("start domain_executors {} {} {}".format(base_domain, scope_id, options))
+    logger.info(f"start domain_executors {base_domain} {scope_id} {options}")
     try:
         query = {"_id": ObjectId(job_id)}
         item = utils.conn_db('scheduler').find_one(query)
         if not item:
-            logger.info("stop  domain_executors {}  not found job_id {}".format(base_domain, job_id))
+            logger.info(f"stop  domain_executors {base_domain}  not found job_id {job_id}")
             return
 
         if item.get("status") == SchedulerStatus.STOP:
-            logger.info("stop  ip_executors {}  job_id {} is stop ".format(base_domain, job_id))
+            logger.info(f"stop  ip_executors {base_domain}  job_id {job_id} is stop ")
             return
 
         wrap_domain_executors(base_domain=base_domain, job_id=job_id, scope_id=scope_id, options=options, name=name)
@@ -84,7 +84,7 @@ def wrap_domain_executors(base_domain=None, job_id=None, scope_id=None, options=
         domain_executor.update_task_field("status", TaskStatus.ERROR)
         domain_executor.update_task_field("end_time", utils.curr_date())
 
-    logger.info("end domain_executors {} {} {}".format(base_domain, scope_id, options))
+    logger.info(f"end domain_executors {base_domain} {scope_id} {options}")
 
 
 # ***域名监控任务　＊＊＊
@@ -147,7 +147,7 @@ class DomainExecutor(DomainTask):
         """
         self.domain_info_list = []
         self.record_map = {}
-        logger.info("start build domain monitor task, new domain {}".format(len(self.new_domain_set)))
+        logger.info(f"start build domain monitor task, new domain {len(self.new_domain_set)}")
         t1 = time.time()
 
         self.task_tag = "task" #标记为正常任务，让build_domain_info 工作
@@ -175,7 +175,7 @@ class DomainExecutor(DomainTask):
         for domain in self.new_domain_set:
             cut_name = utils.domain.cut_first_name(domain)
             if cut_name:
-                cut_set.add("{}.{}".format(random_name, cut_name))
+                cut_set.add(f"{random_name}.{cut_name}")
 
         info_list = build_domain_info(cut_set)
         wildcard_ip_set = set()
@@ -183,7 +183,7 @@ class DomainExecutor(DomainTask):
             wildcard_ip_set |= set(info.ip_list)
 
         self.wildcard_ip_set = wildcard_ip_set
-        logger.info("start get wildcard_ip_set {}".format(len(self.wildcard_ip_set)))
+        logger.info(f"start get wildcard_ip_set {len(self.wildcard_ip_set)}")
 
     def clear_wildcard_domain_info(self, info_list):
         cnt = 0
@@ -194,7 +194,7 @@ class DomainExecutor(DomainTask):
                 cnt += 1
                 continue
             new.append(info)
-        logger.info("clear_wildcard_domain_info {}".format(cnt))
+        logger.info(f"clear_wildcard_domain_info {cnt}")
         return new
 
 
@@ -301,7 +301,7 @@ class IPExecutor(IPTask):
                 continue
 
         self.ip_info_list = new_ip_info_list
-        logger.info("found new ip_info {}".format(len(self.ip_info_list)))
+        logger.info(f"found new ip_info {len(self.ip_info_list)}")
 
     # 同步SITE 和 web_info_hunter 信息
     def sync_asset_site_wih(self):
@@ -324,11 +324,11 @@ def ip_executor(target, scope_id, task_name, job_id, options):
         query = {"_id": ObjectId(job_id)}
         item = utils.conn_db('scheduler').find_one(query)
         if not item:
-            logger.info("stop  ip_executors {}  not found job_id {}".format(target, job_id))
+            logger.info(f"stop  ip_executors {target}  not found job_id {job_id}")
             return
 
         if item.get("status") == SchedulerStatus.STOP:
-            logger.info("stop  ip_executors {}  job_id {} is stop ".format(target, job_id))
+            logger.info(f"stop  ip_executors {target}  job_id {job_id} is stop ")
             return
 
         update_job_run(job_id)
@@ -343,6 +343,6 @@ def ip_executor(target, scope_id, task_name, job_id, options):
         executor.sync_asset_site_wih()
 
     except Exception as e:
-        logger.warning("error on ip_executor {}".format(executor.ip_target))
+        logger.warning(f"error on ip_executor {executor.ip_target}")
         logger.exception(e)
         executor.base_update_task.update_task_field("status", TaskStatus.ERROR)

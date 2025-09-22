@@ -7,7 +7,7 @@ from app import utils
 logger = utils.get_logger()
 
 
-class BaiduSearch(object):
+class BaiduSearch:
     def __init__(self, keyword=None, page_num=6):
         self.search_url = "https://www.baidu.com/s?rn=100&pn={page}&wd={keyword}"
         self.num_pattern = re.compile(r'百度为您找到相关结果约?([\d,]*)个')
@@ -25,7 +25,7 @@ class BaiduSearch(object):
         self.first_html = html
         result = re.findall(self.num_pattern, html)
         if not result:
-            logger.warning("Unable to get baidu search results， {}".format(self.keyword))
+            logger.warning(f"Unable to get baidu search results， {self.keyword}")
             return 0
 
         num = int("".join(result[0].split(",")))
@@ -44,7 +44,7 @@ class BaiduSearch(object):
         for u in urls_result:
             try:
                 if not re.match(r'^https?:/{2}\w.+$', u):
-                    logger.info("url {} is invalid".format(u))
+                    logger.info(f"url {u} is invalid")
                     continue
                 resp = utils.http_req(u, "head")
                 real_url = resp.headers.get('Location')
@@ -56,7 +56,7 @@ class BaiduSearch(object):
 
     def run(self):
         self.result_num()
-        logger.info("baidu search {} results found for keyword {}".format(self.search_result_num, self.keyword))
+        logger.info(f"baidu search {self.search_result_num} results found for keyword {self.keyword}")
         urls = []
 
         # 没有找到直接return
@@ -67,18 +67,18 @@ class BaiduSearch(object):
             if page == 1:
                 _urls = self.match_urls(self.first_html)
                 urls.extend(_urls)
-                logger.info("baidu firsturl result {}".format(len(_urls)))
+                logger.info(f"baidu firsturl result {len(_urls)}")
             else:
                 time.sleep(self.default_interval)
                 url = self.search_url.format(page=(page - 1) * 10, keyword=quote(self.keyword))
                 html = utils.http_req(url, headers=self.headers).text
                 _urls = self.match_urls(html)
-                logger.info("baidu search url {}, result {}".format(url, len(_urls)))
+                logger.info(f"baidu search url {url}, result {len(_urls)}")
                 urls.extend(_urls)
         return urls
 
 
-class BingSearch(object):
+class BingSearch:
     def __init__(self, keyword=None, page_num=6):
         self.search_url = "https://cn.bing.com/search?q={keyword}&qs=n&form=QBRE&sp=-1&first={page}"
         self.num_pattern = re.compile(r'<span class="sb_count">([^<]+)</span>')
@@ -110,7 +110,7 @@ class BingSearch(object):
                     num = int("".join(result_num_2[0].split(",")))
                     self.search_result_num = num
         else:
-            logger.warning("Unable to get bing search results， {}".format(self.keyword))
+            logger.warning(f"Unable to get bing search results， {self.keyword}")
             return 0
 
         return self.search_result_num
@@ -129,7 +129,7 @@ class BingSearch(object):
 
     def run(self):
         self.result_num()
-        logger.info("bing search {} results found for keyword {}".format(self.search_result_num, self.keyword))
+        logger.info(f"bing search {self.search_result_num} results found for keyword {self.keyword}")
         urls = []
 
         # 没有找到直接return
@@ -140,19 +140,19 @@ class BingSearch(object):
             if page == 1:
                 _urls = self.match_urls(self.first_html)
                 urls.extend(_urls)
-                logger.info("bing search first url result {}".format(len(_urls)))
+                logger.info(f"bing search first url result {len(_urls)}")
             else:
                 time.sleep(self.default_interval)
                 url = self.search_url.format(page=(page - 1) * 10, keyword=quote(self.keyword))
                 html = utils.http_req(url, headers=self.headers).text
                 _urls = self.match_urls(html)
-                logger.info("bing search url {}, result {}".format(url, len(_urls)))
+                logger.info(f"bing search url {url}, result {len(_urls)}")
                 urls.extend(_urls)
         return urls
 
 
 def baidu_search(domain, page_num=6):
-    keyword = "site:{}".format(domain)
+    keyword = f"site:{domain}"
     b = BaiduSearch(keyword, page_num)
     urls = b.run()
     urls = [u for u in urls if domain in urlparse(u).netloc]
@@ -161,14 +161,14 @@ def baidu_search(domain, page_num=6):
 
 def bing_search(domain, page_num=5):
     urls = []
-    keyword = "site:{}".format(domain)
+    keyword = f"site:{domain}"
     b = BingSearch(keyword, page_num)
     urls.extend(b.run())
     if b.search_result_num > 1000 and len(urls) > 25:
         keywords = ["admin", "管理|后台", "登陆|密码", "login", "manage", "dashboard", "api",
                     "console"]
         for k in keywords:
-            keyword = "site:{} {}".format(domain, k)
+            keyword = f"site:{domain} {k}"
             try:
                 time.sleep(15)
                 b = BingSearch(keyword, page_num=1)
@@ -179,7 +179,7 @@ def bing_search(domain, page_num=5):
     return utils.rm_similar_url(urls)
 
 
-class SearchEngines(object):
+class SearchEngines:
     # *** 调用搜索引擎查找URL
     def __init__(self, base_domain):
         self.engines = [bing_search, baidu_search]

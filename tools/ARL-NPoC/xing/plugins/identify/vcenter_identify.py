@@ -7,7 +7,7 @@ import re
 class Plugin(BasePlugin):
 
     def __init__(self):
-        super(Plugin, self).__init__()      
+        super().__init__()      
         self.plugin_type = PluginType.POC
         self.vul_name = "发现VMware vCenter"
         self.app_name = 'vCenter'
@@ -34,5 +34,5 @@ class Plugin(BasePlugin):
             fullname = re.findall(b'<fullName>(.*?)</fullName>', resp)
             if len(fullname) == 1:
                 result = fullname[0].decode()
-                self.logger.success("found vCenter {} at {}".format(result, url))
+                self.logger.success(f"found vCenter {result} at {url}")
                 return result

@@ -5,7 +5,7 @@ from app import utils
 logger = utils.get_logger()
 
 
-class SyncAsset(object):
+class SyncAsset:
     def __init__(self, task_id, scope_id, update_flag=False,  category=None, task_name=""):
         self.available_category = ["site", "domain", "ip", "wih"]
 
@@ -52,7 +52,7 @@ class SyncAsset(object):
         return True
 
     def sync_by_category(self, category):
-        dist_collection = 'asset_{}'.format(category)
+        dist_collection = f'asset_{category}'
         for data in conn(category).find({"task_id": self.task_id}):
             data_content = data.get(category)
             query = {"scope_id": self.scope_id, category: data_content}
@@ -97,15 +97,15 @@ class SyncAsset(object):
                 conn(dist_collection).find_one_and_replace(query, data)
 
     def run(self):
-        logger.info("start sync {} -> {}".format(self.task_id, self.scope_id))
+        logger.info(f"start sync {self.task_id} -> {self.scope_id}")
         for category in self.category_list:
             if category not in self.available_category:
-                logger.warning("not found {} category in {}".format(category, self.available_category))
+                logger.warning(f"not found {category} category in {self.available_category}")
                 continue
 
             self.sync_by_category(category)
 
-        logger.info("end sync {} -> {}, result: {}".format(self.task_id, self.scope_id, self.new_asset_counter))
+        logger.info(f"end sync {self.task_id} -> {self.scope_id}, result: {self.new_asset_counter}")
 
         return self.new_asset_map, self.new_asset_counter
 

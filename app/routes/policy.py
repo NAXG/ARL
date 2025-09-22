@@ -302,7 +302,7 @@ def _update_plugin_config(config):
 
         plugin_info = plugin_name_in_arl(plugin_name)
         if not plugin_info:
-            return "没有找到 {} 插件".format(plugin_name)
+            return f"没有找到 {plugin_name} 插件"
 
         config_item = {
             "plugin_name": plugin_name,

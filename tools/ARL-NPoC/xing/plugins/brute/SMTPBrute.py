@@ -8,7 +8,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(ServiceBrutePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.BRUTE
         self.vul_name = "SMTP 弱口令"
         self.app_name = 'SMTP'
@@ -22,7 +22,7 @@ class Plugin(ServiceBrutePlugin):
         recv = self._recv_data(client)
         if success_str not in recv:
             if b'235 ' != success_str:
-                raise Exception("Error on {} {}".format(command, recv.decode()))
+                raise Exception(f"Error on {command} {recv.decode()}")
         return recv
 
     # 接收全部数据
@@ -41,7 +41,7 @@ class Plugin(ServiceBrutePlugin):
 
     def login(self, target, user, passwd):
         if self.smtp_domain:
-            user = "{}@{}".format(user, self.smtp_domain)
+            user = f"{user}@{self.smtp_domain}"
 
         client = self.conn_target(20)
         self._recv_data(client)
@@ -61,7 +61,7 @@ class Plugin(ServiceBrutePlugin):
             fld_domain = self._get_domain(result)
             if fld_domain:
                 self.smtp_domain = fld_domain
-                self.logger.info("get smtp domain {} from {}".format(self.smtp_domain, target))
+                self.logger.info(f"get smtp domain {self.smtp_domain} from {target}")
 
             if not self.smtp_domain:
                 fld_domain = get_fld(self.target_info["host"])
@@ -70,7 +70,7 @@ class Plugin(ServiceBrutePlugin):
 
             if os.getenv('BRUTE_MAIL_DOMAIN'):
                 self.smtp_domain = os.getenv('BRUTE_MAIL_DOMAIN')
-                self.logger.debug("get smtp domain {} from env".format(self.smtp_domain))
+                self.logger.debug(f"get smtp domain {self.smtp_domain} from env")
 
             return True
 

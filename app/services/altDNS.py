@@ -14,7 +14,7 @@ NUM_COUNT = 4
 
 #  FROM: https://github.com/ProjectAnte/dnsgen/blob/master/dnsgen/dnsgen.py
 
-class DnsGen(object):
+class DnsGen:
     def __init__(self, subdomains, words, base_domain=None):
         self.subdomains = subdomains
         self.base_domain = base_domain
@@ -34,7 +34,7 @@ class DnsGen(object):
             return subdomain.split(".") + [self.base_domain]
 
         ext = tld.get_tld(domain.lower(), fail_silently=True, as_object=True, fix_protocol=True)
-        base_domain = "{}.{}".format(ext.domain, ext.suffix)
+        base_domain = f"{ext.domain}.{ext.suffix}"
 
         parts = (ext.subdomain.split('.') + [base_domain])
 
@@ -80,7 +80,7 @@ class DnsGen(object):
                     continue
                 # single digit
                 tmp_parts = parts[:-1]
-                tmp_parts[i] = '{}{}'.format(tmp_parts[i], num)
+                tmp_parts[i] = f'{tmp_parts[i]}{num}'
                 domains.append('{}.{}'.format('.'.join(tmp_parts), '.'.join(parts[-1:])))
 
         return domains
@@ -103,12 +103,12 @@ class DnsGen(object):
                     continue
 
                 tmp_parts = parts[:-1]
-                tmp_parts[i] = '{}{}'.format(w, tmp_parts[i])
+                tmp_parts[i] = f'{w}{tmp_parts[i]}'
                 domains.append('{}.{}'.format('.'.join(tmp_parts), parts[-1]))
 
                 # prepend with dash
                 tmp_parts = parts[:-1]
-                tmp_parts[i] = '{}-{}'.format(w, tmp_parts[i])
+                tmp_parts[i] = f'{w}-{tmp_parts[i]}'
                 domains.append('{}.{}'.format('.'.join(tmp_parts), parts[-1]))
 
         return domains
@@ -131,12 +131,12 @@ class DnsGen(object):
                     continue
 
                 tmp_parts = parts[:-1]
-                tmp_parts[i] = '{}{}'.format(tmp_parts[i], w)
+                tmp_parts[i] = f'{tmp_parts[i]}{w}'
                 domains.append('{}.{}'.format('.'.join(tmp_parts), '.'.join(parts[-1:])))
 
                 # append with dash
                 tmp_parts = parts[:-1]
-                tmp_parts[i] = '{}-{}'.format(tmp_parts[i], w)
+                tmp_parts[i] = f'{tmp_parts[i]}-{w}'
                 domains.append('{}.{}'.format('.'.join(tmp_parts), '.'.join(parts[-1:])))
 
         return domains
@@ -176,11 +176,10 @@ class DnsGen(object):
             permutations += self.append_word_every_index(parts)
             permutations += self.replace_word_with_word(parts)
 
-            for perm in permutations:
-                yield perm
+            yield from permutations
 
 
-class AltDNS(object):
+class AltDNS:
     def __init__(self, subdomains, base_domain, words, wildcard_domain_ip=None):
         self.subdomains = subdomains
 

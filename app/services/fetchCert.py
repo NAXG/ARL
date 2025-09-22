@@ -20,10 +20,10 @@ class FetchCert(BaseThread):
 
     def run(self):
         t1 = time.time()
-        logger.info("start FetchCert {}".format(len(self.targets)))
+        logger.info(f"start FetchCert {len(self.targets)}")
         self._run()
         elapse = time.time() - t1
-        logger.info("end FetchCert elapse {}".format(elapse))
+        logger.info(f"end FetchCert elapse {elapse}")
         return self.fetch_map
 
 
@@ -48,11 +48,11 @@ class SSLCert():
                     if port_id == 80:
                         continue
 
-                    target_temp1 = "{}:{}".format(info.ip, port_id)
+                    target_temp1 = f"{info.ip}:{port_id}"
                     target_temp_list.append(target_temp1)
 
             elif isinstance(info, str) and utils.is_vaild_ip_target(info):
-                target_temp_list.append("{}:443".format(info))
+                target_temp_list.append(f"{info}:443")
 
             elif isinstance(info, str) and ":" in info:
                 target_temp_list.append(info)

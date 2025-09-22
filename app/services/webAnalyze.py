@@ -27,10 +27,10 @@ class WebAnalyze(BaseThread):
 
     def run(self):
         t1 = time.time()
-        logger.info("start WebAnalyze {}".format(len(self.targets)))
+        logger.info(f"start WebAnalyze {len(self.targets)}")
         self._run()
         elapse = time.time() - t1
-        logger.info("end WebAnalyze elapse {}".format(elapse))
+        logger.info(f"end WebAnalyze elapse {elapse}")
         return self.analyze_map
 
 

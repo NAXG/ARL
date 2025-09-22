@@ -5,7 +5,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.POC
         self.vul_name = "Apache solr 未授权访问"
         self.app_name = 'solr'
@@ -20,5 +20,5 @@ class Plugin(BasePlugin):
                 continue
 
             if b"responseHeader" in conn.content:
-                self.logger.success("发现 Apache solr 未授权访问 {}".format(url))
+                self.logger.success(f"发现 Apache solr 未授权访问 {url}")
                 return url

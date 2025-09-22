@@ -5,7 +5,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.POC
         self.vul_name = "发现 Nacos"
         self.app_name = 'Nacos'
@@ -18,6 +18,6 @@ class Plugin(BasePlugin):
             url = target + path
             conn = http_req(url)
             if check in conn.content:
-                self.logger.success("found Nacos {}".format(url))
+                self.logger.success(f"found Nacos {url}")
                 return url
 
