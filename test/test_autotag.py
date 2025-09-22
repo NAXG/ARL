@@ -1,59 +1,95 @@
-import unittest
+import pytest
+
 from app.modules import SiteAutoTag
-from app.services import auto_tag
-from app.services.fetchSite import fetch_site
+from app.services.autoTag import auto_tag
 
 
-class TestCDNName(unittest.TestCase):
-    def test_302_1(self):
-        item = {
-            "site": "https://www.qq.com",
-            "title": "",
-            "status": 302,
-            "headers": "Connection: keep-alive\nLocation: https://url.cn/sorry",
-            "body_length": 0,
-        }
-        auto_tag(item)
-        self.assertTrue(item["tag"][0] == SiteAutoTag.INVALID)
+@pytest.mark.parametrize(
+    "item, expected",
+    [
+        (
+            {
+                "site": "https://foo.com",
+                "hostname": "foo.com",
+                "title": "Welcome to nginx",
+                "status": 200,
+                "headers": "Content-Type: text/html",
+                "body_length": 1200,
+            },
+            SiteAutoTag.INVALID,
+        ),
+        (
+            {
+                "site": "https://foo.com",
+                "hostname": "foo.com",
+                "title": "",
+                "status": 302,
+                "headers": "Connection: keep-alive\nLocation: https://foo.com/login",
+                "body_length": 80,
+            },
+            SiteAutoTag.INVALID,
+        ),
+        (
+            {
+                "site": "https://foo.com",
+                "hostname": "foo.com",
+                "title": "",
+                "status": 302,
+                "headers": "Connection: close\nLocation: https://bar.com/welcome",
+                "body_length": 80,
+            },
+            SiteAutoTag.ENTRY,
+        ),
+        (
+            {
+                "site": "https://foo.com",
+                "hostname": "foo.com",
+                "title": "",
+                "status": 200,
+                "headers": "Content-Type: text/html",
+                "body_length": 100,
+            },
+            SiteAutoTag.INVALID,
+        ),
+        (
+            {
+                "site": "https://foo.com",
+                "hostname": "foo.com",
+                "title": "",
+                "status": 200,
+                "headers": "Content-Type: text/html",
+                "body_length": 320,
+            },
+            SiteAutoTag.ENTRY,
+        ),
+    ],
+)
+def test_auto_tag_dict_input(item, expected):
+    auto_tag(item)
+    assert item["tag"] == [expected]
 
-    def test_302_2(self):
-        item = {
-            "site": "https://www.qq.com",
-            "title": "",
-            "status": 302,
-            "headers": "Connection: close\nLocation: https://www.dnspod.cn/promo/mi",
-            "body_length": 0,
-        }
-        auto_tag(item)
-        self.assertTrue(item["tag"][0] == SiteAutoTag.ENTRY)
 
-    def test_200(self):
-        site_info_list = fetch_site(["https://www.baidu.com"])
-        auto_tag(site_info_list)
-        self.assertTrue(site_info_list[0]["tag"][0] == SiteAutoTag.ENTRY)
-
-    def test_invalid(self):
-        item = {
-            "site": "https://www.qq.com",
-            "title": "Test Page for the Nginx HTTP Server on Fedora",
-            "status": 200,
-            "headers": "Connection: close",
-            "body_length": 3700,
-        }
-        auto_tag(item)
-        self.assertTrue(item["tag"][0] == SiteAutoTag.INVALID)
-
-    def test_entry(self):
-        item = {
-            "site": "https://www.qq.com",
+def test_auto_tag_accepts_list_input():
+    items = [
+        {
+            "site": "https://inside.local",
+            "hostname": "inside.local",
+            "title": "Error 404--Not Found",
+            "status": 404,
+            "headers": "Content-Type: text/html",
+            "body_length": 1024,
+        },
+        {
+            "site": "https://inside.local/welcome",
+            "hostname": "inside.local",
             "title": "",
             "status": 200,
             "headers": "Content-Type: text/html",
-            "body_length": 260,
-        }
-        auto_tag(item)
-        self.assertTrue(item["tag"][0] == SiteAutoTag.ENTRY)
+            "body_length": 600,
+        },
+    ]
 
+    auto_tag(items)
 
-if __name__ == '__main__':
-    unittest.main()
+    assert items[0]["tag"] == [SiteAutoTag.INVALID]
+    assert items[1]["tag"] == [SiteAutoTag.ENTRY]

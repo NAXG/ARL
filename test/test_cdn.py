@@ -1,28 +1,27 @@
-import unittest
-from app.utils import get_cdn_name_by_ip, get_cdn_name_by_cname
+import pytest
+
+from app.utils import get_cdn_name_by_cname, get_cdn_name_by_ip
 
 
-class TestCDNName(unittest.TestCase):
-    def test_cdn_ip(self):
-        name = get_cdn_name_by_ip("1.1.1.1")
+@pytest.mark.parametrize(
+    "ip, expected",
+    [
+        ("1.1.1.1", ""),
+        ("164.88.98.2", "云盾CDN"),
+    ],
+)
+def test_get_cdn_name_by_ip(ip, expected):
+    assert get_cdn_name_by_ip(ip) == expected
 
-        self.assertTrue(name == "")
 
-        name = get_cdn_name_by_ip("164.88.98.2")
-        self.assertTrue(name == "云盾CDN")
-
-    def test_cdn_cname(self):
-        name = get_cdn_name_by_cname("example.com")
-        self.assertTrue(name == "")
-
-        name = get_cdn_name_by_cname("zff.qaxwzws.com")
-        self.assertTrue(name == "网神CDN")
-
-        name = get_cdn_name_by_cname("zff.xxgslb.com")
-        self.assertTrue(name == "CDN")
-
-        name = get_cdn_name_by_cname("zff.akamaized.net")
-        self.assertTrue(name == "AkamaiCDN")
-
-if __name__ == '__main__':
-    unittest.main()
+@pytest.mark.parametrize(
+    "cname, expected",
+    [
+        ("example.com", ""),
+        ("zff.qaxwzws.com", "网神CDN"),
+        ("zff.xxgslb.com", "CDN"),
+        ("zff.akamaized.net", "AkamaiCDN"),
+    ],
+)
+def test_get_cdn_name_by_cname(cname, expected):
+    assert get_cdn_name_by_cname(cname) == expected

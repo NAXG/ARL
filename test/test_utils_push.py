@@ -1,143 +1,136 @@
-import unittest
-from app import services
-from app.utils import push
-from app.config import Config
+import pytest
+
+from app.utils.push import Push, dict2dingding_mark, dict2table, message_push
 
 
-class TestUtilsPush(unittest.TestCase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._site_data = None
-        self._domain_data = None
-        self._ip_data = None
+@pytest.fixture
+def sample_asset_map():
+    return {
+        "task_name": "Demo Task",
+        "site": [
+            {
+                "site": "https://demo",
+                "title": "Welcome",
+                "status": 200,
+                "favicon": {"hash": 123},
+            }
+        ],
+        "domain": [
+            {
+                "domain": "demo.example",
+                "type": "A",
+                "record": ["1.1.1.1"],
+            }
+        ],
+        "ip": [
+            {
+                "ip": "1.1.1.1",
+                "port_info": [{"port_id": 80}, {"port_id": 443}],
+                "geo_asn": {"organization": "Example Org"},
+            }
+        ],
+    }
 
-    @property
-    def site_data(self):
-        if self._site_data is None:
-            sites = ["https://www.baidu.com", "https://www.qq.com/"]
-            site_data = services.fetch_site(sites, concurrency=2)
-            self._site_data = site_data
 
-        return self._site_data
+@pytest.fixture
+def sample_asset_counter():
+    return {"site": 1, "domain": 1, "ip": 1}
 
-    @property
-    def domain_data(self):
-        if self._domain_data is None:
-            _domain_data = services.build_domain_info(["www.baidu.com", "www.qq.com"])
-            domain_data = []
-            for x in _domain_data:
-                domain_data.append(x.dump_json(flag=False))
-            self._domain_data = domain_data
 
-        return self._domain_data
+def test_push_builders_extract_expected_fields(sample_asset_map, sample_asset_counter):
+    p = Push(sample_asset_map, sample_asset_counter)
 
-    @property
-    def ip_data(self):
-        if self._ip_data is None:
-            _ip_data = services.build_domain_info(["www.baidu.com", "www.qq.com"])
-            ip_data = []
-            for x in services.port_scan(["1.1.1.1"]):
-                x["geo_asn"] = {
-                    "number": 13335,
-                    "organization": "Cloudflare, Inc."
-                }
-                ip_data.append(x)
-            self._ip_data = ip_data
-
-        return self._ip_data
-
-    @property
-    def domain_asset_map(self):
-        asset_map = {
-            "site": self.site_data,
-            "domain": self.domain_data,
-            "task_name": "灯塔测试域名"
+    assert p.site_info_list == [
+        {
+            "站点": "https://demo",
+            "标题": "Welcome",
+            "状态码": 200,
+            "favicon": 123,
         }
-        return asset_map
+    ]
 
-    @property
-    def domain_asset_counter(self):
-        asset_counter = {
-            "site": 10,
-            "domain": 10
+    assert p.domain_info_list == [
+        {"域名": "demo.example", "解析类型": "A", "记录值": "1.1.1.1"}
+    ]
+
+    assert p.ip_info_list == [
+        {
+            "IP": "1.1.1.1",
+            "端口数目": 2,
+            "开放端口": "80,443",
+            "组织": "Example Org",
         }
-        return asset_counter
+    ]
 
-    @property
-    def ip_asset_map(self):
-        asset_map = {
-            "site": self.site_data,
-            "ip": self.ip_data,
-            "task_name": "灯塔测试 IP"
+
+def test_push_dingding_invokes_helper(monkeypatch, sample_asset_map, sample_asset_counter):
+    p = Push(sample_asset_map, sample_asset_counter)
+
+    monkeypatch.setattr("app.config.Config.DINGDING_ACCESS_TOKEN", "token")
+    monkeypatch.setattr("app.config.Config.DINGDING_SECRET", "secret")
+
+    calls = {"count": 0}
+
+    def fake_push():
+        calls["count"] += 1
+        return True
+
+    monkeypatch.setattr(p, "_push_dingding", fake_push)
+
+    assert p.push_dingding() is True
+    assert calls["count"] == 1
+
+
+def test_dict2dingding_mark_formats_rows(sample_asset_map):
+    site_list = Push(sample_asset_map, {"site": 1}).site_info_list
+    result = dict2dingding_mark(site_list)
+
+    lines = result.splitlines()
+    assert lines[0].startswith("站点")
+    assert any(line.startswith("1.") for line in lines)
+    assert "https://demo" in result
+
+
+def test_dict2table_escapes_html(sample_asset_map):
+    html_map = sample_asset_map.copy()
+    html_map["site"] = [
+        {
+            "site": "https://demo",
+            "title": "<b>Welcome</b>",
+            "status": 200,
+            "favicon": {"hash": "<123>"},
         }
-        return asset_map
+    ]
 
-    @property
-    def ip_asset_counter(self):
-        asset_counter = {
-            "site": 10,
-            "ip": 10
-        }
-        return asset_counter
-
-    def assert_dingding_config(self):
-        self.assertTrue(Config.DINGDING_SECRET)
-        self.assertTrue(Config.DINGDING_ACCESS_TOKEN)
-
-    def assert_email_config(self):
-        self.assertTrue(Config.EMAIL_PASSWORD)
-        self.assertTrue(Config.EMAIL_USERNAME)
-
-    def assert_feishu_config(self):
-        self.assertTrue(Config.FEISHU_SECRET)
-        self.assertTrue(Config.FEISHU_WEBHOOK)
-
-    def assert_wx_work_config(self):
-        self.assertTrue(Config.WX_WORK_WEBHOOK)
-
-    def test_push_dingding(self):
-        self.assert_dingding_config()
-
-        push_domain = push.Push(asset_map=self.domain_asset_map, asset_counter=self.domain_asset_counter)
-        ret = push_domain.push_dingding()
-        self.assertTrue(ret)
-
-        push_ip = push.Push(asset_map=self.ip_asset_map, asset_counter=self.ip_asset_counter)
-        ret = push_ip.push_dingding()
-        self.assertTrue(ret)
-
-    def test_push_email(self):
-        self.assert_email_config()
-
-        push_domain = push.Push(asset_map=self.domain_asset_map, asset_counter=self.domain_asset_counter)
-        ret = push_domain.push_email()
-        self.assertTrue(ret)
-
-        push_ip = push.Push(asset_map=self.ip_asset_map, asset_counter=self.ip_asset_counter)
-        ret = push_ip.push_email()
-        self.assertTrue(ret)
-
-    def test_push_feishu(self):
-        self.assert_feishu_config()
-
-        push_domain = push.Push(asset_map=self.domain_asset_map, asset_counter=self.domain_asset_counter)
-        ret = push_domain.push_feishu()
-        self.assertTrue(ret)
-
-        push_ip = push.Push(asset_map=self.ip_asset_map, asset_counter=self.ip_asset_counter)
-        ret = push_ip.push_feishu()
-        self.assertTrue(ret)
-
-    def test_wx_work_push(self):
-        self.assert_wx_work_config()
-        push_domain = push.Push(asset_map=self.domain_asset_map, asset_counter=self.domain_asset_counter)
-        ret = push_domain.push_wx_work()
-        self.assertTrue(ret)
-
-        push_ip = push.Push(asset_map=self.ip_asset_map, asset_counter=self.ip_asset_counter)
-        ret = push_ip.push_wx_work()
-        self.assertTrue(ret)
+    table_html = dict2table(Push(html_map, {"site": 1}).site_info_list)
+    assert "<b>" not in table_html
+    assert "&#x3c;b&#x3e;Welcome&#x3c;/b&#x3e;" in table_html
 
 
-if __name__ == '__main__':
-    unittest.main()
+def test_message_push_triggers_all_channels(monkeypatch, sample_asset_map, sample_asset_counter):
+    created = []
+
+    class DummyPush:
+        def __init__(self, asset_map, asset_counter):
+            self.asset_map = asset_map
+            self.asset_counter = asset_counter
+            self.calls = []
+            created.append(self)
+
+        def push_dingding(self):
+            self.calls.append("dingding")
+
+        def push_email(self):
+            self.calls.append("email")
+
+        def push_feishu(self):
+            self.calls.append("feishu")
+
+        def push_wx_work(self):
+            self.calls.append("wx")
+
+    monkeypatch.setattr("app.utils.push.Push", DummyPush)
+
+    message_push(sample_asset_map, sample_asset_counter)
+
+    assert created and created[0].calls == ["dingding", "email", "feishu", "wx"]

@@ -1,49 +1,72 @@
-import sys
-import unittest
-from app.services.webhook import ip_asset_web_hook, domain_asset_web_hook, site_asset_web_hook
-from app.config import Config
+from types import SimpleNamespace
+
+from app.services.webhook import domain_asset_web_hook, ip_asset_web_hook
 
 
-class TestCDNName(unittest.TestCase):
-    def test_ip_asset_web_hook(self):
-        self.assertTrue(Config.WEB_HOOK_URL)
+class DummyCollection:
+    def __init__(self, items=None, one=None):
+        self._items = items or []
+        self._one = one
 
-        if "/pycharm/" in sys.argv[0]:
-            task_id = "62e20a4a6591e72712558422"
-            scope_id = "61b9e0a56591e70a53c5f69d"
-        else:
-            task_id = sys.argv[1]
-            scope_id = sys.argv[2]
+    def find(self, query, projection=None):
+        return DummyCursor(self._items)
 
-        print(f"task_id:{task_id} scope_id: web_hook_url:{scope_id}")
-        ip_asset_web_hook(task_id=task_id, scope_id=scope_id)
-
-    def test_domain_asset_web_hook(self):
-        self.assertTrue(Config.WEB_HOOK_URL)
-
-        if "/pycharm/" in sys.argv[0]:
-            task_id = "62d8c1f76591e723876347ee"
-            scope_id = "61b9e0a56591e70a53c5f69d"
-        else:
-            task_id = sys.argv[1]
-            scope_id = sys.argv[2]
-
-        print(f"task_id:{task_id} scope_id: web_hook_url:{scope_id}")
-        domain_asset_web_hook(task_id=task_id, scope_id=scope_id)
-
-    def test_site_asset_web_hook(self):
-        self.assertTrue(Config.WEB_HOOK_URL)
-
-        if "/pycharm/" in sys.argv[0]:
-            task_id = "62d8c1f76591e723876347ee"
-            scope_id = "61b9e0a56591e70a53c5f69d"
-        else:
-            task_id = sys.argv[1]
-            scope_id = sys.argv[2]
-
-        print(f"task_id:{task_id} scope_id: web_hook_url:{scope_id}")
-        site_asset_web_hook(task_id=task_id, scope_id=scope_id)
+    def find_one(self, query, projection=None):
+        return dict(self._one) if self._one else None
 
 
-if __name__ == '__main__':
-    unittest.main(argv=[sys.argv[0]])
+class DummyCursor:
+    def __init__(self, items):
+        self._items = items
+
+    def limit(self, _):
+        return self
+
+    def __iter__(self):
+        return iter(self._items)
+
+
+def stub_conn_db(data_map):
+    def factory(name):
+        return data_map[name]
+    return factory
+
+
+def test_domain_asset_web_hook_sends_payload(monkeypatch):
+    data_map = {
+        "domain": DummyCollection(items=[{"domain": "a"}]),
+        "site": DummyCollection(items=[{"site": "https://a"}]),
+        "asset_scope": DummyCollection(one={"_id": "0" * 24, "name": "scope", "scope_type": "domain"}),
+        "task": DummyCollection(one={"_id": "0" * 24, "name": "task"}),
+    }
+
+    sent = {}
+    monkeypatch.setattr("app.services.webhook.Config.WEB_HOOK_URL", "https://hook")
+    monkeypatch.setattr("app.services.webhook.Config.WEB_HOOK_TOKEN", "token")
+    monkeypatch.setattr("app.services.webhook.utils.conn_db", stub_conn_db(data_map))
+    monkeypatch.setattr("app.services.webhook.utils.http_req", lambda url, **kwargs: sent.update({"url": url, **kwargs}))
+
+    domain_asset_web_hook("0" * 24, "1" * 24)
+
+    assert sent["url"] == "https://hook"
+    assert sent["headers"]["Token"] == "token"
+    assert sent["json"]["type"] == "domain_monitor"
+
+
+def test_ip_asset_web_hook_requires_assets(monkeypatch):
+    data_map = {
+        "ip": DummyCollection(items=[]),
+        "site": DummyCollection(items=[]),
+        "asset_scope": DummyCollection(one={"_id": "0" * 24}),
+        "task": DummyCollection(one={"_id": "0" * 24}),
+    }
+    monkeypatch.setattr("app.services.webhook.Config.WEB_HOOK_URL", "https://hook")
+    monkeypatch.setattr("app.services.webhook.Config.WEB_HOOK_TOKEN", "token")
+    monkeypatch.setattr("app.services.webhook.utils.conn_db", stub_conn_db(data_map))
+
+    called = {}
+    monkeypatch.setattr("app.services.webhook.utils.http_req", lambda *args, **kwargs: called.update({"called": True}))
+
+    ip_asset_web_hook("0" * 24, "1" * 24)
+
+    assert called == {}

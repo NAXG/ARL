@@ -1,28 +1,40 @@
-import logging
-import sys
-import unittest
-from app.services import run_query_plugin
-from app import utils
+from app.services.dns_query import run_plugin, run_query_plugin
 
 
-class TestQueryPlugin(unittest.TestCase):
-    def test_run_query_plugin(self):
-        logger = utils.get_logger()
-        logger.setLevel(logging.DEBUG)
+class DummyPlugin:
+    def __init__(self, source_name, results):
+        self.source_name = source_name
+        self._results = results
+        self.inited_with = None
 
-        # pycharm 下运行
-        if "/pycharm/" in sys.argv[0]:
-            results = run_query_plugin("tophant.com", ["fofa"])
-        else:
-            print("sources :{}".format(" ".join(sys.argv[1:])))
-            results = run_query_plugin("tophant.com", sys.argv[1:])
+    def init_key(self, **kwargs):
+        self.inited_with = kwargs
 
-        print("results:")
-        for item in results:
-            print(item["domain"], item["source"])
-        self.assertTrue(len(results) >= 1)
+    def query(self, target):
+        return [f"{sub}.{target}" for sub in self._results]
 
 
-if __name__ == '__main__':
-    #  python3.6 -m test.test_query_plugin [source1] [source2]
-    unittest.main(argv=[sys.argv[0]])
+def test_run_plugin_respects_config(monkeypatch):
+    plugin = DummyPlugin("demo", ["www"])
+
+    monkeypatch.setattr("app.services.dns_query.Config.QUERY_PLUGIN_CONFIG", {"demo": {"enable": False}})
+
+    source, results = run_plugin(plugin, "example.com")
+
+    assert source == "demo"
+    assert results == []
+
+
+def test_run_query_plugin_deduplicates_domains(monkeypatch):
+    plugins = [
+        DummyPlugin("demo1", ["www", "api"]),
+        DummyPlugin("demo2", ["www", "cdn"]),
+    ]
+
+    monkeypatch.setattr("app.services.dns_query.Config.QUERY_PLUGIN_CONFIG", {})
+    monkeypatch.setattr("app.services.dns_query.utils.load_query_plugins", lambda path: plugins)
+
+    results = run_query_plugin("example.com", sources=["demo1", "demo2"])
+
+    domains = {item["domain"] for item in results}
+    assert domains == {"www.example.com", "api.example.com", "cdn.example.com"}

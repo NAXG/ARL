@@ -1,14 +1,20 @@
-import unittest
 from app import services
 
 
-class TestWebInfoHunter(unittest.TestCase):
-    def test_run_wih(self):
-        sites = ["https://www.freebuf.com", "https://www.qq.com/"]
-        results = services.run_wih(sites)
+def test_run_wih_uses_infohunter(monkeypatch):
+    captured = {}
 
-        for result in results:
-            print(result)
+    class FakeRecord:
+        def __init__(self, fnv_hash):
+            self.fnv_hash = fnv_hash
 
-        self.assertTrue(len(results) > 2)
+    def fake_init(self, sites):
+        captured["sites"] = sites
 
+    monkeypatch.setattr("app.services.infoHunter.InfoHunter.__init__", fake_init)
+    monkeypatch.setattr("app.services.infoHunter.InfoHunter.run", lambda self: [FakeRecord(1)])
+
+    results = services.run_wih(["https://demo"])
+
+    assert captured["sites"] == ["https://demo"]
+    assert [r.fnv_hash for r in results] == [1]

@@ -2,7 +2,6 @@ import time
 from pyquery import PyQuery as pq
 import binascii
 from urllib.parse import urljoin, urlparse
-import base64
 import mmh3
 from app import utils
 from .baseThread import BaseThread
@@ -159,7 +158,6 @@ class FetchFavicon:
         pass
 
     def build_result(self, data, hash_value):
-        logger.info(f"favicon hash calc url={self.url} icon={self.favicon_url} len={len(data)} hash={hash_value}")
         result = {
             "data": data,
             "url": self.favicon_url,
@@ -203,15 +201,8 @@ class FetchFavicon:
         if "image" in conn.headers.get("Content-Type", ""):
             # 维持与主干一致的多行 Base64 形式，保证 Shodan hash 兼容
             b64_data = self.encode_bas64_lines(conn.content)
-            # 记录不同编码下的候选哈希方便排查
-            h_shodan = mmh3.hash(b64_data)
-            h_b64_no_nl = mmh3.hash(base64.b64encode(conn.content).decode())
-            try:
-                h_latin1 = mmh3.hash(conn.content.decode('latin1'))
-            except Exception:
-                h_latin1 = None
-            logger.info(f"favicon alt hashes url={favicon_url} shodan={h_shodan} b64_no_nl={h_b64_no_nl} latin1={h_latin1}")
-            return b64_data, h_shodan
+            hash_value = mmh3.hash(b64_data)
+            return b64_data, hash_value
 
     def encode_bas64_lines(self, s):
         """Encode bytes into multiple lines of base-64 data (76 字符换行)."""

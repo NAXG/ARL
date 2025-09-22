@@ -1,46 +1,46 @@
-import unittest
-from app.services.fofaClient import fofa_query, FofaClient
+from base64 import b64decode
+
 from app.config import Config
-from itertools import chain
-from app import utils
+from app.services.fofaClient import FofaClient, fofa_query
 
 
-class TestFofa(unittest.TestCase):
-    def test_search(self):
-        self.assertTrue(Config.FOFA_KEY != "")
-        client = FofaClient(Config.FOFA_KEY,
-                            page_size=10, max_page=3)
+def test_fofa_client_search_stops_on_short_page(monkeypatch):
+    calls = []
 
-        results = list(chain.from_iterable(client.search('body = "test"')))
-        self.assertTrue(len(results) == 30)
+    def fake_api(self, path, params):
+        query = b64decode(params["qbase64"]).decode()
+        calls.append((path, query, params["page"]))
+        page = params["page"]
+        results = [f"item-{page}-{i}" for i in range(self.page_size)] if page < 3 else []
+        return {"query": query, "size": 5, "results": results}
 
-    def test_search_all(self):
-        self.assertTrue(Config.FOFA_KEY != "")
-        client = FofaClient(Config.FOFA_KEY,
-                            page_size=10, max_page=3)
+    monkeypatch.setattr(FofaClient, "_api", fake_api)
 
-        query = 'domain = "baidu.com" && port = 80'
+    client = FofaClient("key", page_size=2, max_page=5)
+    pages = list(client.search('body="test"'))
 
-        data = client.fofa_search_all(query)
-
-        print(f"Query: {data['query']}, Size: {data['size']}, Results: {len(data['results'])}")
-
-        self.assertTrue(data["size"] > 30)
-        self.assertTrue(len(data["results"]) == 10)
-
-    def test_fofa_query(self):
-        results = fofa_query('body = "test"',  page_size=10, max_page=3)
-        self.assertTrue(len(results) == 30)
-
-    def test_fofa_query_fields(self):
-        results = fofa_query('body = "test"', fields="ip", page_size=10, max_page=3)
-        for result in results:
-            if not utils.is_vaild_ip_target(result):
-                print(result, "is not a valid ip")
-                self.assertTrue(False)
-
-        self.assertTrue(len(results) == 30)
+    assert len(pages) == 2
+    assert pages[0] == ["item-1-0", "item-1-1"]
+    assert calls[0][1] == 'body="test"'
 
 
-if __name__ == '__main__':
-    unittest.main()
+def test_fofa_query_returns_message_without_key(monkeypatch):
+    monkeypatch.setattr("app.services.fofaClient.Config.FOFA_KEY", "")
+
+    result = fofa_query("query")
+
+    assert "please set fofa key" in result
+
+
+def test_fofa_query_flattens_results(monkeypatch):
+    monkeypatch.setattr("app.services.fofaClient.Config.FOFA_KEY", "key")
+
+    def fake_search(self, query):
+        yield ["a", "b"]
+        yield ["c"]
+
+    monkeypatch.setattr(FofaClient, "search", fake_search)
+
+    result = fofa_query("query", page_size=1, max_page=2)
+
+    assert result == ["a", "b", "c"]

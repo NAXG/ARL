@@ -1,22 +1,27 @@
-import unittest
-from app.config import Config
-from app.utils import http_req, get_logger, get_title
+from types import SimpleNamespace
 
-logger = get_logger()
+from app.utils.conn import http_req
 
 
-class TestProxyURL(unittest.TestCase):
-    def test_proxy_url(self):
-        self.assertTrue(Config.PROXY_URL)
-        target = "https://www.baidu.com"
-        conn = http_req(target)
-        code = conn.status_code
-        logger.info(f"req:{target} proxy:{Config.PROXY_URL}")
-        title = get_title(conn.content)
-        logger.info(f"status_code:{code} title:{title} body_length:{len(conn.content)}")
+def test_http_req_uses_configured_proxy(monkeypatch):
+    captured = {}
 
-        self.assertTrue(conn.status_code == 200)
+    monkeypatch.setattr("app.config.Config.PROXY_URL", "http://proxy:8080")
+    monkeypatch.setattr("app.utils.conn.proxies", {"https": "", "http": ""})
 
+    def fake_get(url, **kwargs):
+        captured["url"] = url
+        captured["kwargs"] = kwargs
+        return SimpleNamespace(content=b"", status_code=200, raw=None)
 
-if __name__ == '__main__':
-    unittest.main()
+    monkeypatch.setattr("app.utils.conn.requests.get", fake_get)
+
+    conn = http_req("https://example.com")
+
+    assert conn.status_code == 200
+    assert captured["url"] == "https://example.com"
+    assert captured["kwargs"]["proxies"] == {
+        "https": "http://proxy:8080",
+        "http": "http://proxy:8080",
+    }
+    assert captured["kwargs"]["headers"]["User-Agent"]
