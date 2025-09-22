@@ -116,8 +116,7 @@ class WebSiteFetch:
         self.web_analyze_map = services.web_analyze(self.available_sites)
 
     def __str__(self):
-        return "<WebSiteFetch> task_id:{}, sites: {}, available_sites:{}".format(
-            self.task_id, len(self.sites), len(self.available_sites))
+        return f"<WebSiteFetch> task_id:{self.task_id}, sites: {len(self.sites)}, available_sites:{len(self.available_sites)}"
 
     def save_site_info(self):
         for site_info in self.site_info_list:

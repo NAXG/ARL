@@ -34,7 +34,7 @@ def fetch_cert(targets, concurrency = 15):
 
 
 
-class SSLCert():
+class SSLCert:
     def __init__(self, ip_info_list, base_doamin = None):
         self.ip_info_list = ip_info_list
         self.base_domain = base_doamin

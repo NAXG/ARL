@@ -62,8 +62,7 @@ class DomainSiteUpdate:
 
         self.set_and_check_domains()
 
-        logger.info("start domain site update task_id: {}, len:{}, source: {}".format(self.task_id,
-                                                                                      len(self.domains), self.source))
+        logger.info(f"start domain site update task_id: {self.task_id}, len:{len(self.domains)}, source: {self.source}")
         self.base_update_task.update_task_field("status", status_name)
 
         t1 = time.time()

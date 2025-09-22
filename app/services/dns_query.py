@@ -67,8 +67,7 @@ class DNSQueryBase:
         subdomains = list(set(subdomains))
 
         t2 = time.time()
-        self.logger.info("end query {} on {}, source result:{}, real result:{} ({:.2f}s)".format(
-            target, self.source_name, len(domains), len(subdomains), t2 - t1))
+        self.logger.info(f"end query {target} on {self.source_name}, source result:{len(domains)}, real result:{len(subdomains)} ({t2 - t1:.2f}s)")
 
         return subdomains
 

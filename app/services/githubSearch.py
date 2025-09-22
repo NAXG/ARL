@@ -51,8 +51,7 @@ class GithubResult:
     @property
     def commit_date(self):
         if self._commit_date is None:
-            commit_url = "https://api.github.com/repos/{}/commits".format(
-                    self.repo_full_name)
+            commit_url = f"https://api.github.com/repos/{self.repo_full_name}/commits"
             params = {
                 "per_page": 1,
                 "path": self.path
@@ -184,8 +183,7 @@ class GithubSearch:
                 curr_page = 1
                 query = f"{self.query} {build_in}"
                 results, total_count = github_search_code(query=query, per_page=self.per_page, page=curr_page)
-                logger.info("[{}/{}] page:1 keyword:{} total:{}".format(search_cnt,
-                                                                        total_search_cnt,  self.query, total_count))
+                logger.info(f"[{search_cnt}/{total_search_cnt}] page:1 keyword:{self.query} total:{total_count}")
 
                 self.total_count += total_count
 

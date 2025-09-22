@@ -227,8 +227,7 @@ class AssetSiteMonitor:
         return html
 
     def build_html_report(self):
-        html = " <br/><br/> 新发现标题变化 {}， 状态码变化 {}<br/><br/><br/>".format(
-            len(self.title_change_list), len(self.status_change_list))
+        html = f" <br/><br/> 新发现标题变化 {len(self.title_change_list)}， 状态码变化 {len(self.status_change_list)}<br/><br/><br/>"
 
         if self.title_change_list:
             title_html = self.build_title_html_report()
@@ -279,8 +278,7 @@ class AssetSiteMonitor:
     def build_markdown_report(self):
         markdown = f"\n站点监控-{self.scope_name} 灯塔消息推送\n\n"
 
-        markdown += "\n 新发现标题变化 {}， 状态码变化 {} \n\n".format(
-            len(self.title_change_list), len(self.status_change_list))
+        markdown += f"\n 新发现标题变化 {len(self.title_change_list)}， 状态码变化 {len(self.status_change_list)} \n\n"
 
         if self.title_change_list:
             markdown += self.build_title_markdown_report()
@@ -387,8 +385,7 @@ class Domain2SiteMonitor:
             }
             info_list.append(info)
 
-        html = " <br/> 新发现站点 {} <br/>".format(
-            len(self.site_info_list))
+        html = f" <br/> 新发现站点 {len(self.site_info_list)} <br/>"
 
         html += dict2table(info_list)
 

@@ -28,7 +28,7 @@ def translate(pattern):
                     stuff = '^' + stuff[1:]
                 elif stuff[0] == '^':
                     stuff = '\\' + stuff
-                res = '{}[{}]'.format(res, stuff)
+                res = f'{res}[{stuff}]'
         else:
             res = res + re.escape(c)
     return res + r'\Z(?ms)'

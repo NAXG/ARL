@@ -18,7 +18,7 @@ read_timeout = 60
 bool_ratio = 0.8
 concurrency_count = 6
 
-class URL():
+class URL:
     def __init__(self, url, payload):
         self.url = url
         self.payload = payload
@@ -67,7 +67,7 @@ class URL():
 
         return self._path
 
-class HTTPReq():
+class HTTPReq:
     def __init__(self, url: URL , read_timeout = 60, max_length = 50*1024):
         self.url = url
         self.read_timeout = read_timeout
@@ -101,7 +101,7 @@ class HTTPReq():
 
 
 
-class Page():
+class Page:
     def __init__(self, req: HTTPReq):
         self.raw_req = req
         self.url = req.url
@@ -483,7 +483,7 @@ class GenBackDicts:
         return ret
 
 
-class GenURL():
+class GenURL:
     def __init__(self, target, dicts):
         self.target = normal_url(target).split("?")[0]
         self.dicts = set(dicts)

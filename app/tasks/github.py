@@ -163,16 +163,14 @@ class GithubTaskMonitor(GithubTaskTask):
     def build_html_report(self):
         repo_map = self.build_repo_map()
         repo_cnt = 0
-        html = "<br/><br/> <div> 搜索: {}  仓库数：{}  结果数： {} </div>".format(self.keyword,
-                                                                        len(repo_map.keys()), len(self.new_results))
+        html = f"<br/><br/> <div> 搜索: {self.keyword}  仓库数：{len(repo_map.keys())}  结果数： {len(self.new_results)} </div>"
         for repo_name in repo_map:
             repo_cnt += 1
             # 为了较少长度，超过 5 个仓库就跳过
             if repo_cnt > 5:
                 break
 
-            start_div = '<br/><br/><br/><div>#{} <a href="https://github.com/{}"> {} </a> 结果数：{}</div><br/>\n'.format(
-                repo_cnt, repo_name, repo_name, len(repo_map[repo_name]))
+            start_div = f'<br/><br/><br/><div>#{repo_cnt} <a href="https://github.com/{repo_name}"> {repo_name} </a> 结果数：{len(repo_map[repo_name])}</div><br/>\n'
             table_start = '''<table style="border-collapse: collapse;">
             <thead>
                 <tr>
@@ -193,14 +191,11 @@ class GithubTaskMonitor(GithubTaskTask):
                 code_content = item.human_content(self.keyword).replace('>', "&#x3e;").replace('<', "&#x3c;")
                 code_content = code_content[:2000]
                 tr_tag = '<tr>' \
-                         '<td {}> {} </td>' \
-                         '<td {}> <div style="width: 300px"> <a href="{}"> {} </a> </div> </td>' \
-                         '<td {}> <pre style="max-width: 600px; overflow: auto; max-height: 600px;">{}</pre></td>' \
-                         '<td {}> {} </td>' \
-                         '</tr>\n'.format(
-                    style, tr_cnt, style, item.html_url, item.path,
-                    style, code_content,
-                    style, item.commit_date)
+                         f'<td {style}> {tr_cnt} </td>' \
+                         f'<td {style}> <div style="width: 300px"> <a href="{item.html_url}"> {item.path} </a> </div> </td>' \
+                         f'<td {style}> <pre style="max-width: 600px; overflow: auto; max-height: 600px;">{code_content}</pre></td>' \
+                         f'<td {style}> {item.commit_date} </td>' \
+                         '</tr>\n'
 
                 html += tr_tag
                 if tr_cnt > 10:
@@ -217,8 +212,7 @@ class GithubTaskMonitor(GithubTaskTask):
     def build_markdown_report(self):
         repo_map = self.build_repo_map()
 
-        markdown = "[监控-Github-{}] \n 仓库数:{}  结果数:{} \n --- \n".format(self.keyword,
-                                                                        len(repo_map.keys()), len(self.new_results))
+        markdown = f"[监控-Github-{self.keyword}] \n 仓库数:{len(repo_map.keys())}  结果数:{len(self.new_results)} \n --- \n"
 
         global_cnt = 0
         repo_cnt = 0

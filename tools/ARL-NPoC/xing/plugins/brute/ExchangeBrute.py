@@ -57,7 +57,7 @@ class Plugin(BasePlugin):
             'destination': '%s' % self.target,
             'flags': '4',
             'forcedownlevel': '0',
-            'username': r'{}\{}'.format(self.ad_domain, user),
+            'username': rf'{self.ad_domain}\{user}',
             'password': pwd,
             'isUtf8': '1',
             'passwordText': ''

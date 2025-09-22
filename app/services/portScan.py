@@ -66,8 +66,7 @@ class PortScan:
                 self.nmap_arguments += f" --exclude-ports {self.exclude_ports}"
 
     def run(self):
-        logger.info("nmap target {}  ports {}  arguments {}".format(
-            self.targets[:20], self.ports[:20], self.nmap_arguments))
+        logger.info(f"nmap target {self.targets[:20]}  ports {self.ports[:20]}  arguments {self.nmap_arguments}")
         nm = nmap.PortScanner()
         nm.scan(hosts=self.targets, ports=self.ports, arguments=self.nmap_arguments)
         ip_info_list = []

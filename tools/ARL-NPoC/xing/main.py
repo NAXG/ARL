@@ -24,11 +24,9 @@ def show_plugins(args):
             cnt += 1
 
             if plugin.plugin_type == PluginType.SNIFFER:
-                print("[{}][{}-{}] {} ".format(cnt,plugin.plugin_type,
-                    plugin.target_scheme, plugin_name ))
+                print(f"[{cnt}][{plugin.plugin_type}-{plugin.target_scheme}] {plugin_name} ")
             else:
-                print("[{}][{}] {} | {}".format(cnt, plugin.plugin_type,
-                plugin_name, plugin.vul_name))
+                print(f"[{cnt}][{plugin.plugin_type}] {plugin_name} | {plugin.vul_name}")
 
 
 def load_plugin_by_filter(plugin_type, filter_name):

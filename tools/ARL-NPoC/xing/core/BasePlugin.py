@@ -161,11 +161,9 @@ class BasePlugin:
                 error = self.target_info['raw_target']
 
             if self.plugin_type == PluginType.SNIFFER:
-                self.logger.debug("[{}] {} {} ".format(
-                    plugin_name, error, e))
+                self.logger.debug(f"[{plugin_name}] {error} {e} ")
             else:
-                self.logger.warning("[{}] {} {} ".format(
-                    plugin_name, error, e))
+                self.logger.warning(f"[{plugin_name}] {error} {e} ")
 
             if isinstance(e, OSError):
                 return

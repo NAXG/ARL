@@ -106,8 +106,7 @@ class RiskCruising(CommonTask):
         while run_thread.is_alive():
             time.sleep(5)
             status = f"poc {npoc_instance.runner.runner_cnt}/{run_total}"
-            logger.info("[{}]runner cnt {}/{}".format(self.task_id,
-                                                      npoc_instance.runner.runner_cnt, run_total))
+            logger.info(f"[{self.task_id}]runner cnt {npoc_instance.runner.runner_cnt}/{run_total}")
             self.update_task_field("status", status)
 
         result = npoc_instance.result
@@ -129,8 +128,7 @@ class RiskCruising(CommonTask):
         while run_thread.is_alive():
             time.sleep(5)
             status = f"brute {npoc_instance.runner.runner_cnt}/{run_total}"
-            logger.info("[{}]runner cnt {}/{}".format(self.task_id,
-                                                      npoc_instance.runner.runner_cnt, run_total))
+            logger.info(f"[{self.task_id}]runner cnt {npoc_instance.runner.runner_cnt}/{run_total}")
             self.update_task_field("status", status)
 
         result = npoc_instance.result

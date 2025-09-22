@@ -111,9 +111,7 @@ class BruteVhost(BaseThread):
 
         self.cnt += 1
         if self.cnt % 20 == 1:
-            logger.debug("[{}/{}] >>> {} {}".format(
-                self.cnt, self.total_cnt,
-                self.url_ip, domain))
+            logger.debug(f"[{self.cnt}/{self.total_cnt}] >>> {self.url_ip} {domain}")
 
         page = self.brute_domain(domain)
         if not page:

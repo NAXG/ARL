@@ -20,9 +20,7 @@ class Plugin(ServiceBrutePlugin):
         port = self.target_info["port"]
         if port is None:
             port = 27017
-        uri = "mongodb://{}:{}@{}:{}".format(quote_plus(user),
-                                             quote_plus(passwd),
-                                             host, port)
+        uri = f"mongodb://{quote_plus(user)}:{quote_plus(passwd)}@{host}:{port}"
 
         try:
             conn = MongoClient(uri, connectTimeoutMS=5000,

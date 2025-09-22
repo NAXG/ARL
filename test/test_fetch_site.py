@@ -39,7 +39,7 @@ def test_fetch_favicon_prefers_direct_icon(monkeypatch):
         assert url in {"https://example.com", "https://example.com/favicon.ico"}
         if url.endswith("favicon.ico"):
             return DummyResponse(raw_bytes, 200)
-        html = "<html><head><link rel=\"icon\" href=\"/other.ico\" /></head></html>".encode()
+        html = b"<html><head><link rel=\"icon\" href=\"/other.ico\" /></head></html>"
         return DummyResponse(html, 200, {"Content-Type": "text/html"})
 
     monkeypatch.setattr("app.services.fetchSite.http_req", fake_http_req)

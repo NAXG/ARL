@@ -160,8 +160,7 @@ class DomainExecutor(DomainTask):
             new = self.clear_wildcard_domain_info(new)
 
         elapse = time.time() - t1
-        logger.info("end build domain monitor task  {}, elapse {}".format(
-            len(new), elapse))
+        logger.info(f"end build domain monitor task  {len(new)}, elapse {elapse}")
 
         #删除前面步骤插入的域名
         conn('domain').delete_many({"task_id": self.task_id})

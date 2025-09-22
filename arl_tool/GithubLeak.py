@@ -176,12 +176,10 @@ class GithubLeak:
                 repo_map[repo_name].append(result)
 
         repo_cnt = 0
-        html = "<br/><br/> <div> 搜索: {}  仓库数：{}  结果数： {} </div>".format(self.query,
-                                                                        len(repo_map.keys()), len(self.new_results))
+        html = f"<br/><br/> <div> 搜索: {self.query}  仓库数：{len(repo_map.keys())}  结果数： {len(self.new_results)} </div>"
         for repo_name in repo_map:
             repo_cnt += 1
-            start_div = '<br/><br/><br/><div>#{} <a href="https://github.com/{}"> {} </a> 结果数：{}</div><br/>\n'.format(
-                repo_cnt, repo_name, repo_name, len(repo_map[repo_name]))
+            start_div = f'<br/><br/><br/><div>#{repo_cnt} <a href="https://github.com/{repo_name}"> {repo_name} </a> 结果数：{len(repo_map[repo_name])}</div><br/>\n'
             table_start = '''<table style="border-collapse: collapse;">
             <thead>
                 <tr>
@@ -199,9 +197,8 @@ class GithubLeak:
             for item in repo_map[repo_name]:
                 tr_cnt += 1
                 code_content = item.human_content(self.query).replace('>', "&#x3e;").replace('<', "&#x3c;")
-                tr_tag = '<tr><td {}> {} </td><td {}> <a href="{}">{}</a> </td><td {}>' \
-                         '<pre>{}</pre></td></tr>\n'.format(
-                    style, tr_cnt, style, item.html_url, item.path, style, code_content)
+                tr_tag = f'<tr><td {style}> {tr_cnt} </td><td {style}> <a href="{item.html_url}">{item.path}</a> </td><td {style}>' \
+                         f'<pre>{code_content}</pre></td></tr>\n'
 
                 html += tr_tag
                 if tr_cnt > 10:

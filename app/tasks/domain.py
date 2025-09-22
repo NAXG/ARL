@@ -84,8 +84,7 @@ class DomainBrute:
         logger.info(f"start resolver {self.base_domain} {len(domains)}")
         self.resolver_map = services.resolver_domain(domains)
         elapse = time.time() - start_time
-        logger.info("end resolver {} result {}, elapse {}".format(self.base_domain,
-                                                                  len(self.resolver_map), elapse))
+        logger.info(f"end resolver {self.base_domain} result {len(self.resolver_map)}, elapse {elapse}")
 
     '''
     DomainInfo
@@ -96,8 +95,7 @@ class DomainBrute:
         logger.info(f"start brute {self.base_domain} with dict {len(self.dicts)}")
         self._brute_domain()
         elapse = time.time() - start_time
-        logger.info("end brute {}, result {}, elapse {}".format(self.base_domain,
-                                                                len(self.brute_out), elapse))
+        logger.info(f"end brute {self.base_domain}, result {len(self.brute_out)}, elapse {elapse}")
 
         self._resolver()
 
@@ -364,8 +362,7 @@ class AltDNS:
         t1 = time.time()
         self._fetch_domains()
 
-        logger.info("start {} AltDNS {}  dict {}".format(self.base_domain,
-                                                         len(self.domains), len(self.dicts)))
+        logger.info(f"start {self.base_domain} AltDNS {len(self.domains)}  dict {len(self.dicts)}")
 
         out = services.alt_dns(self.domains, self.base_domain,
                                self.dicts, wildcard_domain_ip=self.wildcard_domain_ip)
@@ -588,8 +585,7 @@ class DomainTask(CommonTask):
 
         self.domain_info_list.extend(domain_info_list)
         elapse = time.time() - arl_t1
-        logger.info("end arl fetch {} {} elapse {}".format(
-            self.base_domain, len(domain_info_list), elapse))
+        logger.info(f"end arl fetch {self.base_domain} {len(domain_info_list)} elapse {elapse}")
 
     def build_domain_info(self, domains):
         """
@@ -650,8 +646,7 @@ class DomainTask(CommonTask):
             return
 
         if len(self.domain_info_list) > 300 and len(self.not_found_domain_ips) > 0:
-            logger.warning("{} 域名泛解析, 当前子域名{}, 大于300, 不进行alt_dns".format(
-                self.base_domain, len(self.domain_info_list)))
+            logger.warning(f"{self.base_domain} 域名泛解析, 当前子域名{len(self.domain_info_list)}, 大于300, 不进行alt_dns")
             return
 
         alt_dns_current_out = self.alt_dns_current()
@@ -839,8 +834,7 @@ class DomainTask(CommonTask):
             cnt += len(domain_info_list)
             self.domain_info_list.extend(domain_info_list)
 
-        logger.info("end run dns_query_plugin {}, result {}, real result:{}".format(
-            self.base_domain, len(results), cnt))
+        logger.info(f"end run dns_query_plugin {self.base_domain}, result {len(results)}, real result:{cnt}")
 
     def domain_fetch(self):
         '''****域名爆破开始****'''
@@ -1073,9 +1067,7 @@ class DomainTask(CommonTask):
         elapse = time.time() - t1
         self.update_services("search_engines", elapse)
 
-        logger.info("search_engines {}, result domain:{} url:{}".format(self.base_domain,
-                                                                        len(domain_info_list),
-                                                                        len(urls)))
+        logger.info(f"search_engines {self.base_domain}, result domain:{len(domain_info_list)} url:{len(urls)}")
 
         # 构建Page 信息
         if len(urls) > 0:

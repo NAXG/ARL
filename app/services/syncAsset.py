@@ -72,8 +72,7 @@ class SyncAsset:
             if old is None:
                 data["save_date"] = utils.curr_date_obj()
                 data["update_date"] = data["save_date"]
-                logger.debug("sync {}, insert {}  {} -> {}".format(
-                    category, data_content, self.task_id, self.scope_id))
+                logger.debug(f"sync {category}, insert {data_content}  {self.task_id} -> {self.scope_id}")
 
                 #记录新插入的资产
                 if category in self.new_asset_map:
@@ -92,8 +91,7 @@ class SyncAsset:
                         old["domain"].extend(data["domain"])
                         data["domain"] = list(set(old["domain"]))
 
-                logger.debug("sync {}, replace {}  {} -> {}".format(
-                    category, data_content, self.task_id, self.scope_id))
+                logger.debug(f"sync {category}, replace {data_content}  {self.task_id} -> {self.scope_id}")
                 conn(dist_collection).find_one_and_replace(query, data)
 
     def run(self):
