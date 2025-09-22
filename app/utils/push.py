@@ -3,7 +3,8 @@ import base64
 import hmac
 import urllib.parse
 import hashlib
-import smtplib, ssl
+import smtplib
+import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from app.utils import http_req, get_logger

@@ -1,5 +1,4 @@
-import time
-from flask_restx import Resource, Api, reqparse, fields, Namespace
+from flask_restx import fields, Namespace
 from app.utils import auth
 from app import utils
 from . import ARLResource

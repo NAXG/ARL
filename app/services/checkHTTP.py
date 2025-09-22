@@ -50,7 +50,7 @@ class CheckHTTP(BaseThread):
             if out is not None:
                 self.checkout_map[url] = out
 
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             pass
 
         except Exception as e:

@@ -140,7 +140,7 @@ def verify_cert(url):
     try:
         http_req(url, method='head', verify= True)
         return True
-    except Exception as e:
+    except Exception:
         return False
 
 

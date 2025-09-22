@@ -41,7 +41,7 @@ class Plugin(BasePlugin):
         qtype = data['type']
         qtime = data['time']
 
-        cur.execute(f'''INSERT INTO RECORD VALUES (?, ?, ?, ?)''', (src, domain, qtype, qtime))
+        cur.execute('''INSERT INTO RECORD VALUES (?, ?, ?, ?)''', (src, domain, qtype, qtime))
         conn.commit()
         conn.close()
 

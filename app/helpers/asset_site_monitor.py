@@ -1,5 +1,5 @@
-from app.modules import CeleryAction, SchedulerStatus, AssetScopeType, TaskStatus, TaskType
-from app import celerytask, utils
+from app.modules import TaskStatus, TaskType
+from app import utils
 from app.config import Config
 logger = utils.get_logger()
 

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os
-import socket
 import sys
 import time
 from xing.utils.file import load_file, clear_empty

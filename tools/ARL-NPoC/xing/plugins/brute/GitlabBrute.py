@@ -1,10 +1,8 @@
-import base64
 import json
 import re
 import urllib.parse
 from xing.core.BasePlugin import BasePlugin
-from xing.core.BaseThread import BaseThread
-from xing.utils import http_req, get_logger
+from xing.utils import http_req
 from xing.core import PluginType, SchemeType, thread_map
 
 
@@ -76,7 +74,7 @@ class Plugin(BasePlugin):
             data = conn.json()
             if data.get("state") == "active":
                 return data.get("username")
-        except json.decoder.JSONDecodeError as e:
+        except json.decoder.JSONDecodeError:
             self.logger.info(f"skip gen user {self.target}")
             self.gen_user_skip = True
 

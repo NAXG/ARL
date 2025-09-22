@@ -9,7 +9,6 @@ https://github.com/haypo/python-ipy
 __version__ = '1.00'
 
 import bisect
-import types
 
 try:
     import collections.abc as collections_abc

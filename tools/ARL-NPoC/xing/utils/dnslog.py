@@ -1,4 +1,3 @@
-import json
 import time
 from . import get_logger
 from . import http_req

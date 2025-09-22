@@ -1,4 +1,3 @@
-import time
 from base64 import b64encode
 from xing.core.BasePlugin import BasePlugin
 from xing.utils import http_req

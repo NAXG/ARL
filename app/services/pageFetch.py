@@ -1,7 +1,5 @@
 import time
-import json
 from app import  utils
-from app.config import Config
 from .baseThread import BaseThread
 from .fileLeak import Page, HTTPReq, URL
 logger = utils.get_logger()

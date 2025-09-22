@@ -1,4 +1,3 @@
-import re
 from xing.core import PluginType, SchemeType
 from xing.core.BasePlugin import BasePlugin
 import socket

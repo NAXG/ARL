@@ -1,6 +1,5 @@
 from xing.core import PluginType, SchemeType
 from xing.core.BasePlugin import BasePlugin
-from xing.utils import http_req, get_logger
 import socket
 from struct import Struct
 

@@ -504,7 +504,6 @@ class GenURL():
 
         return self.urls
 
-from typing import  List
 
 def file_leak(targets, dicts, gen_dict = True) -> list[Page]:
     all_gen_url = set()

@@ -1,7 +1,7 @@
 import re
 from pyquery import PyQuery as pq
 import time
-from urllib.parse import quote, urljoin, urlparse
+from urllib.parse import quote, urlparse
 from app import utils
 
 logger = utils.get_logger()

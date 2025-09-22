@@ -3,7 +3,6 @@ from flask_restx import fields, Namespace
 from app.utils import get_logger
 from app import utils
 from . import  ARLResource
-from app import modules
 
 ns = Namespace('user', description="管理员登录认证")
 

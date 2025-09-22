@@ -1,8 +1,5 @@
-import os
 import re
 import tld
-import subprocess
-import shlex
 from collections import Counter
 from app.config import Config
 from app import utils

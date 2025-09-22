@@ -32,7 +32,7 @@ class Plugin(BasePlugin):
                 return False
             if (not data.get("message")) and (not data.get("username")):
                 return False
-        except json.decoder.JSONDecodeError as e:
+        except json.decoder.JSONDecodeError:
             return
 
         users = self.gen_users()

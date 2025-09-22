@@ -5,7 +5,6 @@ from urllib.parse import urlparse, urljoin
 import re
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-import sys
 from tld import get_tld
 import itertools
 import argparse
@@ -65,7 +64,7 @@ def get_title(body):
     if len(title) > 0:
         try:
             result = title[0].decode("utf-8")
-        except Exception as e:
+        except Exception:
             result = title[0].decode("gbk", errors="replace")
     return result
 
@@ -88,7 +87,7 @@ class BaseThread:
     def _work(self, url):
         try:
             self.work(url)
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             pass
 
         except BaseException as e:

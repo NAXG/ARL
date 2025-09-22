@@ -1,4 +1,3 @@
-import json
 from xing.core.BasePlugin import BasePlugin
 from xing.utils import http_req
 from xing.core import PluginType, SchemeType

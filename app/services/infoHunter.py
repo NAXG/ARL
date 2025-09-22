@@ -1,5 +1,3 @@
-from typing import List
-import subprocess
 from app import utils
 from app.config import Config
 import os

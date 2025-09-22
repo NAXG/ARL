@@ -1,12 +1,10 @@
-import re
-import bson
-from flask_restx import Resource, Api, reqparse, fields, Namespace
+from flask_restx import fields, Namespace
 from bson import ObjectId
 from app import celerytask
 from app.utils import get_logger, auth
 from . import base_query_fields, ARLResource, get_arl_parser, conn
 from app import utils
-from app.modules import TaskStatus, ErrorMsg, TaskSyncStatus, CeleryAction, TaskTag, TaskType
+from app.modules import TaskStatus, ErrorMsg, TaskSyncStatus, CeleryAction, TaskTag
 from app.helpers import get_options_by_policy_id, submit_task_task,\
     submit_risk_cruising, get_scope_by_scope_id, check_target_in_scope
 from app.helpers.task import get_task_data, restart_task

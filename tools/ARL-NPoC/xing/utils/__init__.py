@@ -84,7 +84,7 @@ def get_celery_logger():
         if 'celery' in sys.argv[0]:
             task_logger = get_task_logger(__name__)
             return task_logger
-    except Exception as e:
+    except Exception:
         pass
 
     return None
@@ -251,7 +251,7 @@ def get_title(body):
     if len(title) > 0:
         try:
             result = title[0].decode("utf-8")
-        except Exception as e:
+        except Exception:
             result = title[0].decode("gbk", errors="replace")
     return result.strip()
 

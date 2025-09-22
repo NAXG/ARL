@@ -1,11 +1,9 @@
-from bson.objectid import  ObjectId
 import time
 from app import services
 from app.modules import ScanPortType, TaskStatus
 from app.services import fetchCert, run_risk_cruising, run_sniffer
 from app import utils
 from app.services.commonTask import CommonTask, BaseUpdateTask, WebSiteFetch
-from app.config import Config
 
 
 logger = utils.get_logger()

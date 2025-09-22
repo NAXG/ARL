@@ -1,6 +1,6 @@
 import base64
 from xing.core.BasePlugin import BasePlugin
-from xing.utils import http_req, get_logger
+from xing.utils import http_req
 from xing.core import PluginType, SchemeType
 
 

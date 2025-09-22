@@ -1,4 +1,3 @@
-import logging
 import time
 import concurrent.futures
 from app import utils

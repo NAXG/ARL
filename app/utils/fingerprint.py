@@ -1,6 +1,6 @@
 import json
 from app.config import Config
-from app.utils import get_logger, conn_db, load_file
+from app.utils import get_logger, load_file
 logger = get_logger()
 
 # 解析规则，只有或，且条件不能出现=
@@ -119,7 +119,7 @@ def fetch_fingerprint(content, headers, title, favicon_hash, finger_list):
                     finger_name_list.append(rule_name)
                     match_flag = True
                     break
-            except Exception as e:
+            except Exception:
                 logger.debug(f"error on fetch_fingerprint {html} to gbk")
 
         if match_flag:

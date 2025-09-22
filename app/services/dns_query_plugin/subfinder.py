@@ -65,7 +65,7 @@ class Query(DNSQueryBase):
         except FileNotFoundError:
             self.logger.error(f"Subfinder binary not found at path: {self.subfinder_path}")
             return []
-        except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError:
             self.logger.error(f"Subfinder execution failed for target {target}")
             return []
         except Exception as e:

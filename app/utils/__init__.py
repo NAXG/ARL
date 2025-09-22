@@ -25,7 +25,6 @@ from .cdn import get_cdn_name_by_cname, get_cdn_name_by_ip
 from .device import device_info
 from .cron import check_cron, check_cron_interval
 from .query_loader import load_query_plugins
-import re
 
 def load_file(path):
     with open(path, "r+", encoding="utf-8") as f:

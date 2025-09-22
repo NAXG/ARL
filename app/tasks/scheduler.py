@@ -5,7 +5,7 @@ from .domain import DomainTask
 from .ip import IPTask
 from app import utils
 from app.modules import TaskStatus, CollectSource, SchedulerStatus
-from app.services import sync_asset, build_domain_info, sync_asset
+from app.services import build_domain_info, sync_asset
 import time
 from app.scheduler import update_job_run
 from app.services import webhook

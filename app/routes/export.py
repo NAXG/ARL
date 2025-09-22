@@ -5,7 +5,7 @@ from bson import ObjectId
 import re
 from collections import Counter
 from io import BytesIO
-from openpyxl.styles import Font, Color
+from openpyxl.styles import Font
 from app.utils import get_logger, auth
 from app import utils
 from urllib.parse import quote
@@ -43,7 +43,7 @@ def get_task_data(task_id):
     try:
         task_data = utils.conn_db('task').find_one({'_id': ObjectId(task_id)})
         return task_data
-    except Exception as e:
+    except Exception:
         pass
 
 

@@ -13,7 +13,7 @@ def get_title(body):
     if len(title) > 0:
         try:
             result = title[0].decode("utf-8")
-        except Exception as e:
+        except Exception:
             result = title[0].decode("gbk", errors="replace")
     return result.strip()
 

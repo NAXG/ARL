@@ -1,4 +1,3 @@
-import base64
 from xing.core.BasePlugin import BasePlugin
 from xing.utils import http_req, random_choices
 from xing.core import PluginType, SchemeType

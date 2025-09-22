@@ -1,12 +1,11 @@
-import json
 import time
 import yaml
 from werkzeug.datastructures import FileStorage
 from urllib.parse import quote
 from flask import make_response
-from flask_restx import Resource, Api, reqparse, fields, Namespace
+from flask_restx import reqparse, fields, Namespace
 from bson import ObjectId
-from app.utils import get_logger, auth, parse_human_rule, transform_rule_map
+from app.utils import get_logger, auth
 from app import utils
 from app.modules import ErrorMsg
 from app.services import check_expression_with_error, have_human_rule_from_db

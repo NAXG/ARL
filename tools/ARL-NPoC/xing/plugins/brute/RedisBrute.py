@@ -1,6 +1,5 @@
 from xing.core.BasePlugin import BasePlugin
 from xing.core import PluginType, SchemeType
-import ssl
 import time
 
 

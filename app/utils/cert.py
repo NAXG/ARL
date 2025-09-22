@@ -1,4 +1,3 @@
-import json
 import ssl
 import OpenSSL
 import socket

@@ -1,7 +1,7 @@
 from xing.core.BaseThread import BaseThread
 from xing.core.BasePlugin import BasePlugin
 from xing.core import PluginType
-from xing.utils import get_logger, append_file
+from xing.utils import get_logger
 from xing.utils.save_result import save_result
 
 

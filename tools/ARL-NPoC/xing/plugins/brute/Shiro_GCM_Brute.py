@@ -2,7 +2,7 @@ import base64
 from Cryptodome.Cipher import AES
 import uuid
 from xing.core.BasePlugin import BasePlugin
-from xing.utils import http_req, get_logger, random_choices
+from xing.utils import http_req, random_choices
 from xing.core import PluginType, SchemeType
 
 

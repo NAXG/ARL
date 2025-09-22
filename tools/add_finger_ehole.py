@@ -1,7 +1,5 @@
 import json
 import requests
-import yaml
-import re
 requests.packages.urllib3.disable_warnings()
 
 def update_data(name,rule,token):
