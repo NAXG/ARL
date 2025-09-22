@@ -59,7 +59,7 @@ class Query(DNSQueryBase):
             self.logger.warning(f"Subfinder command timed out for target: {target}")
             try:
                 process.kill()
-            except:
+            except Exception:
                 pass
             return []
         except FileNotFoundError:

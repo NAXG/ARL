@@ -1,4 +1,3 @@
-import time
 
 from app import utils
 from .baseThread import BaseThread

@@ -1064,21 +1064,21 @@ class IPSet(collections_abc.MutableSet):
         right = iter(other.prefixes)
         result = []
         try:
-            l = next(left)
+            left_item = next(left)
             r = next(right)
             while True:
                 # iterate over prefixes in order, keeping the smaller of the
                 # two if they overlap
-                if l in r:
-                    result.append(l)
-                    l = next(left)
+                if left_item in r:
+                    result.append(left_item)
+                    left_item = next(left)
                     continue
-                elif r in l:
+                elif r in left_item:
                     result.append(r)
                     r = next(right)
                     continue
-                if l < r:
-                    l = next(left)
+                if left_item < r:
+                    left_item = next(left)
                 else:
                     r = next(right)
         except StopIteration:
@@ -1145,13 +1145,13 @@ class IPSet(collections_abc.MutableSet):
         left = iter(self.prefixes)
         right = iter(other.prefixes)
         try:
-            l = next(left)
+            left_item = next(left)
             r = next(right)
             while True:
-                if l in r or r in l:
+                if left_item in r or r in left_item:
                     return False
-                if l < r:
-                    l = next(left)
+                if left_item < r:
+                    left_item = next(left)
                 else:
                     r = next(right)
         except StopIteration:
@@ -1444,16 +1444,16 @@ def intToIp(ip, version):
     if version == 4:
         if ip > MAX_IPV4_ADDRESS:
             raise ValueError("IPv4 Address can't be larger than {:x}: {:x}".format(MAX_IPV4_ADDRESS, ip))
-        for l in xrange(4):
+        for _byte_index in xrange(4):
             ret = str(ip & 0xff) + '.' + ret
             ip = ip >> 8
         ret = ret[:-1]
     elif version == 6:
         if ip > MAX_IPV6_ADDRESS:
             raise ValueError("IPv6 Address can't be larger than {:x}: {:x}".format(MAX_IPV6_ADDRESS, ip))
-        l = "%032x" % ip
+        hex_str_32 = "%032x" % ip
         for x in xrange(1, 33):
-            ret = l[-x] + ret
+            ret = hex_str_32[-x] + ret
             if x % 4 == 0:
                 ret = ':' + ret
         ret = ret[1:]
@@ -1486,14 +1486,14 @@ def _ipVersionToLen(version):
         raise ValueError("only IPv4 and IPv6 supported")
 
 
-def _countFollowingZeros(l):
+def _countFollowingZeros(sequence):
     """Return number of elements containing 0 at the beginning of the list."""
-    if len(l) == 0:
+    if len(sequence) == 0:
         return 0
-    elif l[0] != 0:
+    elif sequence[0] != 0:
         return 0
     else:
-        return 1 + _countFollowingZeros(l[1:])
+        return 1 + _countFollowingZeros(sequence[1:])
 
 
 _BitTable = {'0': '0000', '1': '0001', '2': '0010', '3': '0011',
