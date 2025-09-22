@@ -58,10 +58,8 @@ class CheckHTTP(BaseThread):
             logger.warning(e)
 
     def run(self):
-        t1 = time.time()
         logger.info(f"start check http {len(self.targets)}")
         self._run()
-        elapse = time.time() - t1
         return self.checkout_map
 
 

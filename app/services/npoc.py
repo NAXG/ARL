@@ -34,7 +34,7 @@ class NPoC:
 
         if self._plugin_name_list is None:
             # 触发下调用
-            x = self.poc_info_list
+            self.poc_info_list
             self._plugin_name_list = list(self.plugin_name_set)
 
         return self._plugin_name_list
@@ -184,7 +184,7 @@ def run_risk_cruising(plugins, targets):
 
 def run_sniffer(targets):
     n = NPoC(concurrency=15, tmp_dir=Config.TMP_PATH)
-    x = n.plugin_name_list
+    n.plugin_name_list
     new_targets = []
 
     #  跳过80 和 443 的识别
