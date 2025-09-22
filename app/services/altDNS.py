@@ -157,9 +157,13 @@ class DnsGen:
                     if w == w_alt:
                         continue
 
-                    if w in parts[:-1]:
+                    if w_alt in parts[:-1]:
                         continue
-                    domains.append('{}.{}'.format('.'.join(parts[:-1]).replace(w, w_alt), '.'.join(parts[-1:])))
+
+                    domains.append('{}.{}'.format(
+                        '.'.join(parts[:-1]).replace(w, w_alt),
+                        '.'.join(parts[-1:])
+                    ))
 
         return domains
 
