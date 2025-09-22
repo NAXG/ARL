@@ -1,6 +1,6 @@
 import subprocess
-import time
-import json
+import time  # noqa: F401
+import json  # noqa: F401
 import shlex
 import random
 import string
@@ -9,18 +9,18 @@ import inspect
 import colorlog
 import logging
 import urllib3
-import importlib
-import os
+import importlib  # noqa: F401
+import os  # noqa: F401
 from base64 import b64encode
 import re
 import sys
 from urllib.parse import urlparse, urlsplit
 from requests.models import PreparedRequest
-urllib3.disable_warnings()
 import requests
 import hashlib
-from xing.utils.file import load_file,append_file
+from xing.utils.file import load_file as load_file, append_file as append_file
 from xing.conf import Conf
+urllib3.disable_warnings()
 
 
 def exec_system(cmd, **kwargs):
@@ -45,7 +45,6 @@ def exec_system(cmd, **kwargs):
 
 def random_choices(k = 6):
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
-
 
 
 
@@ -330,9 +329,6 @@ def run_listener(plg, args):
     plg.listen(args.host, args.port, **run_args)
 
 
-
-
-
-from xing.utils.loader import load_all_plugin, load_plugins
-from xing.utils.filter import pattern_match
-from xing.utils.dnslog import xn_9tr_com_get, xn_9tr_com_verify
+from xing.utils.loader import load_all_plugin as load_all_plugin, load_plugins as load_plugins  # noqa: E402
+from xing.utils.filter import pattern_match as pattern_match  # noqa: E402
+from xing.utils.dnslog import xn_9tr_com_get as xn_9tr_com_get, xn_9tr_com_verify as xn_9tr_com_verify  # noqa: E402

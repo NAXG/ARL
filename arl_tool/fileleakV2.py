@@ -4,10 +4,13 @@ import requests
 from urllib.parse import urlparse, urljoin
 import re
 import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from tld import get_tld
 import itertools
 import argparse
+import threading
+import collections
+import requests.exceptions
+import os
 
 class ObjectDict(dict):
     """Makes a dictionary behave like an object, with attribute-style access.
@@ -25,6 +28,8 @@ class ObjectDict(dict):
         self[name] = value
 
 UA = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def http_req(url, method = 'get', **kwargs):
     proxies = {
@@ -69,72 +74,12 @@ def get_title(body):
     return result
 
 
-
-
-import threading
-import collections
-import  requests.exceptions
-
-class BaseThread:
-    def __init__(self, targets, concurrency=6):
-        self.concurrency = concurrency
-        self.semaphore = threading.Semaphore(concurrency)
-        self.targets = targets
-
-    def work(self, site):
-        raise NotImplementedError()
-
-    def _work(self, url):
-        try:
-            self.work(url)
-        except requests.exceptions.RequestException:
-            pass
-
-        except BaseException as e:
-            logger(f"error on {url}")
-            self.semaphore.release()
-            raise e
-
-        self.semaphore.release()
-
-    def _run(self):
-        deque = collections.deque(maxlen=2000)
-        cnt = 0
-        for target in self.targets:
-            if isinstance(target, str):
-                target = target.strip()
-
-            cnt += 1
-            logger(f"[{cnt}/{len(self.targets)}] work on {target}")
-
-            if not target:
-                continue
-
-            self.semaphore.acquire()
-            #self._work(target)
-            t1 = threading.Thread(target=self._work, args=(target,))
-            t1.start()
-
-            deque.append(t1)
-
-        for t in list(deque):
-            while t.is_alive():
-                time.sleep(0.2)
-
-
-
-
 settings = ObjectDict()
 
 settings.min_length = 100
 settings.max_length = 50*1024
 settings.read_timeout = 60
 settings.bool_ratio = 0.8
-
-
-
-
-
 
 
 class URL():
@@ -215,8 +160,6 @@ class HTTPReq():
         conn.close()
 
         return self.status_code, self.content
-
-
 
 
 class Page():
@@ -350,7 +293,51 @@ class Page():
         return "<Page> "+ self.__str__()
 
 
+class BaseThread:
+    def __init__(self, targets, concurrency=6):
+        self.concurrency = concurrency
+        self.semaphore = threading.Semaphore(concurrency)
+        self.targets = targets
 
+    def work(self, site):
+        raise NotImplementedError()
+
+    def _work(self, url):
+        try:
+            self.work(url)
+        except requests.exceptions.RequestException:
+            pass
+
+        except BaseException as e:
+            logger(f"error on {url}")
+            self.semaphore.release()
+            raise e
+
+        self.semaphore.release()
+
+    def _run(self):
+        deque = collections.deque(maxlen=2000)
+        cnt = 0
+        for target in self.targets:
+            if isinstance(target, str):
+                target = target.strip()
+
+            cnt += 1
+            logger(f"[{cnt}/{len(self.targets)}] work on {target}")
+
+            if not target:
+                continue
+
+            self.semaphore.acquire()
+            #self._work(target)
+            t1 = threading.Thread(target=self._work, args=(target,))
+            t1.start()
+
+            deque.append(t1)
+
+        for t in list(deque):
+            while t.is_alive():
+                time.sleep(0.2)
 
 
 class FileLeak(BaseThread):
@@ -428,7 +415,6 @@ class FileLeak(BaseThread):
             logger(f"error on {e}")
             self.error_times += 1
             raise e
-
 
 
     def is_404_page(self, page: Page):
@@ -545,9 +531,59 @@ def normal_url(url):
     return ret_url
 
 
-import os
+def load_file(path):
+    with open(path, "r+") as f:
+        return f.readlines()
 
 
+
+def file_leak(targets, dicts):
+    all_gen_url = set()
+    map_url = dict()
+    for site in targets:
+        site = normal_url(site.strip())
+        if not site:
+            continue
+
+        map_url[URL(site, "").scope] = set()
+        a = GenURL(site, dicts)
+        all_gen_url |= a.gen(settings.gen_dict)
+
+    for url in all_gen_url:
+        map_url[url.scope].add(url)
+
+    cnt = 0
+    total = len(map_url)
+    for target in map_url:
+        cnt += 1
+        print(f"file leak => [{cnt}/{total}] {target}")
+        try:
+            f = FileLeak(target, map_url[target], settings.concurrency_count)
+            pages = f.run()
+            with open(settings.output, "a") as f:
+                for page in pages:
+                    logger(f"found => {page}")
+                    f.write(f"{page}\n")
+
+        except Exception as e:
+            logger(f"error on {e}")
+
+class ArgumentDefaultsHelpFormatter(argparse.HelpFormatter):
+    """Help message formatter which adds default values to argument help.
+
+    Only the name of this class is considered a public API. All the methods
+    provided by the class are considered an implementation detail.
+    """
+
+    def _get_help_string(self, action):
+        help = action.help
+        if '%(default)' not in action.help:
+            if action.default is not argparse.SUPPRESS:
+                defaulting_nargs = [argparse.OPTIONAL, argparse.ZERO_OR_MORE]
+                if action.option_strings or action.nargs in defaulting_nargs:
+                    if action.default is not None:
+                        help += ' (default: %(default)s)'
+        return help
 
 
 class GenBackDicts:
@@ -618,62 +654,6 @@ class GenURL():
             self.urls |=  GenBackDicts(self.target).gen()
 
         return self.urls
-
-
-def load_file(path):
-    with open(path, "r+") as f:
-        return f.readlines()
-
-
-
-def file_leak(targets, dicts):
-    all_gen_url = set()
-    map_url = dict()
-    for site in targets:
-        site = normal_url(site.strip())
-        if not site:
-            continue
-
-        map_url[URL(site, "").scope] = set()
-        a = GenURL(site, dicts)
-        all_gen_url |= a.gen(settings.gen_dict)
-
-    for url in all_gen_url:
-        map_url[url.scope].add(url)
-
-    cnt = 0
-    total = len(map_url)
-    for target in map_url:
-        cnt += 1
-        print(f"file leak => [{cnt}/{total}] {target}")
-        try:
-            f = FileLeak(target, map_url[target], settings.concurrency_count)
-            pages = f.run()
-            with open(settings.output, "a") as f:
-                for page in pages:
-                    logger(f"found => {page}")
-                    f.write(f"{page}\n")
-
-        except Exception as e:
-            logger(f"error on {e}")
-
-class ArgumentDefaultsHelpFormatter(argparse.HelpFormatter):
-    """Help message formatter which adds default values to argument help.
-
-    Only the name of this class is considered a public API. All the methods
-    provided by the class are considered an implementation detail.
-    """
-
-    def _get_help_string(self, action):
-        help = action.help
-        if '%(default)' not in action.help:
-            if action.default is not argparse.SUPPRESS:
-                defaulting_nargs = [argparse.OPTIONAL, argparse.ZERO_OR_MORE]
-                if action.option_strings or action.nargs in defaulting_nargs:
-                    if action.default is not None:
-                        help += ' (default: %(default)s)'
-        return help
-
 
 
 

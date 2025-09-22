@@ -2,12 +2,13 @@ import time
 import difflib
 from urllib.parse import urlparse, urljoin
 import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from tld import get_tld
 import itertools
-
+import os
 from app import utils
 from .baseThread import BaseThread
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logger = utils.get_logger()
 
@@ -430,7 +431,7 @@ def normal_url(url):
     return ret_url
 
 
-import os
+ 
 
 
 
@@ -522,7 +523,6 @@ def file_leak(targets, dicts, gen_dict = True) -> list[Page]:
         map_url[url.scope].add(url)
 
     cnt = 0
-    total = len(map_url)
     ret = []
     for target in map_url:
         cnt += 1

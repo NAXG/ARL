@@ -5,11 +5,11 @@ from urllib.parse import urljoin, urlparse
 import mmh3
 from app import utils
 from .baseThread import BaseThread
-
-logger = utils.get_logger()
 from .autoTag import auto_tag
 from app.utils import http_req, normal_url
 from app.utils.fingerprint import load_fingerprint, fetch_fingerprint
+
+logger = utils.get_logger()
 
 
 class FetchSite(BaseThread):

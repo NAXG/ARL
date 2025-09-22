@@ -2,13 +2,14 @@ import base64
 import sys
 import os
 from collections import deque
-ARL_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "./../"))
-sys.path.append(ARL_PATH)
-from app.utils import http_req, get_logger, gen_md5, load_file
-from app.config import Config
 import time
 
-from app.utils.push import send_email
+ARL_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "./../"))
+sys.path.append(ARL_PATH)
+
+from app.utils import http_req, get_logger, gen_md5, load_file  # noqa: E402
+from app.config import Config  # noqa: E402
+from app.utils.push import send_email  # noqa: E402
 
 logger = get_logger()
 
