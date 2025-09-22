@@ -2,6 +2,7 @@ import time
 from pyquery import PyQuery as pq
 import binascii
 from urllib.parse import urljoin, urlparse
+import base64
 import mmh3
 from app import utils
 from .baseThread import BaseThread
@@ -157,11 +158,12 @@ class FetchFavicon:
         self.favicon_url = None
         pass
 
-    def build_result(self, data):
+    def build_result(self, data, hash_value):
+        logger.info(f"favicon hash calc url={self.url} icon={self.favicon_url} len={len(data)} hash={hash_value}")
         result = {
             "data": data,
             "url": self.favicon_url,
-            "hash": mmh3.hash(data)
+            "hash": hash_value
         }
         return result
 
@@ -172,7 +174,8 @@ class FetchFavicon:
             data = self.get_favicon_data(favicon_url)
             if data:
                 self.favicon_url = favicon_url
-                return self.build_result(data)
+                b64_data, hash_value = data
+                return self.build_result(b64_data, hash_value)
 
             favicon_url = self.find_icon_url_from_html()
             if not favicon_url:
@@ -180,7 +183,8 @@ class FetchFavicon:
             data = self.get_favicon_data(favicon_url)
             if data:
                 self.favicon_url = favicon_url
-                return self.build_result(data)
+                b64_data, hash_value = data
+                return self.build_result(b64_data, hash_value)
 
         except Exception as e:
             logger.warning(f"error on {self.url} {e}")
@@ -188,7 +192,7 @@ class FetchFavicon:
         return result
 
     def get_favicon_data(self, favicon_url):
-        conn = http_req(favicon_url)
+        conn = http_req(favicon_url, allow_redirects=True)
         if conn.status_code != 200:
             return
 
@@ -197,28 +201,25 @@ class FetchFavicon:
             return
 
         if "image" in conn.headers.get("Content-Type", ""):
-            data = self.encode_bas64_lines(conn.content)
-            return data
+            # Base64 string for storage (no newlines)
+            b64_data = base64.b64encode(conn.content).decode()
+            # Shodan-compatible icon hash: mmh3 over base64 with newlines
+            hash_value = mmh3.hash(base64.encodebytes(conn.content))
+            return b64_data, hash_value
 
     def encode_bas64_lines(self, s):
-        """Encode a string into multiple lines of base-64 data."""
-        MAXLINESIZE = 76  # Excluding the CRLF
-        MAXBINSIZE = (MAXLINESIZE // 4) * 3
-        pieces = []
-        for i in range(0, len(s), MAXBINSIZE):
-            chunk = s[i: i + MAXBINSIZE]
-            pieces.append(bytes.decode(binascii.b2a_base64(chunk)))
-        return "".join(pieces)
+        # Encode entire content to base64 without newlines to ensure stable mmh3 hash
+        return base64.b64encode(s).decode()
 
     def find_icon_url_from_html(self):
-        conn = http_req(self.url)
+        conn = http_req(self.url, allow_redirects=True)
         if b"<link" not in conn.content:
             return
         d = pq(conn.content)
         links = d('link').items()
         icon_link_list = []
         for link in links:
-            if link.attr("href") and 'icon' in link.attr("rel"):
+            if link.attr("href") and 'icon' in (link.attr("rel") or ""):
                 icon_link_list.append(link)
 
         for link in icon_link_list:
