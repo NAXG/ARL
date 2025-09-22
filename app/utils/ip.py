@@ -68,14 +68,19 @@ def get_ip_city(ip):
     try:
         reader = geoip2.database.Reader(Config.GEOIP_CITY)
         response = reader.city(ip)
+        city_name = response.city.name
+        subdivision = response.subdivisions.most_specific
+        region_name = getattr(subdivision, 'name', None) or city_name or response.country.name
+        region_code = getattr(subdivision, 'iso_code', None) or response.country.iso_code
+
         item = {
-            "city": response.city.name,
+            "city": city_name,
             "latitude": response.location.latitude,
             "longitude": response.location.longitude,
             "country_name": response.country.name,
             "country_code": response.country.iso_code,
-            "region_name": response.subdivisions.most_specific.name,
-            "region_code": response.subdivisions.most_specific.iso_code,
+            "region_name": region_name,
+            "region_code": region_code,
         }
         reader.close()
         return item
