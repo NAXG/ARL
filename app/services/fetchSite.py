@@ -203,8 +203,16 @@ class FetchFavicon:
         if "image" in conn.headers.get("Content-Type", ""):
             # Base64 string for storage (no newlines)
             b64_data = base64.b64encode(conn.content).decode()
-            # Shodan-compatible icon hash: mmh3 over base64 with newlines
-            hash_value = mmh3.hash(base64.encodebytes(conn.content))
+            # Candidate hashes
+            h_shodan = mmh3.hash(base64.encodebytes(conn.content))
+            h_b64_no_nl = mmh3.hash(b64_data)
+            try:
+                h_latin1 = mmh3.hash(conn.content.decode('latin1'))
+            except Exception:
+                h_latin1 = None
+            logger.info(f"favicon alt hashes url={favicon_url} shodan={h_shodan} b64_no_nl={h_b64_no_nl} latin1={h_latin1}")
+            # Prefer Shodan-compatible
+            hash_value = h_shodan
             return b64_data, hash_value
 
     def encode_bas64_lines(self, s):
