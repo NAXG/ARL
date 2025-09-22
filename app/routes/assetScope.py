@@ -90,9 +90,9 @@ class ARLAssetScope(ARLResource):
             "black_scope": black_scope,
             "black_scope_array": black_scope_array,
         }
-        conn('asset_scope').insert(scope_data)
+        inserted = conn('asset_scope').insert_one(scope_data)
 
-        scope_id = str(scope_data.pop("_id"))
+        scope_id = str(inserted.inserted_id)
         scope_data["scope_id"] = scope_id
 
         return utils.build_ret(ErrorMsg.Success, scope_data)

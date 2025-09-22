@@ -140,7 +140,7 @@ class ARLResource(Resource):
         orderby_list = default_field.get('order', [("_id", -1)])
         query = self.build_db_query(args)
         result = conn(collection).find(query).sort(orderby_list).skip(size * (page - 1)).limit(size)
-        count = conn(collection).count(query)
+        count = conn(collection).count_documents(query)
         items = self.build_return_items(result)
 
         special_keys = ["_id", "save_date", "update_date"]

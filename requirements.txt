@@ -1,6 +1,6 @@
 urllib3
 colorlog
-pymongo
+pymongo>=4.1
 Flask
 Werkzeug
 celery
@@ -16,6 +16,7 @@ pyquery
 openpyxl
 gunicorn
 psutil
-crontab
+python-crontab
+lxml
 pyparsing
 pytest
