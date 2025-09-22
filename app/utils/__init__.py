@@ -45,35 +45,59 @@ from .device import device_info as device_info
 from .cron import check_cron as check_cron, check_cron_interval as check_cron_interval
 from .query_loader import load_query_plugins as load_query_plugins
 
+
+def _normalize_cmd(cmd):
+    if isinstance(cmd, (list, tuple)):
+        cmd_str = " ".join(str(part) for part in cmd)
+    else:
+        cmd_str = str(cmd)
+    return shlex.split(cmd_str)
+
+
+def _ensure_phantom_env(cmd_args, kwargs):
+    if not cmd_args:
+        return
+
+    executable = os.path.basename(cmd_args[0])
+    if executable != 'phantomjs':
+        return
+
+    env = kwargs.get('env')
+    if env is None:
+        env = os.environ.copy()
+    else:
+        env = dict(env)
+
+    env['OPENSSL_CONF'] = os.devnull
+    kwargs['env'] = env
+
+
 def load_file(path):
     with open(path, "r+", encoding="utf-8") as f:
         return f.readlines()
 
 
 def exec_system(cmd, **kwargs):
-    cmd = " ".join(cmd)
-    timeout = 4 * 60 * 60
+    cmd_args = _normalize_cmd(cmd)
+    timeout = kwargs.pop('timeout', 4 * 60 * 60)
 
-    if kwargs.get('timeout'):
-        timeout = kwargs['timeout']
-        kwargs.pop('timeout')
+    _ensure_phantom_env(cmd_args, kwargs)
 
-    completed = subprocess.run(shlex.split(cmd), timeout=timeout, check=False, close_fds=True, **kwargs)
+    completed = subprocess.run(cmd_args, timeout=timeout, check=False, close_fds=True, **kwargs)
 
     return completed
 
 
 def check_output(cmd, **kwargs):
-    cmd = " ".join(cmd)
-    timeout = 4 * 60 * 60
-
-    if kwargs.get('timeout'):
-        timeout = kwargs.pop('timeout')
+    cmd_args = _normalize_cmd(cmd)
+    timeout = kwargs.pop('timeout', 4 * 60 * 60)
 
     if 'stdout' in kwargs:
         raise ValueError('stdout argument not allowed, it will be overridden.')
 
-    output = subprocess.run(shlex.split(cmd), stdout=subprocess.PIPE, timeout=timeout, check=False,
+    _ensure_phantom_env(cmd_args, kwargs)
+
+    output = subprocess.run(cmd_args, stdout=subprocess.PIPE, timeout=timeout, check=False,
                **kwargs).stdout
     return output
 
