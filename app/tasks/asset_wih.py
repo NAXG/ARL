@@ -50,8 +50,13 @@ class AssetWihUpdateTask(CommonTask):
         service_name = "wih_monitor"
         self.base_update_task.update_task_field("status", service_name)
         start_time = time.time()
-
-        self.wih_results = asset_wih_monitor(self.scope_id)
+        # 预检资产组是否存在，避免后续抛异常
+        scope_data = get_scope_by_scope_id(self.scope_id)
+        if not scope_data:
+            logger.warning(f"没有找到资产组 {self.scope_id}")
+            self.wih_results = []
+        else:
+            self.wih_results = asset_wih_monitor(self.scope_id)
 
         elapsed = time.time() - start_time
 

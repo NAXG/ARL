@@ -5,6 +5,7 @@ from app.modules import TaskStatus
 from app.helpers.message_notify import push_email, push_dingding
 from app.tasks.poc import RiskCruising
 from app.services import webhook
+from app.helpers.scope import get_scope_by_scope_id
 logger = utils.get_logger()
 
 
@@ -41,6 +42,11 @@ class AssetSiteUpdateTask(CommonTask):
     def monitor(self):
         from app.services.asset_site_monitor import AssetSiteMonitor, Domain2SiteMonitor
         self.update_status("fetch site")
+        # 预检资产组是否存在，避免后续抛异常
+        scope_data = get_scope_by_scope_id(self.scope_id)
+        if not scope_data:
+            logger.warning(f"没有找到资产组 {self.scope_id}")
+            return
         monitor = AssetSiteMonitor(scope_id=self.scope_id)
         monitor.build_change_list()
 
