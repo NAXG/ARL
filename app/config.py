@@ -98,7 +98,7 @@ class Config(object):
 
 try:
     with open(os.path.join(basedir, 'config.yaml')) as f:
-        y = yaml.load(f, Loader=yaml.SafeLoader)
+        y = yaml.safe_load(f)
 
     Config.MONGO_URL = y["MONGO"]["URI"]
     Config.MONGO_DB = y["MONGO"]["DB"]
