@@ -35,7 +35,7 @@ class SiteScreenshot(BaseThread):
     def gen_filename(self, site):
         filename = site.replace('://', '_')
 
-        return re.sub('[^\w\-_\. ]', '_', filename)
+        return re.sub(r'[^\w\-_\. ]', '_', filename)
 
     def run(self):
         t1 = time.time()

@@ -22,7 +22,7 @@ def transfer_ip_scope(target):
     try:
         return IP(target, make_net=True).strNormal(1)
     except Exception as e:
-        logger.warn("error on ip_scope {} {}".format(target, e))
+        logger.warning("error on ip_scope {} {}".format(target, e))
 
 
 #判断是否在黑名单IP内，有点不严谨
@@ -41,7 +41,7 @@ def not_in_black_ips(target):
                 if IP(target) in IP(ip):
                     return False
     except Exception as e:
-        logger.warn("error on check black ip {} {}".format(target, e))
+        logger.warning("error on check black ip {} {}".format(target, e))
 
     return True
 
