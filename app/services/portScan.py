@@ -1,6 +1,8 @@
+import nmap
+
 from app import utils
-from app.utils import nmap, is_valid_exclude_ports
 from app.config import Config
+from app.utils import is_valid_exclude_ports
 
 logger = utils.get_logger()
 

@@ -20,3 +20,4 @@ python-crontab
 lxml
 pyparsing
 pytest
+python-nmap>=0.7.1
