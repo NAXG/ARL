@@ -1,4 +1,3 @@
-from types import SimpleNamespace
 
 from app.services.webhook import domain_asset_web_hook, ip_asset_web_hook
 

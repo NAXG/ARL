@@ -31,7 +31,7 @@ def do_login():
 		print("[+] login Success! ")
 		token = res.json()['data']['token']
 		update_data(token)
-	elif code==401:
+	elif res.json()['code']==401:
 		print("[-] login Failure! ")
 	else:
 		print("[-] login Error! ")

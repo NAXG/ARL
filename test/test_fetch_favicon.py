@@ -1,5 +1,4 @@
 import mmh3
-import pytest
 
 from app.services.fetchSite import FetchFavicon
 

@@ -1,6 +1,5 @@
 from base64 import b64decode
 
-from app.config import Config
 from app.services.fofaClient import FofaClient, fofa_query
 
 

@@ -27,7 +27,7 @@ def do_login():
 		print("[+] login Success! ")
 		token = res.json()['data']['token']
 		get_rule(token)
-	elif code==401:
+	elif res.json()['code'] ==401:
 		print("[-] login Failure! ")
 	else:
 		print("[-] login Error! ")

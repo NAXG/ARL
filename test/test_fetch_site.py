@@ -1,7 +1,6 @@
 import base64
 
 import mmh3
-import pytest
 
 from app.services.fetchSite import FetchFavicon, same_netloc_and_scheme
 

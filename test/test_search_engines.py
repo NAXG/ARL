@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 
-from app.services.searchEngines import BaiduSearch, SearchEngines, search_engines
+from app.services.searchEngines import BaiduSearch, search_engines
 
 
 def test_baidu_search_match_urls_follow_redirect(monkeypatch):

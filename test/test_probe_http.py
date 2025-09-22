@@ -1,4 +1,3 @@
-from types import SimpleNamespace
 
 from app.services import check_http, probe_http
 
