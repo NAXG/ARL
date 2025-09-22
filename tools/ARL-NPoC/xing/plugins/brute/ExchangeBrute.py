@@ -54,7 +54,7 @@ class Plugin(BasePlugin):
 
     def login_owa(self, user, pwd):
         data = {
-            'destination': '%s' % self.target,
+            'destination': f'{self.target}',
             'flags': '4',
             'forcedownlevel': '0',
             'username': rf'{self.ad_domain}\{user}',

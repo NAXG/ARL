@@ -2,7 +2,7 @@ from app.services.findVhost import Page, find_vhost
 
 
 def make_page(domain, title, body_length=200):
-    body = ("<html><title>%s</title><body>%s</body></html>" % (title, "x" * body_length)).encode()
+    body = (f"<html><title>{title}</title><body>{'x' * body_length}</body></html>").encode()
     return Page(url="http://1.1.1.1", domain=domain, content=body, status_code=200, content_type="text/html")
 
 
