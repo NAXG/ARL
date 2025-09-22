@@ -6,7 +6,7 @@ from openpyxl import Workbook
 from bson import ObjectId
 import re
 from collections import Counter
-from openpyxl.writer.excel import save_virtual_workbook
+from io import BytesIO
 from openpyxl.styles import Font, Color
 from app.utils import get_logger, auth
 from app import utils
@@ -383,7 +383,9 @@ class SaveTask(object):
 
         self.build_statist()
 
-        return save_virtual_workbook(self.wb)
+        bio = BytesIO()
+        self.wb.save(bio)
+        return bio.getvalue()
 
 
 def export_arl(task_id):
