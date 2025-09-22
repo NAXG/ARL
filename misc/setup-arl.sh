@@ -82,11 +82,9 @@ if [ ! -f /usr/local/bin/pip3.12 ]; then
   source /opt/venv/bin/activate
   python3.12 -m ensurepip --default-pip
   python3.12 -m pip install --upgrade pip
+  echo "check virtualenv pip version ..."
+  pip --version
 fi
-
-echo "check virtualenv pip version ..."
-pip --version
-
 
 if ! command -v nmap &> /dev/null
 then
@@ -99,7 +97,7 @@ if ! command -v nuclei &> /dev/null
 then
   echo "install nuclei"
   wget -c https://github.com/naxg/ARL/raw/2.6.7/tools/nuclei.zip -O nuclei.zip
-  unzip nuclei.zip && mv nuclei /usr/bin/ && rm -f nuclei.zip
+  unzip nuclei.zip -d /opt/nuclei/ && mv /opt/nuclei/nuclei /usr/bin/ && rm -rf nuclei.zip /opt/nuclei/
   nuclei -ut
 fi
 
