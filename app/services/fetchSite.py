@@ -201,23 +201,27 @@ class FetchFavicon:
             return
 
         if "image" in conn.headers.get("Content-Type", ""):
-            # Base64 string for storage (no newlines)
-            b64_data = base64.b64encode(conn.content).decode()
-            # Candidate hashes
-            h_shodan = mmh3.hash(base64.encodebytes(conn.content))
-            h_b64_no_nl = mmh3.hash(b64_data)
+            # 维持与主干一致的多行 Base64 形式，保证 Shodan hash 兼容
+            b64_data = self.encode_bas64_lines(conn.content)
+            # 记录不同编码下的候选哈希方便排查
+            h_shodan = mmh3.hash(b64_data)
+            h_b64_no_nl = mmh3.hash(base64.b64encode(conn.content).decode())
             try:
                 h_latin1 = mmh3.hash(conn.content.decode('latin1'))
             except Exception:
                 h_latin1 = None
             logger.info(f"favicon alt hashes url={favicon_url} shodan={h_shodan} b64_no_nl={h_b64_no_nl} latin1={h_latin1}")
-            # Prefer Shodan-compatible
-            hash_value = h_shodan
-            return b64_data, hash_value
+            return b64_data, h_shodan
 
     def encode_bas64_lines(self, s):
-        # Encode entire content to base64 without newlines to ensure stable mmh3 hash
-        return base64.b64encode(s).decode()
+        """Encode bytes into multiple lines of base-64 data (76 字符换行)."""
+        max_line_size = 76  # exclude CRLF
+        max_bin_size = (max_line_size // 4) * 3
+        pieces = []
+        for i in range(0, len(s), max_bin_size):
+            chunk = s[i: i + max_bin_size]
+            pieces.append(binascii.b2a_base64(chunk).decode())
+        return "".join(pieces)
 
     def find_icon_url_from_html(self):
         conn = http_req(self.url, allow_redirects=True)
