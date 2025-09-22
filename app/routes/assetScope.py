@@ -59,11 +59,9 @@ class ARLAssetScope(ARLResource):
 
         black_scope_array = []
         if black_scope:
-            black_scope_array = re.split(r",|\s", black_scope)
+            black_scope_array = [item for item in re.split(r",|\s", black_scope) if item]
 
-        scope_array = re.split(r",|\s", scope)
-        # 清除空白符
-        scope_array = list(filter(None, scope_array))
+        scope_array = [item for item in re.split(r",|\s", scope) if item]
         new_scope_array = []
         for x in scope_array:
             if scope_type == AssetScopeType.DOMAIN:
@@ -92,7 +90,8 @@ class ARLAssetScope(ARLResource):
         }
         inserted = conn('asset_scope').insert_one(scope_data)
 
-        scope_id = str(inserted.inserted_id)
+        scope_id_obj = scope_data.pop('_id', inserted.inserted_id)
+        scope_id = str(scope_id_obj)
         scope_data["scope_id"] = scope_id
 
         return utils.build_ret(ErrorMsg.Success, scope_data)

@@ -1,6 +1,7 @@
 import re
 from flask_restx import Resource, reqparse, fields
 from bson.objectid import ObjectId
+from bson.errors import InvalidId
 from datetime import datetime
 from urllib.parse import quote
 from flask import make_response
@@ -54,7 +55,10 @@ class ARLResource(Resource):
 
             if key == '_id':
                 if args[key]:
-                    query_args[key] = ObjectId(args[key])
+                    try:
+                        query_args[key] = ObjectId(args[key])
+                    except InvalidId:
+                        continue
 
                 continue
 
