@@ -25,3 +25,42 @@ from .dns_query import run_query_plugin
 from .fingerprint_cache import finger_db_cache, finger_db_identify, have_human_rule_from_db
 from .fingerprint import FingerPrint
 from .expr import evaluate_expression, check_expression, check_expression_with_error
+
+
+__all__ = [
+    "alt_dns",
+    "mass_dns",
+    "port_scan",
+    "resolver_domain",
+    "check_http",
+    "site_screenshot",
+    "fetch_favicon",
+    "fetch_site",
+    "probe_http",
+    "build_domain_info",
+    "baidu_search",
+    "bing_search",
+    "site_spider",
+    "site_spider_thread",
+    "web_analyze",
+    "fofa_query",
+    "fetch_cert",
+    "file_leak",
+    "page_fetch",
+    "sync_asset",
+    "run_risk_cruising",
+    "run_sniffer",
+    "auto_tag",
+    "github_search",
+    "run_wih",
+    "BaseUpdateTask",
+    "domain_site_update",
+    "run_query_plugin",
+    "finger_db_cache",
+    "finger_db_identify",
+    "have_human_rule_from_db",
+    "FingerPrint",
+    "evaluate_expression",
+    "check_expression",
+    "check_expression_with_error",
+]

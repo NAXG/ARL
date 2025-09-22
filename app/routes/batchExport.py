@@ -165,7 +165,7 @@ class BatchExportAssetIP(ARLResource):
 
 
 @ns.route('/asset_domain/')
-class BatchExportAssetIP(ARLResource):
+class BatchExportAssetDomain(ARLResource):
 
     @auth
     @ns.expect(scope_batch_export_fields)
@@ -182,7 +182,7 @@ class BatchExportAssetIP(ARLResource):
 
 
 @ns.route('/asset_site/')
-class BatchExportAssetIP(ARLResource):
+class BatchExportAssetSite(ARLResource):
 
     @auth
     @ns.expect(scope_batch_export_fields)
