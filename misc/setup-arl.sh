@@ -163,7 +163,6 @@ fi
 cd /opt/ARL
 
 if [ ! -f rabbitmq_user ]; then
-  touch rabbitmq_user
   echo "add rabbitmq user"
   rabbitmqctl add_user arl arlpassword
   rabbitmqctl add_vhost arlv2host
