@@ -3,6 +3,7 @@ from pyquery import PyQuery as pq
 import binascii
 from urllib.parse import urljoin, urlparse
 import mmh3
+import requests
 from app import utils
 from .baseThread import BaseThread
 from .autoTag import auto_tag
@@ -184,6 +185,8 @@ class FetchFavicon:
                 b64_data, hash_value = data
                 return self.build_result(b64_data, hash_value)
 
+        except requests.exceptions.RequestException:
+            logger.info(f"favicon request failed on {self.url}")
         except Exception as e:
             logger.warning(f"error on {self.url} {e}")
 
