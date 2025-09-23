@@ -123,7 +123,7 @@ systemctl restart rabbitmq-server
 cd /opt
 if [ ! -d ARL ]; then
   echo "git clone ARL proj"
-  git clone -b 2.6.7 https://github.com/naxg/ARL
+  git clone -b 2.6.7 --depth 1 https://github.com/naxg/ARL
 fi
 
 if [ ! -d "ARL-NPoC" ]; then
