@@ -21,6 +21,7 @@ ARL资产侦察灯塔系统备份项目，**已跑通**
 
 **API 配置说明：** 详细的 API 配置方法请参考 [subfinder 官方文档](https://docs.projectdiscovery.io/opensource/subfinder/install#post-install-configuration)
 
+默认端口5003 (https), 默认用户名密码admin/arlpass 
 
 
 ### 简介
@@ -58,6 +59,4 @@ docker rmi arl
 docker exec -it arl bash
 systemctl restart arl*
 ```
-
-### 配置
-   默认端口5003 (https), 默认用户名密码admin/arlpass  
+ 
