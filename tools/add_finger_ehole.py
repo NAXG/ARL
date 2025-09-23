@@ -1,7 +1,5 @@
 import json
 import requests
-import yaml
-import re
 requests.packages.urllib3.disable_warnings()
 
 def update_data(name,rule,token):
@@ -29,14 +27,14 @@ def do_login():
 		print("[+] login Success! ")
 		token = res.json()['data']['token']
 		get_rule(token)
-	elif code==401:
+	elif res.json()['code'] ==401:
 		print("[-] login Failure! ")
 	else:
 		print("[-] login Error! ")
 def get_rule(token):
 	files = ['tools/finger.json','tools/finger2.json']
 	for filename in files:
-		file = open(filename, 'r',encoding='utf-8')
+		file = open(filename,encoding='utf-8')
 		data = json.load(file)
 		for i in data['fingerprint']:
 			for keyword in i['keyword']:

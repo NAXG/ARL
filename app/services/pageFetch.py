@@ -1,7 +1,5 @@
 import time
-import json
 from app import  utils
-from app.config import Config
 from .baseThread import BaseThread
 from .fileLeak import Page, HTTPReq, URL
 logger = utils.get_logger()
@@ -23,10 +21,10 @@ class PageFetch(BaseThread):
 
     def run(self):
         t1 = time.time()
-        logger.info("start PageFetch {}".format(len(self.targets)))
+        logger.info(f"start PageFetch {len(self.targets)}")
         self._run()
         elapse = time.time() - t1
-        logger.info("end PageFetch elapse {}".format(elapse))
+        logger.info(f"end PageFetch elapse {elapse}")
         return self.page_map
 
 

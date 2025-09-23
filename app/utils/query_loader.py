@@ -35,7 +35,7 @@ def load_query_plugins(path):
             plugin = getattr(module, 'Query')()
             plugins.append(plugin)
         except Exception as e:
-            logger.warning("load query plugin error from {}".format(file_path))
+            logger.warning(f"load query plugin error from {file_path}")
             logger.exception(e)
 
     return plugins

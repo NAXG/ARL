@@ -6,7 +6,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(ServiceBrutePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.BRUTE
         self.vul_name = "MongoDB 弱口令"
         self.app_name = 'mongodb'
@@ -20,18 +20,16 @@ class Plugin(ServiceBrutePlugin):
         port = self.target_info["port"]
         if port is None:
             port = 27017
-        uri = "mongodb://{}:{}@{}:{}".format(quote_plus(user),
-                                             quote_plus(passwd),
-                                             host, port)
+        uri = f"mongodb://{quote_plus(user)}:{quote_plus(passwd)}@{host}:{port}"
 
         try:
             conn = MongoClient(uri, connectTimeoutMS=5000,
                                serverSelectionTimeoutMS=5000)
             self.logger.info(conn.admin.command("ping"))
-            self.logger.success("{} login success".format(uri))
+            self.logger.success(f"{uri} login success")
             return True
         except Exception as e:
-            self.logger.debug("{} {}".format(uri, e))
+            self.logger.debug(f"{uri} {e}")
 
         return False
 
@@ -47,7 +45,7 @@ class Plugin(ServiceBrutePlugin):
                                serverSelectionTimeoutMS=5000)
             self.logger.info(conn.test.command("ping"))
         except Exception as e:
-            self.logger.debug("{} {}".format(uri, e))
+            self.logger.debug(f"{uri} {e}")
             if 'Authentication failed' in str(e):
                 return True
 

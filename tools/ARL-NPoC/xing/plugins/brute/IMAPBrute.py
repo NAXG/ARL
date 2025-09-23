@@ -8,7 +8,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(ServiceBrutePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.BRUTE
         self.vul_name = "IMAP 弱口令"
         self.app_name = 'IMAP'
@@ -21,7 +21,7 @@ class Plugin(ServiceBrutePlugin):
         client.send(command)
         recv = self._recv_data(client)
         if not re.findall(rb'%s' % (success_str.encode()), recv):
-            raise Exception("Error on {} {}".format(command, recv.decode()))
+            raise Exception(f"Error on {command} {recv.decode()}")
         return recv
 
     # 接收全部数据
@@ -46,10 +46,10 @@ class Plugin(ServiceBrutePlugin):
     def _auth_login(self, user, passwd):
         client = self.conn_target(20)
         self._recv_data(client)
-        self._imap_send(client, b'1 CAPABILITY\r\n', '^\* ')
-        self._imap_send(client, b'2 AUTHENTICATE LOGIN\r\n', '^\+ ')
-        self._imap_send(client, b64encode(user.encode()) + b'\r\n', '^\+ ')
-        data = self._imap_send(client, b64encode(passwd.encode()) + b'\r\n', '^\* ')
+        self._imap_send(client, b'1 CAPABILITY\r\n', r'^\* ')
+        self._imap_send(client, b'2 AUTHENTICATE LOGIN\r\n', r'^\+ ')
+        self._imap_send(client, b64encode(user.encode()) + b'\r\n', r'^\+ ')
+        data = self._imap_send(client, b64encode(passwd.encode()) + b'\r\n', r'^\* ')
         client.close()
         if b' OK ' in data:
             return True
@@ -63,7 +63,7 @@ class Plugin(ServiceBrutePlugin):
             return True
 
     def login(self, target, user, passwd):
-        user = "{}@{}".format(user, self.brute_mail_domain)
+        user = f"{user}@{self.brute_mail_domain}"
         if self.auth == "LOGIN":
             if self._auth_login(user, passwd):
                 return True
@@ -98,4 +98,4 @@ class Plugin(ServiceBrutePlugin):
 
         if os.getenv('BRUTE_MAIL_DOMAIN'):
             self.brute_mail_domain = os.getenv('BRUTE_MAIL_DOMAIN')
-            self.logger.debug("get smtp domain {} from env".format(self.brute_mail_domain))
+            self.logger.debug(f"get smtp domain {self.brute_mail_domain} from env")

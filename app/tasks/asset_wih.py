@@ -23,7 +23,7 @@ class AssetWihUpdateTask(CommonTask):
         self._scope_sub_domains = None
 
     def run(self):
-        logger.info("run AssetWihUpdateTask, task_id:{} scope_id: {}".format(self.task_id, self.scope_id))
+        logger.info(f"run AssetWihUpdateTask, task_id:{self.task_id} scope_id: {self.scope_id}")
         self.run_wih_monitor()
 
         self.wih_results_save()
@@ -34,7 +34,7 @@ class AssetWihUpdateTask(CommonTask):
         # 插入统计信息
         self.insert_stat()
 
-        logger.info("end AssetWihUpdateTask, task_id:{} results: {}".format(self.task_id, len(self.wih_results)))
+        logger.info(f"end AssetWihUpdateTask, task_id:{self.task_id} results: {len(self.wih_results)}")
 
     def insert_stat(self):
         self.insert_finger_stat()
@@ -50,8 +50,13 @@ class AssetWihUpdateTask(CommonTask):
         service_name = "wih_monitor"
         self.base_update_task.update_task_field("status", service_name)
         start_time = time.time()
-
-        self.wih_results = asset_wih_monitor(self.scope_id)
+        # 预检资产组是否存在，避免后续抛异常
+        scope_data = get_scope_by_scope_id(self.scope_id)
+        if not scope_data:
+            logger.warning(f"没有找到资产组 {self.scope_id}")
+            self.wih_results = []
+        else:
+            self.wih_results = asset_wih_monitor(self.scope_id)
 
         elapsed = time.time() - start_time
 

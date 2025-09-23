@@ -4,7 +4,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.POC
         self.vul_name = "Mongodb 未授权访问"
         self.app_name = 'Mongodb'
@@ -16,10 +16,10 @@ class Plugin(BasePlugin):
         data = bytes.fromhex(data)
         client.send(data)
         recv = client.recv(512)
-        self.logger.debug("<<< {}".format(recv))
+        self.logger.debug(f"<<< {recv}")
 
         client.close()
 
         if b'sizeOnDisk' in recv and b'Unauthorized' not in recv:
-            self.logger.success("发现 Mongodb 未授权访问 {}".format(self.target))
+            self.logger.success(f"发现 Mongodb 未授权访问 {self.target}")
             return True

@@ -1,18 +1,18 @@
-FROM centos:7
+FROM rockylinux:9
 
 WORKDIR /code
 
-RUN yum install epel-release python36  fontconfig wqy-microhei-fonts -y
+RUN dnf install epel-release python3.12  fontconfig wqy-microhei-fonts -y
 
-RUN python3.6 -m ensurepip --default-pip
+RUN python3.12 -m ensurepip --default-pip
 
-RUN pip3.6 install pip --upgrade
+RUN pip3.12 install pip --upgrade
 
-RUN yum install nmap -y
+RUN dnf install nmap -y
 
-RUN yum install python36-devel gcc-c++ -y
+RUN dnf install python3.12-devel gcc-c++ -y
 
-RUN yum install nginx unzip wget -y
+RUN dnf install nginx unzip wget -y
 
 COPY app/ app/
 
@@ -36,7 +36,7 @@ COPY docker/ncrack-services /usr/local/share/ncrack/ncrack-services
 COPY docker/ARL-NPoC/ /opt/ARL-NPoC/
 WORKDIR /opt/ARL-NPoC/
 ENV LANG en_US.UTF-8
-RUN pip3.6 install -e .
+RUN pip3.12 install -e .
 
 WORKDIR /code
 
@@ -44,16 +44,15 @@ RUN curl https://ssl-config.mozilla.org/ffdhe2048.txt -o /etc/ssl/certs/dhparam.
 
 COPY requirements.txt requirements.txt
 
-RUN pip3.6 config set global.index-url https://mirrors.adysec.com/language/pypi
 
 COPY docker/GeoLite2/ /data/GeoLite2/
 
-RUN pip3.6 install -r requirements.txt
+RUN pip3.12 install -r requirements.txt
 
 
 ## 安装 NPoC 的依赖
 WORKDIR /opt/ARL-NPoC/
-RUN pip3.6 install -r requirements.txt
+RUN pip3.12 install -r requirements.txt
 
 
 # 定义nuclei版本
@@ -77,5 +76,5 @@ WORKDIR /code
 
 ## 自测一下
 RUN cp app/config.yaml.example app/config.yaml
-RUN env FLASK_APP=app.main:arl_app python3.6 -m flask routes
-RUN python3 -m app.celerytask
+RUN env FLASK_APP=app.main:arl_app python3.12 -m flask routes
+RUN python3.12 -m app.celerytask

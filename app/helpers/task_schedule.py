@@ -53,20 +53,20 @@ def submit_task_schedule(item):
 
     if not options:
         change_task_schedule_status(item["_id"], TaskScheduleStatus.ERROR)
-        raise Exception("not found policy_id {}".format(policy_id))
+        raise Exception(f"not found policy_id {policy_id}")
 
-    name = "定时任务-{}".format(task_schedule_name[:15])
+    name = f"定时任务-{task_schedule_name[:15]}"
 
     if item["schedule_type"] == "recurrent_scan":
         run_number = item.get("run_number", 0) + 1
-        name = "周期任务-{}-{}".format(task_schedule_name[:15], run_number)
+        name = f"周期任务-{task_schedule_name[:15]}-{run_number}"
 
     if task_tag == TaskTag.TASK:
         submit_task_task(target=target, name=name, options=options)
     if task_tag == TaskTag.RISK_CRUISING:
         task_data_list = submit_risk_cruising(target=target, name=name, options=options)
         if not task_data_list:
-            raise Exception("not found task_data {}".format(target))
+            raise Exception(f"not found task_data {target}")
 
 
 # 根据cron 生成下一次运行时间

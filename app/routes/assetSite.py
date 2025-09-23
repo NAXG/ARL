@@ -1,5 +1,5 @@
 from bson import ObjectId
-from flask_restx import Resource, Api, reqparse, fields, Namespace
+from flask_restx import fields, Namespace
 from app.utils import get_logger, auth
 from . import base_query_fields, ARLResource, get_arl_parser
 from app.modules import ErrorMsg, TaskTag
@@ -179,7 +179,7 @@ class ARLSaveResultSet(ARLResource):
         query = self.build_db_query(args)
         items = utils.conn_db('asset_site').distinct("site", query)
 
-        items = list(set([utils.url.cut_filename(x) for x in items]))
+        items = list({utils.url.cut_filename(x) for x in items})
 
         if len(items) == 0:
             return utils.build_ret(ErrorMsg.QueryResultIsEmpty, {})

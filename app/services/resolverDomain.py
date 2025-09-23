@@ -1,6 +1,4 @@
 from app import utils
-import threading
-import collections
 from app.modules import  DomainInfo
 from .baseThread import BaseThread
 logger = utils.get_logger()

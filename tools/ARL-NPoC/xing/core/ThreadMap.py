@@ -3,7 +3,7 @@ from xing.core.BaseThread import BaseThread
 
 class ThreadMap(BaseThread):
     def __init__(self, fun, items, arg=None, concurrency=6):
-        super(ThreadMap, self).__init__(targets=items, concurrency=concurrency)
+        super().__init__(targets=items, concurrency=concurrency)
         if not callable(fun):
             raise TypeError("fun must be callable.")
 

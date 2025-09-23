@@ -13,7 +13,7 @@ def push_email(title, html_report):
             logger.info("send email succ")
             return True
     except Exception as e:
-        logger.info("error on send email {}".format(title))
+        logger.info(f"error on send email {title}")
         logger.warning(e)
 
 
@@ -27,10 +27,10 @@ def push_dingding(markdown_report):
                 logger.info("push dingding succ")
                 return True
             else:
-                logger.info("{}".format(data))
+                logger.info(f"{data}")
 
     except Exception as e:
-        logger.info("error on send dingding {}".format(markdown_report[:15]))
+        logger.info(f"error on send dingding {markdown_report[:15]}")
         logger.warning(e)
 
 

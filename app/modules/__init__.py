@@ -6,6 +6,16 @@ from .wihRecord import WihRecord
 from app.config import Config
 
 
+__all__ = [
+    "PortInfo",
+    "IPInfo",
+    "BaseInfo",
+    "DomainInfo",
+    "PageInfo",
+    "WihRecord",
+]
+
+
 class ScanPortType:
     TEST = Config.TOP_10
     TOP100 = Config.TOP_100
@@ -484,4 +494,3 @@ class ErrorMsg:
     AddAssetSiteNotSupportIP = error_map["AddAssetSiteNotSupportIP"]
     RuleAlreadyExists = error_map["RuleAlreadyExists"]
     ExcludePortsInvalid = error_map["ExcludePortsInvalid"]
-

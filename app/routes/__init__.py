@@ -1,12 +1,23 @@
 import re
 from flask_restx import Resource, reqparse, fields
 from bson.objectid import ObjectId
+from bson.errors import InvalidId
 from datetime import datetime
 from urllib.parse import quote
 from flask import make_response
 import time
 
 from app.utils import conn_db as conn
+
+__all__ = [
+    # re-export namespaces for external importers
+    'task_ns', 'domain_ns', 'site_ns', 'ip_ns', 'url_ns', 'user_ns', 'image_ns', 'cert_ns',
+    'service_ns', 'fileleak_ns', 'export_ns', 'asset_scope_ns', 'asset_domain_ns', 'asset_ip_ns',
+    'asset_site_ns', 'scheduler_ns', 'poc_ns', 'vuln_ns', 'batch_export_ns', 'policy_ns',
+    'npoc_service_ns', 'task_fofa_ns', 'console_ns', 'cip_ns', 'fingerprint_ns', 'stat_finger_ns',
+    'github_task_ns', 'github_result_ns', 'github_monitor_result_ns', 'github_scheduler_ns',
+    'task_schedule_ns', 'nuclei_result_ns', 'wih_ns', 'asset_wih_ns',
+]
 
 base_query_fields = {
     'page': fields.Integer(description="当前页数", example=1),
@@ -44,7 +55,10 @@ class ARLResource(Resource):
 
             if key == '_id':
                 if args[key]:
-                    query_args[key] = ObjectId(args[key])
+                    try:
+                        query_args[key] = ObjectId(args[key])
+                    except InvalidId:
+                        continue
 
                 continue
 
@@ -130,7 +144,7 @@ class ARLResource(Resource):
         orderby_list = default_field.get('order', [("_id", -1)])
         query = self.build_db_query(args)
         result = conn(collection).find(query).sort(orderby_list).skip(size * (page - 1)).limit(size)
-        count = conn(collection).count(query)
+        count = conn(collection).count_documents(query)
         items = self.build_return_items(result)
 
         special_keys = ["_id", "save_date", "update_date"]
@@ -282,10 +296,10 @@ class ARLResource(Resource):
 
     def send_file(self, items_set, _type):
         response = make_response("\r\n".join(items_set))
-        filename = "{}_{}_{}.txt".format(_type, len(items_set), int(time.time()))
+        filename = f"{_type}_{len(items_set)}_{int(time.time())}.txt"
         response.headers['Content-Type'] = 'application/octet-stream'
         response.headers["Access-Control-Expose-Headers"] = "Content-Disposition"
-        response.headers["Content-Disposition"] = "attachment; filename={}".format(quote(filename))
+        response.headers["Content-Disposition"] = f"attachment; filename={quote(filename)}"
         return response
 
 
@@ -294,37 +308,37 @@ def get_arl_parser(model, location='args'):
     return r.get_parser(model, location)
 
 
-from .task import ns as task_ns
-from .domain import ns as domain_ns
-from .site import ns as site_ns
-from .ip import ns as ip_ns
-from .url import ns as url_ns
-from .user import ns as user_ns
-from .image import ns as image_ns
-from .cert import ns as cert_ns
-from .service import ns as service_ns
-from .fileleak import ns as fileleak_ns
-from .export import ns as export_ns
-from .assetScope import ns as asset_scope_ns
-from .assetDomain import ns as asset_domain_ns
-from .assetIP import ns as asset_ip_ns
-from .assetSite import ns as asset_site_ns
-from .scheduler import ns as scheduler_ns
-from .poc import ns as poc_ns
-from .vuln import ns as vuln_ns
-from .batchExport import ns as batch_export_ns
-from .policy import ns as policy_ns
-from .npoc_service import ns as npoc_service_ns
-from .taskFofa import ns as task_fofa_ns
-from .console import ns as console_ns
-from .cip import ns as cip_ns
-from .fingerprint import ns as fingerprint_ns
-from .stat_finger import ns as stat_finger_ns
-from .github_task import ns as github_task_ns
-from .github_result import ns as github_result_ns
-from .github_monitor_result import ns as github_monitor_result_ns
-from .github_scheduler import ns as github_scheduler_ns
-from .task_schedule import ns as task_schedule_ns
-from .nuclei_result import ns as nuclei_result_ns
-from .wih import ns as wih_ns
-from .assetWih import ns as asset_wih_ns
+from .task import ns as task_ns  # noqa: E402
+from .domain import ns as domain_ns  # noqa: E402
+from .site import ns as site_ns  # noqa: E402
+from .ip import ns as ip_ns  # noqa: E402
+from .url import ns as url_ns  # noqa: E402
+from .user import ns as user_ns  # noqa: E402
+from .image import ns as image_ns  # noqa: E402
+from .cert import ns as cert_ns  # noqa: E402
+from .service import ns as service_ns  # noqa: E402
+from .fileleak import ns as fileleak_ns  # noqa: E402
+from .export import ns as export_ns  # noqa: E402
+from .assetScope import ns as asset_scope_ns  # noqa: E402
+from .assetDomain import ns as asset_domain_ns  # noqa: E402
+from .assetIP import ns as asset_ip_ns  # noqa: E402
+from .assetSite import ns as asset_site_ns  # noqa: E402
+from .scheduler import ns as scheduler_ns  # noqa: E402
+from .poc import ns as poc_ns  # noqa: E402
+from .vuln import ns as vuln_ns  # noqa: E402
+from .batchExport import ns as batch_export_ns  # noqa: E402
+from .policy import ns as policy_ns  # noqa: E402
+from .npoc_service import ns as npoc_service_ns  # noqa: E402
+from .taskFofa import ns as task_fofa_ns  # noqa: E402
+from .console import ns as console_ns  # noqa: E402
+from .cip import ns as cip_ns  # noqa: E402
+from .fingerprint import ns as fingerprint_ns  # noqa: E402
+from .stat_finger import ns as stat_finger_ns  # noqa: E402
+from .github_task import ns as github_task_ns  # noqa: E402
+from .github_result import ns as github_result_ns  # noqa: E402
+from .github_monitor_result import ns as github_monitor_result_ns  # noqa: E402
+from .github_scheduler import ns as github_scheduler_ns  # noqa: E402
+from .task_schedule import ns as task_schedule_ns  # noqa: E402
+from .nuclei_result import ns as nuclei_result_ns  # noqa: E402
+from .wih import ns as wih_ns  # noqa: E402
+from .assetWih import ns as asset_wih_ns  # noqa: E402

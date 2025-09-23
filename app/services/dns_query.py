@@ -1,11 +1,10 @@
-import logging
 import time
 import concurrent.futures
 from app import utils
 from app.config import Config
 
 
-class DNSQueryBase(object):
+class DNSQueryBase:
     def __init__(self):
         self.source_name = None
         self.logger = utils.get_logger()
@@ -28,48 +27,33 @@ class DNSQueryBase(object):
 
     def query(self, target):
         t1 = time.time()
-        self.logger.info("start query {} on {}".format(target, self.source_name))
+        self.logger.info(f"start query {target} on {self.source_name}")
         try:
             domains = self.sub_domains(target)
         except Exception as e:
-            self.logger.error("{} error: {}".format(self.source_name, e))
+            self.logger.error(f"{self.source_name} error: {e}")
             return []
 
         if not isinstance(domains, list):
-            self.logger.warning("{} is not list".format(domains))
+            self.logger.warning(f"{domains} is not list")
             return []
 
         """下面是过滤掉不合法的数据"""
-        subdomains = []
-
-        for domain in domains:
-            domain = domain.strip("*.")
-            domain = domain.lower()
-            if not domain:
-                continue
-
-            if not domain.endswith(".{}".format(target)):
-                continue
-
-            # 删除掉过长的域名
-            if len(domain) - len(target) >= Config.DOMAIN_MAX_LEN:
-                continue
-
-            if not utils.is_valid_domain(domain):
-                continue
-
-            # 屏蔽和谐域名和黑名单域名
-            if utils.check_domain_black(domain):
-                continue
-
-            if utils.domain_parsed(domain):
-                subdomains.append(domain)
-
+        subdomains = [
+            cleaned_domain
+            for domain in domains
+            for cleaned_domain in (domain.strip("*.").lower(),)
+            if cleaned_domain
+            if cleaned_domain.endswith(f".{target}")
+            if len(cleaned_domain) - len(target) < Config.DOMAIN_MAX_LEN
+            if utils.is_valid_domain(cleaned_domain)
+            if not utils.check_domain_black(cleaned_domain)
+            if utils.domain_parsed(cleaned_domain)
+        ]
         subdomains = list(set(subdomains))
 
         t2 = time.time()
-        self.logger.info("end query {} on {}, source result:{}, real result:{} ({:.2f}s)".format(
-            target, self.source_name, len(domains), len(subdomains), t2 - t1))
+        self.logger.info(f"end query {target} on {self.source_name}, source result:{len(domains)}, real result:{len(subdomains)} ({t2 - t1:.2f}s)")
 
         return subdomains
 
@@ -159,5 +143,5 @@ def run_query_plugin(target, sources=None):
                 subdomains.add(result)
 
     t2 = time.time()
-    logger.info("{} subdomains result {} ({:.2f}s)".format(target, len(subdomains), t2 - t1))
+    logger.info(f"{target} subdomains result {len(subdomains)} ({t2 - t1:.2f}s)")
     return ret

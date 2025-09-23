@@ -1,4 +1,3 @@
-import time
 
 from app import utils
 from .baseThread import BaseThread
@@ -50,18 +49,16 @@ class CheckHTTP(BaseThread):
             if out is not None:
                 self.checkout_map[url] = out
 
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             pass
 
         except Exception as e:
-            logger.warning("error on url {}".format(url))
+            logger.warning(f"error on url {url}")
             logger.warning(e)
 
     def run(self):
-        t1 = time.time()
-        logger.info("start check http {}".format(len(self.targets)))
+        logger.info(f"start check http {len(self.targets)}")
         self._run()
-        elapse = time.time() - t1
         return self.checkout_map
 
 

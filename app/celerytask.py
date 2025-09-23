@@ -67,7 +67,7 @@ def run_task(options):
     }
     start_time = time.time()
     # 这里监控任务 task_id 和 target 是空的
-    logger.info("run_task action:{} time: {}".format(action, start_time))
+    logger.info(f"run_task action:{action} time: {start_time}")
     logger.info("name:{}, target:{}, task_id:{}".format(
         data.get("name"), data.get("target"), data.get("task_id")))
     try:
@@ -75,12 +75,12 @@ def run_task(options):
         if fun:
             fun(data)
         else:
-            logger.warning("not found {} action".format(action))
+            logger.warning(f"not found {action} action")
     except Exception as e:
         logger.exception(e)
 
     elapsed = time.time() - start_time
-    logger.info("end {} elapsed: {}".format(action, elapsed))
+    logger.info(f"end {action} elapsed: {elapsed}")
 
 
 @celery.task(queue=CeleryRoutingKey.GITHUB_TASK)
@@ -127,7 +127,7 @@ def domain_task(options):
     task_id = options["task_id"]
     item = utils.conn_db('task').find_one({"_id": ObjectId(task_id)})
     if not item:
-        logger.info("domain_task not found {} {}".format(target, item))
+        logger.info(f"domain_task not found {target} {item}")
         return
     wrap_tasks.domain_task(target, task_id, task_options)
 

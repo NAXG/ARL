@@ -1,8 +1,8 @@
 from flask import  request
-from app import modules
 from app.config import Config
 from . import gen_md5, random_choices
 from .conn import conn_db
+import functools
 
 salt = 'arlsalt!@#'
 
@@ -69,7 +69,6 @@ def change_pass(token, old_password, new_password):
         return False
 
 
-import functools
 
 
 def auth(func):

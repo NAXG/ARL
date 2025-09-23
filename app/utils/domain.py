@@ -31,7 +31,7 @@ def check_domain_black(domain):
             if subdomain and item and item.strip() in subdomain:
                 return True
     except Exception as e:
-        logger.warning("Error on: {}, {}".format(domain, e))
+        logger.warning(f"Error on: {domain}, {e}")
         return True
 
     return False

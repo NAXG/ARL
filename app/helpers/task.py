@@ -26,22 +26,22 @@ def get_ip_domain_list(target):
 
         if utils.is_vaild_ip_target(item):
             if not utils.not_in_black_ips(item):
-                raise Exception("{} 在黑名单IP中".format(item))
+                raise Exception(f"{item} 在黑名单IP中")
             ip_list.add(item)
 
         elif utils.domain.is_forbidden_domain(item):
-            raise Exception("{} 包含在禁止域名内".format(item))
+            raise Exception(f"{item} 包含在禁止域名内")
 
         elif utils.is_valid_domain(item):
             if utils.check_domain_black(item):
-                raise Exception("{} 包含在系统黑名单中".format(item))
+                raise Exception(f"{item} 包含在系统黑名单中")
 
             domain_list.add(item)
 
         elif utils.is_valid_fuzz_domain(item):
             domain_list.add(item)
         else:
-            raise Exception("{} 无效的目标".format(item))
+            raise Exception(f"{item} 无效的目标")
 
     return ip_list, domain_list
 
@@ -51,15 +51,15 @@ def build_task_data(task_name, task_target, task_type, task_tag, options):
     # 检查是不是IP ,域名任务等
     avail_task_type = [TaskType.IP, TaskType.DOMAIN, TaskType.RISK_CRUISING]
     if task_type not in avail_task_type:
-        raise Exception("{} 无效的 task_type".format(task_type))
+        raise Exception(f"{task_type} 无效的 task_type")
 
     # 检查是不是风险巡航任务等
     avail_task_tag = [TaskTag.RISK_CRUISING, TaskTag.MONITOR, TaskTag.TASK]
     if task_tag not in avail_task_tag:
-        raise Exception("{} 无效的 task_tag".format(task_type))
+        raise Exception(f"{task_type} 无效的 task_tag")
 
     if not isinstance(options, dict):
-        raise Exception("{} 不是 dict".format(options))
+        raise Exception(f"{options} 不是 dict")
 
     options_cp = options.copy()
 
@@ -93,10 +93,10 @@ def build_task_data(task_name, task_target, task_type, task_tag, options):
         if options.get("result_set_id"):
             result_set_id = options.pop("result_set_id")
             result_set_len = options.pop("result_set_len")
-            target_field = "目标：{}， PoC：{}".format(result_set_len, len(poc_config))
+            target_field = f"目标：{result_set_len}， PoC：{len(poc_config)}"
             task_data["result_set_id"] = result_set_id
         else:
-            target_field = "目标：{}， PoC：{}".format(len(task_target), len(poc_config))
+            target_field = f"目标：{len(task_target)}， PoC：{len(poc_config)}"
             task_data["cruising_target"] = task_target
 
         task_data["target"] = target_field
@@ -136,7 +136,7 @@ def submit_task(task_data):
 
     try:
         celery_id = celerytask.arl_task.delay(options=task_options)
-        logger.info("target:{} task_id:{} celery_id:{}".format(target, task_id, celery_id))
+        logger.info(f"target:{target} task_id:{task_id} celery_id:{celery_id}")
 
         values = {"$set": {"celery_id": str(celery_id)}}
         task_data["celery_id"] = str(celery_id)
@@ -144,7 +144,7 @@ def submit_task(task_data):
 
     except Exception as e:
         utils.conn_db('task').delete_one({"_id": bson.ObjectId(task_id), "status": TaskStatus.WAITING})
-        logger.info("下发失败 {}".format(target))
+        logger.info(f"下发失败 {target}")
         raise e
 
     return task_data
@@ -193,7 +193,7 @@ def submit_risk_cruising(target, name, options):
 def submit_add_asset_site_task(task_name: str, target: list, options: dict) -> dict:
     task_data = {
         'name': task_name,
-        'target': "站点：{}".format(len(target)),
+        'target': f"站点：{len(target)}",
         'start_time': '-',
         'status': TaskStatus.WAITING,
         'type': TaskType.ASSET_SITE_ADD,
@@ -217,7 +217,7 @@ def restart_task(task_id):
     name_pre = "重新运行-"
     task_data = get_task_data(task_id)
     if not task_data:
-        raise Exception("没有找到 task_id : {}".format(task_id))
+        raise Exception(f"没有找到 task_id : {task_id}")
 
     # 把一些基础字段初始化
     task_data.pop("_id")
@@ -239,14 +239,14 @@ def restart_task(task_id):
     # 特殊情况单独判断
     if task_type == TaskType.RISK_CRUISING and task_tag == TaskTag.RISK_CRUISING:
         if task_data.get("result_set_id"):
-            raise Exception("task_id : {}, 不支持该任务重新运行".format(task_id))
+            raise Exception(f"task_id : {task_id}, 不支持该任务重新运行")
 
     # 监控任务的重新下发有点麻烦
     if task_type == TaskType.DOMAIN and task_tag == TaskTag.MONITOR:
-        raise Exception("task_id : {}, 不支持该任务重新运行".format(task_id))
+        raise Exception(f"task_id : {task_id}, 不支持该任务重新运行")
 
     elif task_type == TaskType.IP and task_data["options"].get("scope_id"):
-        raise Exception("task_id : {}, 不支持该任务重新运行".format(task_id))
+        raise Exception(f"task_id : {task_id}, 不支持该任务重新运行")
 
     submit_task(task_data)
 

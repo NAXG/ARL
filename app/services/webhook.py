@@ -7,7 +7,7 @@ import json
 logger = utils.get_logger()
 
 
-class BaseAssetWebHook(object):
+class BaseAssetWebHook:
     def __init__(self, task_id: str, scope_id: str):
         self.task_id = task_id
         self.scope_id = scope_id
@@ -94,8 +94,7 @@ class DomainAssetWebHook(BaseAssetWebHook):
         domain_info_list = data["asset"]["domain_info"]
         site_info_list = data["asset"]["site_info"]
         if domain_info_list or site_info_list:
-            logger.info("send web_hook to {} domain_info:{}, site_info:{}".format(
-                self.web_hook_url, len(domain_info_list), len(site_info_list)))
+            logger.info(f"send web_hook to {self.web_hook_url} domain_info:{len(domain_info_list)}, site_info:{len(site_info_list)}")
             utils.http_req(self.web_hook_url,
                            method="post",
                            json=self.build_data(),
@@ -132,8 +131,7 @@ class IPAssetWebHook(BaseAssetWebHook):
         ip_info_list = data["asset"]["ip_info"]
         site_info_list = data["asset"]["site_info"]
         if ip_info_list or site_info_list:
-            logger.info("send web_hook to {} ip_info:{}, site_info:{}".format(
-                self.web_hook_url, len(ip_info_list), len(site_info_list)))
+            logger.info(f"send web_hook to {self.web_hook_url} ip_info:{len(ip_info_list)}, site_info:{len(site_info_list)}")
             utils.http_req(self.web_hook_url,
                            method="post",
                            json=self.build_data(),
@@ -168,8 +166,7 @@ class SiteAssetWebHook(BaseAssetWebHook):
         data = self.build_data()
         site_info_list = data["asset"]["site_info"]
         if site_info_list:
-            logger.info("send web_hook to {} site_info:{}".format(
-                self.web_hook_url, len(site_info_list)))
+            logger.info(f"send web_hook to {self.web_hook_url} site_info:{len(site_info_list)}")
             utils.http_req(self.web_hook_url,
                            method="post",
                            json=self.build_data(),

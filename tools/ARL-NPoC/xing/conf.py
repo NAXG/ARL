@@ -4,7 +4,7 @@ import tempfile
 import yaml
 
 
-class Conf(object):
+class Conf:
     """运行配置类"""
 
     """源码目录"""
@@ -131,7 +131,7 @@ def load_yaml_config():
     else:
         return {}
 
-    f = open(filename, 'r', encoding='utf-8')
+    f = open(filename, encoding='utf-8')
     config = yaml.safe_load(f)
     return config
 

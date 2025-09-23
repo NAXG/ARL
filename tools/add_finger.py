@@ -1,10 +1,9 @@
 import requests
 import yaml
-import re
 requests.packages.urllib3.disable_warnings()
 
 def update_data(token):
-	push_config = yaml.safe_load(open("tools/指纹数据.json", "r", encoding="utf-8").read())
+	push_config = yaml.safe_load(open("tools/指纹数据.json", encoding="utf-8").read())
 	for i in push_config:
 		name = i['name']
 		rule = i['rule']
@@ -32,7 +31,7 @@ def do_login():
 		print("[+] login Success! ")
 		token = res.json()['data']['token']
 		update_data(token)
-	elif code==401:
+	elif res.json()['code']==401:
 		print("[-] login Failure! ")
 	else:
 		print("[-] login Error! ")

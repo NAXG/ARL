@@ -1,13 +1,13 @@
 import re
 from requests_ntlm import HttpNtlmAuth
 from xing.core.BasePlugin import BasePlugin
-from xing.utils import http_req, get_logger
+from xing.utils import http_req
 from xing.core import PluginType, SchemeType
 
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.BRUTE
         self.vul_name = "Exchange 邮件服务器弱口令"
         self.app_name = 'Exchange'
@@ -29,7 +29,7 @@ class Plugin(BasePlugin):
         conn2 = http_req(url2)
 
         if conn2.status_code == 404 or conn2.status_code == 302:
-            self.logger.info("found brute url {}".format(url))
+            self.logger.info(f"found brute url {url}")
             return True
 
     def check_ews(self):
@@ -42,7 +42,7 @@ class Plugin(BasePlugin):
         conn2 = http_req(url2)
 
         if conn2.status_code == 404 or conn2.status_code == 302:
-            self.logger.info("found brute url {}".format(url))
+            self.logger.info(f"found brute url {url}")
             return True
 
     def login_autodiscover(self, user, pwd):
@@ -54,10 +54,10 @@ class Plugin(BasePlugin):
 
     def login_owa(self, user, pwd):
         data = {
-            'destination': '%s' % self.target,
+            'destination': f'{self.target}',
             'flags': '4',
             'forcedownlevel': '0',
-            'username': '%s\%s' % (self.ad_domain, user),
+            'username': rf'{self.ad_domain}\{user}',
             'password': pwd,
             'isUtf8': '1',
             'passwordText': ''

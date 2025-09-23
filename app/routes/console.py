@@ -1,8 +1,8 @@
-from flask_restx import fields, Namespace
+from flask_restx import Namespace
 from app.utils import get_logger, auth
 from app import utils
 from app.modules import ErrorMsg
-from . import base_query_fields, ARLResource, get_arl_parser
+from . import ARLResource
 
 ns = Namespace('console', description="控制台信息")
 

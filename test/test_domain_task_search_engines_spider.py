@@ -1,55 +1,37 @@
-import unittest
-from app import utils
-from app.modules import TaskStatus, TaskType
-from app import tasks as wrap_tasks
+from app.modules import DomainInfo
+from app.tasks.domain import DomainTask
 
 
-class TestDomainTaskSearchSpider(unittest.TestCase):
-    def test_domain_task_search_spider(self):
-        target = "tophant.com"
-        task_id, task_options = insert_task_data(target)
-
-        wrap_tasks.domain_task(target, task_id, task_options)
+def make_domain_info(domain, ip):
+    return DomainInfo(domain=domain, record=[ip], type="A", ips=[ip])
 
 
-def insert_task_data(target):
-    options = {
-        "domain_brute": True,
-        "domain_brute_type": "test",
-        'port_scan': True,
-        'port_scan_type': 'custom',
-        'port_custom': '80,443,22',
-        "service_detection": False,
-        "service_brute": False,
-        "os_detection": False,
-        "site_identify": False,
-        "site_capture": False,
-        "file_leak": False,
-        "alt_dns": False,
-        "site_spider": True,
-        "search_engines": True,
-        "ssl_cert": False,
-        "fofa_search": False,
-        "dns_query_plugin": False,
-    }
+def test_clear_domain_info_by_record_skips_wildcard_and_repeated(monkeypatch):
+    task = DomainTask(base_domain="example.com", task_id="task", options={})
+    task._not_found_domain_ips = ["1.1.1.1"]
+    task.record_map["2.2.2.2"] = 35
 
-    task_data = {
-        'name': "自动化测试",
-        'target': target,
-        'start_time': '-',
-        'status': TaskStatus.WAITING,
-        'type': TaskType.DOMAIN,
-        "task_tag": TaskType.DOMAIN,
-        'options': options,
-        "end_time": "-",
-        "service": [],
-        "celery_id": "fake"
-    }
-    utils.conn_db('task').insert_one(task_data)
-    task_id = str(task_data.pop("_id"))
+    infos = [
+        make_domain_info("wild.example.com", "1.1.1.1"),
+        make_domain_info("repeat.example.com", "2.2.2.2"),
+        make_domain_info("ok.example.com", "3.3.3.3"),
+    ]
 
-    return task_id, options
+    filtered = task.clear_domain_info_by_record(infos)
+
+    assert [info.domain for info in filtered] == ["ok.example.com"]
 
 
-if __name__ == '__main__':
-    unittest.main()
+def test_build_domain_info_ignores_duplicates_and_blacklist(monkeypatch):
+    task = DomainTask(base_domain="example.com", task_id="task", options={})
+    task.task_tag = "monitor"
+    monkeypatch.setattr("app.tasks.domain.utils.check_domain_black", lambda domain: domain.startswith("bad"))
+
+    result = task.build_domain_info([
+        "good.example.com",
+        {"domain": "good.example.com"},
+        "bad.example.com",
+    ])
+
+    assert len(result) == 1
+    assert result[0].domain == "good.example.com"

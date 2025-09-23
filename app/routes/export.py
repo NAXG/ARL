@@ -1,13 +1,11 @@
-#coding: utf-8
-
 from flask import  make_response
 from flask_restx import Resource, Namespace
 from openpyxl import Workbook
 from bson import ObjectId
 import re
 from collections import Counter
-from openpyxl.writer.excel import save_virtual_workbook
-from openpyxl.styles import Font, Color
+from io import BytesIO
+from openpyxl.styles import Font
 from app.utils import get_logger, auth
 from app import utils
 from urllib.parse import quote
@@ -29,12 +27,12 @@ class ARLExport(Resource):
             return "not found"
 
         domain = task_data["target"].replace("/", "_")[:20]
-        filename = "ARL资产导出报告_{}.xlsx".format(domain)
+        filename = f"ARL资产导出报告_{domain}.xlsx"
 
         excel_data = export_arl(task_id)
         response = make_response(excel_data)
         response.headers['Content-Type'] = 'application/octet-stream'
-        response.headers["Content-Disposition"] = "attachment; filename={}".format(quote(filename))
+        response.headers["Content-Disposition"] = f"attachment; filename={quote(filename)}"
 
         return response
 
@@ -45,7 +43,7 @@ def get_task_data(task_id):
     try:
         task_data = utils.conn_db('task').find_one({'_id': ObjectId(task_id)})
         return task_data
-    except Exception as e:
+    except Exception:
         pass
 
 
@@ -82,7 +80,7 @@ def port_service_product_statist(task_id):
         item = {
             "port_id" : port_id,
             "amount" : amount,
-            "percent" : "{:.2f}%".format((amount *100.0 ) / total)
+            "percent" : f"{(amount *100.0 ) / total:.2f}%"
         }
         port_percent_list.append(item)
 
@@ -104,7 +102,7 @@ def port_service_product_statist(task_id):
         item = {
             "service_name" : service_name,
             "amount" : amount,
-            "percent" : "{:.2f}%".format((amount *100.0 ) / len(service_name_list))
+            "percent" : f"{(amount *100.0 ) / len(service_name_list):.2f}%"
         }
         service_percent_list.append(item)
 
@@ -126,7 +124,7 @@ def port_service_product_statist(task_id):
         item = {
             "product" : product,
             "amount" : amount,
-            "percent" : "{:.2f}%".format((amount *100.0 ) / len(product_name_list))
+            "percent" : f"{(amount *100.0 ) / len(product_name_list):.2f}%"
         }
         product_percent_list.append(item)
 
@@ -142,7 +140,7 @@ def port_service_product_statist(task_id):
 
 
 
-class SaveTask(object):
+class SaveTask:
     """docstring for ClassName"""
 
     def __init__(self, task_id):
@@ -155,7 +153,7 @@ class SaveTask(object):
         column = "ABCDEFGHIJKLMNO"
         for x in column:
             for y in range(1, 256):
-                ws["{}{}".format(x,y)].font = font
+                ws[f"{x}{y}"].font = font
 
     def build_service_xl(self):
         ws = self.wb.create_sheet(title="系统服务")
@@ -364,7 +362,7 @@ class SaveTask(object):
     def run(self):
         task_data = get_task_data(self.task_id)
         if not task_data:
-            print("not found {}".format(self.task_id))
+            print(f"not found {self.task_id}")
             return
 
         domain = task_data["target"].replace("/", "_")[:20]
@@ -383,7 +381,9 @@ class SaveTask(object):
 
         self.build_statist()
 
-        return save_virtual_workbook(self.wb)
+        bio = BytesIO()
+        self.wb.save(bio)
+        return bio.getvalue()
 
 
 def export_arl(task_id):

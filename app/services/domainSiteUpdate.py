@@ -10,7 +10,7 @@ from app import utils
 logger = utils.get_logger()
 
 
-class DomainSiteUpdate(object):
+class DomainSiteUpdate:
     def __init__(self, task_id: str, domains: list, source: str):
         self.task_id = task_id
         self.domains = domains
@@ -45,7 +45,7 @@ class DomainSiteUpdate(object):
         for site_info in site_info_list:
             curr_site = site_info["site"]
             site_path = "/image/" + self.task_id
-            file_name = '{}/{}.jpg'.format(site_path, utils.gen_filename(curr_site))
+            file_name = f'{site_path}/{utils.gen_filename(curr_site)}.jpg'
             site_info["task_id"] = self.task_id
             site_info["screenshot"] = file_name
 
@@ -62,8 +62,7 @@ class DomainSiteUpdate(object):
 
         self.set_and_check_domains()
 
-        logger.info("start domain site update task_id: {}, len:{}, source: {}".format(self.task_id,
-                                                                                      len(self.domains), self.source))
+        logger.info(f"start domain site update task_id: {self.task_id}, len:{len(self.domains)}, source: {self.source}")
         self.base_update_task.update_task_field("status", status_name)
 
         t1 = time.time()
@@ -74,7 +73,7 @@ class DomainSiteUpdate(object):
 
         self.base_update_task.update_services(status_name, elapse)
 
-        logger.info("end domain site update elapse {}".format(elapse))
+        logger.info(f"end domain site update elapse {elapse}")
 
 
 # 将域名直接加到任务数据中，只加到域名和站点表中，

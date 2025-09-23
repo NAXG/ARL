@@ -6,7 +6,7 @@ After=network.target
 User=root
 Group=root
 WorkingDirectory=/opt/ARL
-ExecStart=/usr/bin/python3.6 -m app.scheduler
+ExecStart=/opt/venv/bin/python3.12 -m app.scheduler
 
 [Install]
 WantedBy=multi-user.target

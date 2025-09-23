@@ -1,27 +1,33 @@
-import unittest
-from app.services import baidu_search, bing_search
-from app.services.searchEngines import search_engines
+from types import SimpleNamespace
+
+from app.services.searchEngines import BaiduSearch, search_engines
 
 
-class TestSearchEngines(unittest.TestCase):
-    def test_baidu_search(self):
-        urls = baidu_search("tophant.com")
-        print("result:", len(urls))
-        for x in urls:
-            print(x)
+def test_baidu_search_match_urls_follow_redirect(monkeypatch):
+    html = """
+    <html>
+      <span>百度为您找到相关结果约1个</span>
+      <div id="content_left">
+        <h3 class="t"><a href="http://redirect/1">Example</a></h3>
+      </div>
+    </html>
+    """
 
-    def test_bing_search(self):
-        urls = bing_search("qq.com")
-        print("result:", len(urls))
-        for x in urls:
-            print(x)
+    monkeypatch.setattr(
+        "app.services.searchEngines.utils.http_req",
+        lambda url, method='get', headers=None: SimpleNamespace(headers={"Location": "https://example.com"}),
+    )
 
-    def test_search_engines(self):
-        urls = search_engines("vulbox.com")
-        print("result:", len(urls))
-        for x in urls:
-            print(x)
+    search = BaiduSearch("site:example.com")
+    urls = search.match_urls(html)
+
+    assert urls == ["https://example.com"]
 
 
-if __name__ == '__main__':
-    unittest.main()
+def test_search_engines_combines_unique_urls(monkeypatch):
+    monkeypatch.setattr("app.services.searchEngines.bing_search", lambda domain: ["https://a.com", "https://b.com"])
+    monkeypatch.setattr("app.services.searchEngines.baidu_search", lambda domain: ["https://a.com", "https://c.com"])
+
+    urls = search_engines("example.com")
+
+    assert {u.rstrip('/') for u in urls} == {"https://a.com", "https://b.com", "https://c.com"}

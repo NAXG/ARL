@@ -1,13 +1,5 @@
 set -e
 
-cd /etc/yum.repos.d/
-sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
-sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
-sed -i 's|baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
-
-echo "cd /opt/"
-
-mkdir -p /opt/
 cd /opt/
 
 tee /etc/resolv.conf <<"EOF"
@@ -21,19 +13,18 @@ tee /etc/yum.repos.d/mongodb-org-6.0.repo <<"EOF"
 [mongodb-org-6.0]
 name=MongoDB Repository
 baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/6.0/x86_64/
-gpgcheck=1
+gpgcheck=0
 enabled=1
 gpgkey=https://www.mongodb.org/static/pgp/server-6.0.asc
 EOF
 
-tee //etc/yum.repos.d/rabbitmq.repo <<"EOF"
+tee /etc/yum.repos.d/rabbitmq.repo <<"EOF"
 [rabbitmq_erlang]
 name=rabbitmq_erlang
-baseurl=https://packagecloud.io/rabbitmq/erlang/el/8/$basearch
-repo_gpgcheck=1
-gpgcheck=1
+baseurl=https://packagecloud.io/rabbitmq/erlang/el/9/$basearch
+repo_gpgcheck=0
+gpgcheck=0
 enabled=1
-# PackageCloud's repository key and RabbitMQ package signing key
 gpgkey=https://packagecloud.io/rabbitmq/erlang/gpgkey
        https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc
 sslverify=1
@@ -42,8 +33,8 @@ metadata_expire=300
 
 [rabbitmq_erlang-source]
 name=rabbitmq_erlang-source
-baseurl=https://packagecloud.io/rabbitmq/erlang/el/8/SRPMS
-repo_gpgcheck=1
+baseurl=https://packagecloud.io/rabbitmq/erlang/el/9/SRPMS
+repo_gpgcheck=0
 gpgcheck=0
 enabled=1
 gpgkey=https://packagecloud.io/rabbitmq/erlang/gpgkey
@@ -54,8 +45,8 @@ metadata_expire=300
 
 [rabbitmq_server]
 name=rabbitmq_server
-baseurl=https://packagecloud.io/rabbitmq/rabbitmq-server/el/8/$basearch
-repo_gpgcheck=1
+baseurl=https://packagecloud.io/rabbitmq/rabbitmq-server/el/9/$basearch
+repo_gpgcheck=0
 gpgcheck=0
 enabled=1
 gpgkey=https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey
@@ -66,8 +57,8 @@ metadata_expire=300
 
 [rabbitmq_server-source]
 name=rabbitmq_server-source
-baseurl=https://packagecloud.io/rabbitmq/rabbitmq-server/el/8/SRPMS
-repo_gpgcheck=1
+baseurl=https://packagecloud.io/rabbitmq/rabbitmq-server/el/9/SRPMS
+repo_gpgcheck=0
 gpgcheck=0
 enabled=1
 gpgkey=https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey
@@ -78,39 +69,36 @@ EOF
 
 echo "install dependencies ..."
 cd /opt/
-yum update -y
-yum install epel-release -y
-yum install systemd -y
-yum install rabbitmq-server --nobest -y
-yum install python36 mongodb-org-server mongodb-mongosh python36-devel gcc-c++ git nginx fontconfig wqy-microhei-fonts unzip wget -y
+dnf update -y
+dnf install epel-release -y
+dnf install systemd -y
+dnf install rabbitmq-server -y
+dnf install python3.12 mongodb-org-server mongodb-mongosh python3.12-devel gcc-c++ git nginx fontconfig unzip wget -y
 
-if [ ! -f /usr/bin/python3.6 ]; then
-  echo "link python3.6"
-  ln -s /usr/bin/python36 /usr/bin/python3.6
-fi
 
-if [ ! -f /usr/local/bin/pip3.6 ]; then
-  echo "install  pip3.6"
-  python3.6 -m ensurepip --default-pip
-  python3.6 -m pip install --upgrade pip
-  pip3.6 config --global set global.index-url https://mirrors.adysec.com/language/pypi
-  pip3.6 --version
+if [ ! -f /usr/local/bin/pip3.12 ]; then
+  echo "install  pip3.12"
+  python3.12 -m venv /opt/venv
+  source /opt/venv/bin/activate
+  python3.12 -m ensurepip --default-pip
+  python3.12 -m pip install --upgrade pip
+  echo "check virtualenv pip version ..."
+  pip --version
 fi
 
 if ! command -v nmap &> /dev/null
 then
     echo "install nmap ..."
-    yum install nmap -y
+    dnf install nmap -y
 fi
 
 
 if ! command -v nuclei &> /dev/null
 then
   echo "install nuclei"
-  wget -c https://github.com/naxg/ARL/raw/main/tools/nuclei.zip -O nuclei.zip
-  unzip nuclei.zip && mv nuclei /usr/bin/ && rm -f nuclei.zip
+  wget -c https://github.com/naxg/ARL/raw/2.6.7/tools/nuclei.zip -O nuclei.zip
+  unzip nuclei.zip -d /opt/nuclei/ && mv /opt/nuclei/nuclei /usr/bin/ && rm -rf nuclei.zip /opt/nuclei/
   nuclei -ut
-  rm -rf /opt/*
 fi
 
 
@@ -118,7 +106,7 @@ if ! command -v wih &> /dev/null
 then
   echo "install wih ..."
   ## 安装 WIH
-  wget -c https://github.com/naxg/ARL/raw/main/tools/wih/wih_linux_amd64 -O /usr/bin/wih && chmod +x /usr/bin/wih
+  wget -c https://github.com/naxg/ARL/raw/2.6.7/tools/wih/wih_linux_amd64 -O /usr/bin/wih && chmod +x /usr/bin/wih
   wih --version
 fi
 
@@ -135,7 +123,7 @@ systemctl restart rabbitmq-server
 cd /opt
 if [ ! -d ARL ]; then
   echo "git clone ARL proj"
-  git clone -b main https://github.com/naxg/ARL
+  git clone -b 2.6.7 --depth 1 https://github.com/naxg/ARL
 fi
 
 if [ ! -d "ARL-NPoC" ]; then
@@ -145,37 +133,36 @@ fi
 
 cd /opt/ARL-NPoC
 echo "install poc requirements ..."
-pip3.6 install -r requirements.txt
-pip3.6 install -e .
+pip install -r requirements.txt
+pip install -e .
 cd ../
 
 if [ ! -f /usr/local/bin/ncrack ]; then
   echo "Download ncrack ..."
-  wget -c https://github.com/naxg/ARL/raw/main/tools/ncrack -O /usr/local/bin/ncrack
+  wget -c https://github.com/naxg/ARL/raw/2.6.7/tools/ncrack -O /usr/local/bin/ncrack
   chmod +x /usr/local/bin/ncrack
 fi
 
 mkdir -p /usr/local/share/ncrack
 if [ ! -f /usr/local/share/ncrack/ncrack-services ]; then
   echo "Download ncrack-services ..."
-  wget -c https://github.com/naxg/ARL/raw/main/tools/ncrack-services -O /usr/local/share/ncrack/ncrack-services
+  wget -c https://github.com/naxg/ARL/raw/2.6.7/tools/ncrack-services -O /usr/local/share/ncrack/ncrack-services
 fi
 
 mkdir -p /data/GeoLite2
 if [ ! -f /data/GeoLite2/GeoLite2-ASN.mmdb ]; then
   echo "download GeoLite2-ASN.mmdb ..."
-  wget -c https://github.com/naxg/ARL/raw/main/tools/GeoLite2-ASN.mmdb -O /data/GeoLite2/GeoLite2-ASN.mmdb
+  wget -c https://github.com/naxg/ARL/raw/2.6.7/tools/GeoLite2-ASN.mmdb -O /data/GeoLite2/GeoLite2-ASN.mmdb
 fi
 
 if [ ! -f /data/GeoLite2/GeoLite2-City.mmdb ]; then
   echo "download GeoLite2-City.mmdb ..."
-  wget -c https://github.com/naxg/ARL/raw/main/tools/GeoLite2-City.mmdb -O /data/GeoLite2/GeoLite2-City.mmdb
+  wget -c https://github.com/naxg/ARL/raw/2.6.7/tools/GeoLite2-City.mmdb -O /data/GeoLite2/GeoLite2-City.mmdb
 fi
 
 cd /opt/ARL
 
 if [ ! -f rabbitmq_user ]; then
-  touch rabbitmq_user
   echo "add rabbitmq user"
   rabbitmqctl add_user arl arlpassword
   rabbitmqctl add_vhost arlv2host
@@ -186,7 +173,8 @@ if [ ! -f rabbitmq_user ]; then
 fi
 
 echo "install arl requirements ..."
-pip3.6 install -r requirements.txt
+pip install -r requirements.txt
+
 if [ ! -f app/config.yaml ]; then
   echo "create config.yaml"
   cp app/config.yaml.example  app/config.yaml
@@ -256,7 +244,7 @@ systemctl restart arl-scheduler
 systemctl enable nginx
 systemctl restart nginx
 
-python3.6 tools/add_finger.py
-python3.6 tools/add_finger_ehole.py
+python tools/add_finger.py
+python tools/add_finger_ehole.py
 
 echo "install done"

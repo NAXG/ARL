@@ -5,7 +5,7 @@ import sys
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
-class Config(object):
+class Config:
     CELERY_BROKER_URL = "amqp://arl:arlpassword@127.0.0.1:5672/arlv2host"
 
     MONGO_DB = 'ARLV2'
@@ -98,7 +98,7 @@ class Config(object):
 
 try:
     with open(os.path.join(basedir, 'config.yaml')) as f:
-        y = yaml.load(f, Loader=yaml.SafeLoader)
+        y = yaml.safe_load(f)
 
     Config.MONGO_URL = y["MONGO"]["URI"]
     Config.MONGO_DB = y["MONGO"]["DB"]
@@ -134,7 +134,7 @@ try:
         if os.path.isfile(file_leak_dict):
             Config.FILE_LEAK_TOP_2k = file_leak_dict
         else:
-            print("Warning {} is not file".format(file_leak_dict))
+            print(f"Warning {file_leak_dict} is not file")
 
     # *** 域名爆破字典 ***
     if y["ARL"].get("DOMAIN_DICT"):
@@ -142,7 +142,7 @@ try:
         if os.path.isfile(domain_dict):
             Config.DOMAIN_DICT_2W = domain_dict
         else:
-            print("Warning {} is not file".format(domain_dict))
+            print(f"Warning {domain_dict} is not file")
 
     # *** 钉钉配置 ***
     if y.get("DINGDING"):
@@ -217,5 +217,5 @@ try:
             Config.WX_WORK_WEBHOOK = y["WXWORK"]["WEBHOOK_URL"]
 
 except Exception as e:
-    print("Parse config.yaml error {}".format(e))
+    print(f"Parse config.yaml error {e}")
     sys.exit(-1)

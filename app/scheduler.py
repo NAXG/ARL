@@ -28,7 +28,7 @@ ip_monitor_options = {
 
 
 def add_job(domain, scope_id, options=None, interval=60 * 1, name="", scope_type=AssetScopeType.DOMAIN):
-    logger.info("add {} job {} {} {}".format(scope_type, interval, domain, scope_id))
+    logger.info(f"add {scope_type} job {interval} {domain} {scope_id}")
     if options is None:
         if scope_type == AssetScopeType.DOMAIN:
             options = domain_monitor_options
@@ -62,9 +62,9 @@ def add_job(domain, scope_id, options=None, interval=60 * 1, name="", scope_type
         "scope_type": scope_type
 
     }
-    conn('scheduler').insert(item)
+    inserted = conn('scheduler').insert_one(item)
 
-    return str(item["_id"])
+    return str(inserted.inserted_id)
 
 
 def add_asset_site_monitor_job(scope_id, name, interval=60 * 1):
@@ -84,9 +84,9 @@ def add_asset_site_monitor_job(scope_id, name, interval=60 * 1):
         "name": name,
         "scope_type": "site_update_monitor"
     }
-    conn('scheduler').insert(item)
+    inserted = conn('scheduler').insert_one(item)
 
-    return str(item["_id"])
+    return str(inserted.inserted_id)
 
 
 def add_asset_wih_monitor_job(scope_id, name, interval=60 * 1):
@@ -106,9 +106,9 @@ def add_asset_wih_monitor_job(scope_id, name, interval=60 * 1):
         "name": name,
         "scope_type": "wih_update_monitor"
     }
-    conn('scheduler').insert(item)
+    inserted = conn('scheduler').insert_one(item)
 
-    return str(item["_id"])
+    return str(inserted.inserted_id)
 
 
 def delete_job(job_id):
@@ -146,10 +146,7 @@ def find_job(job_id):
 
 
 def all_job():
-    items = []
-    for item in conn('scheduler').find():
-        items.append(item)
-    return items
+    return list(conn('scheduler').find())
 
 
 def submit_job(domain, job_id, scope_id, options=None, name="", scope_type=AssetScopeType.DOMAIN):
@@ -177,7 +174,7 @@ def submit_job(domain, job_id, scope_id, options=None, name="", scope_type=Asset
             "data": task_data
         }
         celery_id = celerytask.arl_task.delay(options=task_options)
-        logger.info("submit domain job {} {} {}".format(celery_id, domain, scope_id))
+        logger.info(f"submit domain job {celery_id} {domain} {scope_id}")
 
     if scope_type == AssetScopeType.IP:
         task_options = {
@@ -185,7 +182,7 @@ def submit_job(domain, job_id, scope_id, options=None, name="", scope_type=Asset
             "data": task_data
         }
         celery_id = celerytask.arl_task.delay(options=task_options)
-        logger.info("submit ip job {} {} {}".format(celery_id, domain, scope_id))
+        logger.info(f"submit ip job {celery_id} {domain} {scope_id}")
 
 
 def update_job_run(job_id):

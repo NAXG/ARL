@@ -22,7 +22,7 @@ def transfer_ip_scope(target):
     try:
         return IP(target, make_net=True).strNormal(1)
     except Exception as e:
-        logger.warn("error on ip_scope {} {}".format(target, e))
+        logger.warning(f"error on ip_scope {target} {e}")
 
 
 #判断是否在黑名单IP内，有点不严谨
@@ -41,7 +41,7 @@ def not_in_black_ips(target):
                 if IP(target) in IP(ip):
                     return False
     except Exception as e:
-        logger.warn("error on check black ip {} {}".format(target, e))
+        logger.warning(f"error on check black ip {target} {e}")
 
     return True
 
@@ -57,7 +57,7 @@ def get_ip_asn(ip):
         item["organization"] = response.autonomous_system_organization
         reader.close()
     except Exception as e:
-        logger.warning("{} {}".format(e, ip))
+        logger.warning(f"{e} {ip}")
 
     return item
 
@@ -68,20 +68,25 @@ def get_ip_city(ip):
     try:
         reader = geoip2.database.Reader(Config.GEOIP_CITY)
         response = reader.city(ip)
+        city_name = response.city.name
+        subdivision = response.subdivisions.most_specific
+        region_name = getattr(subdivision, 'name', None) or city_name or response.country.name
+        region_code = getattr(subdivision, 'iso_code', None) or response.country.iso_code
+
         item = {
-            "city": response.city.name,
+            "city": city_name,
             "latitude": response.location.latitude,
             "longitude": response.location.longitude,
             "country_name": response.country.name,
             "country_code": response.country.iso_code,
-            "region_name": response.subdivisions.most_specific.name,
-            "region_code": response.subdivisions.most_specific.iso_code,
+            "region_name": region_name,
+            "region_code": region_code,
         }
         reader.close()
         return item
 
     except Exception as e:
-        logger.warning("{} {}".format(e,ip))
+        logger.warning(f"{e} {ip}")
         return {}
 
 
@@ -102,7 +107,7 @@ def get_ip_type(ip):
         return ip_type
 
     except Exception as e:
-        logger.warning("{} {}".format(e, ip))
+        logger.warning(f"{e} {ip}")
         return "ERROR"
 
 
@@ -115,5 +120,5 @@ def ip_in_scope(ip, scope_list):
             if IP(ip) in IP(item):
                 return True
         except Exception as e:
-            logger.warning("{} {} {}".format(e, ip, item))
+            logger.warning(f"{e} {ip} {item}")
 

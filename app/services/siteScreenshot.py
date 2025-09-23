@@ -16,15 +16,15 @@ class SiteScreenshot(BaseThread):
         os.makedirs(self.capture_dir, 0o777, True)
 
     def work(self, site):
-        file_name = '{}/{}.jpg'.format(self.capture_dir, self.gen_filename(site))
+        file_name = f'{self.capture_dir}/{self.gen_filename(site)}.jpg'
 
         cmd_parameters = ['phantomjs',
                           '--ignore-ssl-errors true',
                           '--ssl-protocol any',
                           '--ssl-ciphers ALL',
                           Config.SCREENSHOT_JS,
-                          '-u={}'.format(site),
-                          '-s={}'.format(file_name),
+                          f'-u={site}',
+                          f'-s={file_name}',
                           ]
         logger.debug("screenshot {}".format(" ".join(cmd_parameters)))
 
@@ -35,14 +35,14 @@ class SiteScreenshot(BaseThread):
     def gen_filename(self, site):
         filename = site.replace('://', '_')
 
-        return re.sub('[^\w\-_\. ]', '_', filename)
+        return re.sub(r'[^\w\-_\. ]', '_', filename)
 
     def run(self):
         t1 = time.time()
-        logger.info("start screen shot {}".format(len(self.targets)))
+        logger.info(f"start screen shot {len(self.targets)}")
         self._run()
         elapse = time.time() - t1
-        logger.info("end screen shot elapse {}".format(elapse))
+        logger.info(f"end screen shot elapse {elapse}")
 
 
 def site_screenshot(sites, concurrency = 3, capture_dir="./"):

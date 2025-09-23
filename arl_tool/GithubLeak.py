@@ -2,18 +2,19 @@ import base64
 import sys
 import os
 from collections import deque
-ARL_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "./../"))
-sys.path.append(ARL_PATH)
-from app.utils import http_req, get_logger, gen_md5, load_file
-from app.config import Config
 import time
 
-from app.utils.push import send_email
+ARL_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "./../"))
+sys.path.append(ARL_PATH)
+
+from app.utils import http_req, get_logger, gen_md5, load_file  # noqa: E402
+from app.config import Config  # noqa: E402
+from app.utils.push import send_email  # noqa: E402
 
 logger = get_logger()
 
 
-class GithubResult(object):
+class GithubResult:
     def __init__(self, item):
         self.raw_data = item
         self.git_url = item["git_url"]
@@ -24,7 +25,7 @@ class GithubResult(object):
         self._content = None
 
     def __str__(self):
-        return "{} {}".format(self.repo_full_name, self.path)
+        return f"{self.repo_full_name} {self.path}"
 
     def __hash__(self):
         return self.hash_md5
@@ -33,7 +34,7 @@ class GithubResult(object):
         return self.hash_md5 == other.hash_md5
 
     def __repr__(self):
-        return "<GithubResult>{} {}".format(self.hash_md5, str(self))
+        return f"<GithubResult>{self.hash_md5} {str(self)}"
 
     @property
     def content(self):
@@ -43,7 +44,7 @@ class GithubResult(object):
                 decode_bytes = base64.decodebytes(content_base64.encode("utf-8"))
                 self._content = decode_bytes.decode("utf-8", errors="replace")
             except Exception as e:
-                logger.info("error on {}".format(self.git_url))
+                logger.info(f"error on {self.git_url}")
                 logger.exception(e)
                 self._content = ""
 
@@ -78,17 +79,12 @@ def github_search_code(query, order="desc", sort="indexed", per_page=100, page=1
 
     data = github_client(url, params=params)
     logger.info("search {} count {}".format(query, data["total_count"]))
-    ret_list = []
-    for item in data["items"]:
-        result = GithubResult(item=item)
-        ret_list.append(result)
-
-    return ret_list
+    return [GithubResult(item=item) for item in data["items"]]
 
 
 def github_client(url, params=None):
     headers = {
-        "Authorization": "Bearer {}".format(Config.GITHUB_TOKEN),
+        "Authorization": f"Bearer {Config.GITHUB_TOKEN}",
         "Accept": "application/vnd.github.v3+json"
     }
     time.sleep(1)
@@ -101,7 +97,7 @@ def github_client(url, params=None):
     return data
 
 
-class GithubSearch(object):
+class GithubSearch:
     def __init__(self, query):
         self.results = []
         self.query = query
@@ -117,20 +113,20 @@ class GithubSearch(object):
     def search(self):
         try:
             for build_in in self.built_in_rules:
-                query = "{} {}".format(self.query, build_in)
+                query = f"{self.query} {build_in}"
                 results = github_search_code(query=query, per_page=100)
                 for result in results:
                     if result not in self.results:
                         self.results.append(result)
         except Exception as e:
-            logger.info("Error on {} {}".format(self.query, e))
+            logger.info(f"Error on {self.query} {e}")
             logger.exception(e)
 
-        logger.info("{} search result {}".format(self.query, len(self.results)))
+        logger.info(f"{self.query} search result {len(self.results)}")
         return self.results
 
 
-class HashManager(object):
+class HashManager:
     def __init__(self):
         self._hash_list = None
         self.hash_file = Config.GITHUB_HASH_FILE
@@ -152,13 +148,13 @@ class HashManager(object):
 
         self._hash_list.append(hash_str)
         with open(self.hash_file, "a", encoding="utf-8") as f:
-            f.write("{}\n".format(hash_str))
+            f.write(f"{hash_str}\n")
 
     def __contains__(self, value):
         return value in self.hash_list
 
 
-class GithubLeak(object):
+class GithubLeak:
     def __init__(self, query):
         self.hash_manager = HashManager()
         self.new_results = []
@@ -175,12 +171,10 @@ class GithubLeak(object):
                 repo_map[repo_name].append(result)
 
         repo_cnt = 0
-        html = "<br/><br/> <div> 搜索: {}  仓库数：{}  结果数： {} </div>".format(self.query,
-                                                                        len(repo_map.keys()), len(self.new_results))
+        html = f"<br/><br/> <div> 搜索: {self.query}  仓库数：{len(repo_map.keys())}  结果数： {len(self.new_results)} </div>"
         for repo_name in repo_map:
             repo_cnt += 1
-            start_div = '<br/><br/><br/><div>#{} <a href="https://github.com/{}"> {} </a> 结果数：{}</div><br/>\n'.format(
-                repo_cnt, repo_name, repo_name, len(repo_map[repo_name]))
+            start_div = f'<br/><br/><br/><div>#{repo_cnt} <a href="https://github.com/{repo_name}"> {repo_name} </a> 结果数：{len(repo_map[repo_name])}</div><br/>\n'
             table_start = '''<table style="border-collapse: collapse;">
             <thead>
                 <tr>
@@ -198,9 +192,8 @@ class GithubLeak(object):
             for item in repo_map[repo_name]:
                 tr_cnt += 1
                 code_content = item.human_content(self.query).replace('>', "&#x3e;").replace('<', "&#x3c;")
-                tr_tag = '<tr><td {}> {} </td><td {}> <a href="{}">{}</a> </td><td {}>' \
-                         '<pre>{}</pre></td></tr>\n'.format(
-                    style, tr_cnt, style, item.html_url, item.path, style, code_content)
+                tr_tag = f'<tr><td {style}> {tr_cnt} </td><td {style}> <a href="{item.html_url}">{item.path}</a> </td><td {style}>' \
+                         f'<pre>{code_content}</pre></td></tr>\n'
 
                 html += tr_tag
                 if tr_cnt > 10:
@@ -224,7 +217,7 @@ class GithubLeak(object):
             if self.filter_result(x):
                 continue
 
-            logger.info("found {}".format(x))
+            logger.info(f"found {x}")
             self.new_results.append(x)
 
         self.new_results = self.new_results
@@ -234,10 +227,10 @@ class GithubLeak(object):
         #     f.write(html)
 
         if self.new_results:
-            logger.info("found new result {} {}".format(self.query, len(self.new_results)))
+            logger.info(f"found new result {self.query} {len(self.new_results)}")
             send_email(host=Config.EMAIL_HOST, port=Config.EMAIL_PORT, mail=Config.EMAIL_USERNAME,
                        password=Config.EMAIL_PASSWORD, to=Config.EMAIL_TO,
-                       title="[Github-{}] 灯塔消息推送".format(self.query), html=html)
+                       title=f"[Github-{self.query}] 灯塔消息推送", html=html)
 
         return self.new_results
 

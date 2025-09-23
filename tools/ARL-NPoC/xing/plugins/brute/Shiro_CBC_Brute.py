@@ -2,13 +2,13 @@ import base64
 from Cryptodome.Cipher import AES
 import uuid
 from xing.core.BasePlugin import BasePlugin
-from xing.utils import http_req, get_logger, random_choices
+from xing.utils import http_req, random_choices
 from xing.core import PluginType, SchemeType
 
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.BRUTE
         self.vul_name = "Shiro CBC 弱密钥"
         self.app_name = 'Shiro'
@@ -29,9 +29,9 @@ class Plugin(BasePlugin):
         count = set_cookie.count(self._check_value)
         if count > 0:
             self._remember_me_count = count
-            self.logger.debug("found shiro {}  count {}".format(target, count))
+            self.logger.debug(f"found shiro {target}  count {count}")
             if self.check_key('dGhpc25vdGFrZXlhYWN6eg=='):
-                self.logger.info("{} may be have waf".format(target))
+                self.logger.info(f"{target} may be have waf")
                 return False
 
             return True
@@ -42,7 +42,7 @@ class Plugin(BasePlugin):
         url = self.target + "/"
         url = url + "?" + random_choices() + "=" + random_choices()
         headers = {
-            "Cookie": '{}={}'.format(self._cookie_name, data)
+            "Cookie": f'{self._cookie_name}={data}'
         }
         set_cookie = http_req(url, headers=headers).headers.get('Set-Cookie', "")
         return set_cookie
@@ -56,11 +56,15 @@ class Plugin(BasePlugin):
             return True
 
 
+def _pkcs7_pad(data_bytes: bytes, block_size: int) -> bytes:
+    pad_len = block_size - (len(data_bytes) % block_size)
+    return data_bytes + (chr(pad_len) * pad_len).encode()
+
+
 def shiro_cbc(key, data):
     BS = AES.block_size
-    pad = lambda s: s + ((BS - len(s) % BS) * chr(BS - len(s) % BS)).encode()
     mode = AES.MODE_CBC
     iv = uuid.uuid4().bytes
     encryptor = AES.new(base64.b64decode(key), mode, iv)
-    base64_ciphertext = base64.b64encode(iv + encryptor.encrypt(pad(base64.b64decode(data))))
+    base64_ciphertext = base64.b64encode(iv + encryptor.encrypt(_pkcs7_pad(base64.b64decode(data), BS)))
     return base64_ciphertext

@@ -6,7 +6,7 @@ volumes:
 
 services:
     web:
-        image: centos:latest
+        image: rockylinux:9
         container_name: arl
         restart: unless-stopped
         ports:

@@ -52,7 +52,7 @@ class BasePlugin:
     def set_target(self, target):
         self._target_info = None
         if ":" not in target and self.plugin_type == PluginType.SNIFFER:
-            target = "{}:{}".format(target, self.default_port[0])
+            target = f"{target}:{self.default_port[0]}"
         self.target = target
 
     def do_verify(self):
@@ -70,20 +70,20 @@ class BasePlugin:
             result_map[brute_ret["username"]] = brute_ret["password"]
 
         else:
-            self.logger.info("start brute {} {}".format(self.app_name, self.target))
+            self.logger.info(f"start brute {self.app_name} {self.target}")
             if not self.check_app(target=self.target):
                 return
 
-            self.logger.info("found {} {}".format(self.app_name, self.target))
+            self.logger.info(f"found {self.app_name} {self.target}")
 
             user_list, pass_list = self.load_dict()
-            self.logger.info("load auth pair {}".format(len(user_list)))
+            self.logger.info(f"load auth pair {len(user_list)}")
 
             result_map = brute_runner(plg=self, target=self.target,
                          username_list=user_list, password_list=pass_list, concurrency=6)
 
         for user in result_map:
-            self.logger.success("found weak pass {}:{} {}".format(user, result_map[user], self.target))
+            self.logger.success(f"found weak pass {user}:{result_map[user]} {self.target}")
         return result_map
 
     def load_dict(self):
@@ -91,17 +91,17 @@ class BasePlugin:
         user_file = os.path.join(dict_dir, self.username_file)
         pwd_file = os.path.join(dict_dir, self.password_file)
 
-        self.logger.debug("username_file -> {}".format(self.username_file))
-        self.logger.debug("password_file -> {}".format(self.password_file))
+        self.logger.debug(f"username_file -> {self.username_file}")
+        self.logger.debug(f"password_file -> {self.password_file}")
 
         user = load_file(user_file)
 
         """获取确定的用户名密码"""
         gen_users_fun = getattr(self, "gen_users", None)
         if gen_users_fun:
-            self.logger.info("gen user {} {}".format(self.target, self))
+            self.logger.info(f"gen user {self.target} {self}")
             _gen_users = gen_users_fun()
-            self.logger.info("get user {} {} {}".format(len(_gen_users), self.target, self))
+            self.logger.info(f"get user {len(_gen_users)} {self.target} {self}")
             if _gen_users:
                 user = _gen_users
 
@@ -141,8 +141,8 @@ class BasePlugin:
         port = self.target_info['port']
         results = self.sniffer(host, port)
         if results:
-            uri = "{}://{}:{}".format(results, host, port)
-            self.logger.success("found {}".format(uri))
+            uri = f"{results}://{host}:{port}"
+            self.logger.success(f"found {uri}")
             return uri
         return results
 
@@ -151,7 +151,7 @@ class BasePlugin:
         plugin_name = getattr(self, '_plugin_name', None)
         try:
             if self.should_skip():
-                self.logger.debug("skip [{}] {}".format(plugin_name, target))
+                self.logger.debug(f"skip [{plugin_name}] {target}")
                 return
             do_action = self.do_map[self.plugin_type]
             return do_action()
@@ -161,11 +161,9 @@ class BasePlugin:
                 error = self.target_info['raw_target']
 
             if self.plugin_type == PluginType.SNIFFER:
-                self.logger.debug("[{}] {} {} ".format(
-                    plugin_name, error, e))
+                self.logger.debug(f"[{plugin_name}] {error} {e} ")
             else:
-                self.logger.warning("[{}] {} {} ".format(
-                    plugin_name, error, e))
+                self.logger.warning(f"[{plugin_name}] {error} {e} ")
 
             if isinstance(e, OSError):
                 return

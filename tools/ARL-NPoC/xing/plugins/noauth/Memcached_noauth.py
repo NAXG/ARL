@@ -4,7 +4,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.POC
         self.vul_name = "Memcached 未授权访问"
         self.app_name = 'Memcached'
@@ -14,8 +14,8 @@ class Plugin(BasePlugin):
         client = self.conn_target()
         client.send(b"stats\r\n")
         data = client.recv(128)
-        self.logger.debug("<<< {}".format(data))
+        self.logger.debug(f"<<< {data}")
         client.close()
         if b'STAT version' in data:
-            self.logger.success("发现 Memcached 未授权访问 {}".format(self.target))
+            self.logger.success(f"发现 Memcached 未授权访问 {self.target}")
             return True

@@ -86,7 +86,7 @@ class RiskCruising(CommonTask):
         self.targets = targets
 
     def npoc_service_detection(self):
-        logger.info("start npoc_service_detection {}".format(len(self.sniffer_target_set)))
+        logger.info(f"start npoc_service_detection {len(self.sniffer_target_set)}")
         result = npoc.run_sniffer(self.sniffer_target_set)
         for item in result:
             self.npoc_service_target_set.add(item["target"])
@@ -97,7 +97,7 @@ class RiskCruising(CommonTask):
     def run_poc(self):
         """运行poc，获取进度"""
         targets = self.available_sites + list(self.npoc_service_target_set)
-        logger.info("start run poc {}*{}".format(len(self.poc_plugin_name), len(targets)))
+        logger.info(f"start run poc {len(self.poc_plugin_name)}*{len(targets)}")
 
         run_total = len(self.poc_plugin_name) * len(targets)
         npoc_instance = npoc.NPoC(tmp_dir=Config.TMP_PATH, concurrency=10)
@@ -105,9 +105,8 @@ class RiskCruising(CommonTask):
         run_thread.start()
         while run_thread.is_alive():
             time.sleep(5)
-            status = "poc {}/{}".format(npoc_instance.runner.runner_cnt, run_total)
-            logger.info("[{}]runner cnt {}/{}".format(self.task_id,
-                                                      npoc_instance.runner.runner_cnt, run_total))
+            status = f"poc {npoc_instance.runner.runner_cnt}/{run_total}"
+            logger.info(f"[{self.task_id}]runner cnt {npoc_instance.runner.runner_cnt}/{run_total}")
             self.update_task_field("status", status)
 
         result = npoc_instance.result
@@ -120,7 +119,7 @@ class RiskCruising(CommonTask):
         """运行爆破，获取进度"""
         target = self.available_sites + list(self.npoc_service_target_set)
         plugin_name = self.brute_plugin_name
-        logger.info("start run brute {}*{}".format(len(plugin_name), len(target)))
+        logger.info(f"start run brute {len(plugin_name)}*{len(target)}")
         run_total = len(plugin_name) * len(target)
 
         npoc_instance = npoc.NPoC(tmp_dir=Config.TMP_PATH, concurrency=10)
@@ -128,9 +127,8 @@ class RiskCruising(CommonTask):
         run_thread.start()
         while run_thread.is_alive():
             time.sleep(5)
-            status = "brute {}/{}".format(npoc_instance.runner.runner_cnt, run_total)
-            logger.info("[{}]runner cnt {}/{}".format(self.task_id,
-                                                      npoc_instance.runner.runner_cnt, run_total))
+            status = f"brute {npoc_instance.runner.runner_cnt}/{run_total}"
+            logger.info(f"[{self.task_id}]runner cnt {npoc_instance.runner.runner_cnt}/{run_total}")
             self.update_task_field("status", status)
 
         result = npoc_instance.result
@@ -140,7 +138,7 @@ class RiskCruising(CommonTask):
             utils.conn_db('vuln').insert_one(item)
 
     def update_services(self, status, elapsed):
-        elapsed = "{:.2f}".format(elapsed)
+        elapsed = f"{elapsed:.2f}"
         self.update_task_field("status", status)
         update = {"$push": {"service": {"name": status, "elapsed": float(elapsed)}}}
         utils.conn_db('task').update_one(self.query, update)
@@ -153,7 +151,7 @@ class RiskCruising(CommonTask):
         # *** 对用户提交的数据 保存到 user_target_site_set
         for x in self.targets:
             if "://" not in x:
-                self.user_target_site_set.add("http://{}".format(x))
+                self.user_target_site_set.add(f"http://{x}")
                 continue
 
             if not x.startswith("http"):

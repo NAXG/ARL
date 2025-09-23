@@ -19,9 +19,9 @@ class MassDNS:
         self.tmp_dir = tmp_dir
         self.dns_server = dns_server
         self.domain_gen_output_path = os.path.join(tmp_dir,
-                                                   "domain_gen_{}".format(utils.random_choices()))
+                                                   f"domain_gen_{utils.random_choices()}")
         self.mass_dns_output_path = os.path.join(tmp_dir,
-                                                 "mass_dns_{}".format(utils.random_choices()))
+                                                 f"mass_dns_{utils.random_choices()}")
         self.mass_dns_bin = mass_dns_bin
         self.wildcard_domain_ip = wildcard_domain_ip
         self.concurrent = concurrent
@@ -37,15 +37,15 @@ class MassDNS:
                 f.write(domain + "\n")
                 cnt += 1
 
-        logger.info("MassDNS dict {}".format(cnt))
+        logger.info(f"MassDNS dict {cnt}")
 
     def mass_dns(self):
         """域名爆破"""
         command = [self.mass_dns_bin, "-q",
-                   "-r {}".format(self.dns_server),
+                   f"-r {self.dns_server}",
                    "-o S",
-                   "-w {}".format(self.mass_dns_output_path),
-                   "-s {}".format(self.concurrent),
+                   f"-w {self.mass_dns_output_path}",
+                   f"-s {self.concurrent}",
                    self.domain_gen_output_path,
                    "--root"
                    ]
@@ -104,7 +104,7 @@ def mass_dns(based_domain, words, wildcard_domain_ip=None):
             if is_fuzz_domain:
                 domains.append(based_domain.replace("{fuzz}", word))
             else:
-                domains.append("{}.{}".format(word, based_domain))
+                domains.append(f"{word}.{based_domain}")
 
     if not is_fuzz_domain:
         domains.append(based_domain)

@@ -4,11 +4,10 @@ import time
 import requests.exceptions
 from lxml import etree
 from app import utils
-from app.modules import DomainInfo
 logger = utils.get_logger()
 
 
-class BaseThread(object):
+class BaseThread:
     def __init__(self, targets, concurrency=6):
         self.concurrency = concurrency
         self.semaphore = threading.Semaphore(concurrency)
@@ -20,18 +19,18 @@ class BaseThread(object):
     def _work(self, url):
         try:
             self.work(url)
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             pass
 
-        except etree.Error as e:
+        except etree.Error:
             pass
 
         except Exception as e:
-            logger.warning("error on {}".format(url))
+            logger.warning(f"error on {url}")
             logger.exception(e)
 
         except BaseException as e:
-            logger.warning("BaseException on {}".format(url))
+            logger.warning(f"BaseException on {url}")
             raise e
         finally:
             self.semaphore.release()
@@ -45,7 +44,7 @@ class BaseThread(object):
                 target = target.strip()
 
             cnt += 1
-            logger.debug("[{}/{}] work on {}".format(cnt, len(self.targets), target))
+            logger.debug(f"[{cnt}/{len(self.targets)}] work on {target}")
 
             if not target:
                 continue
@@ -53,7 +52,7 @@ class BaseThread(object):
             self.semaphore.acquire()
             t1 = threading.Thread(target=self._work, args=(target,))
             # 可以快速结束程序
-            t1.setDaemon(True)
+            t1.daemon = True
             t1.start()
 
             deque.append(t1)
@@ -65,7 +64,7 @@ class BaseThread(object):
 
 class ThreadMap(BaseThread):
     def __init__(self, fun, items, arg=None, concurrency=6):
-        super(ThreadMap, self).__init__(targets=items, concurrency=concurrency)
+        super().__init__(targets=items, concurrency=concurrency)
         if not callable(fun):
             raise TypeError("fun must be callable.")
 

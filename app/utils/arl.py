@@ -6,60 +6,45 @@ import re
 
 def get_task_ids(domain):
     query = {"target": domain}
-    task_ids = []
-    for item in conn_db('task').find(query):
-        task_ids.append(str(item["_id"]))
-
-    return task_ids
+    return [str(item["_id"]) for item in conn_db('task').find(query)]
 
 
 def get_domain_by_id(task_id):
     query = {"task_id": task_id}
-    domains = []
-    for item in conn_db('domain').find(query):
-        domains.append(item["domain"])
-
-    return domains
+    return [item["domain"] for item in conn_db('domain').find(query)]
 
 
 def arl_domain(domain):
     from app.utils.domain import is_valid_domain
-    domains = []
-    for task_id in get_task_ids(domain):
-        for item in get_domain_by_id(task_id):
-            if not is_valid_domain(domain):
-                continue
 
-            if item.endswith("." + domain):
-                domains.append(item)
+    if not is_valid_domain(domain):
+        return []
 
-    for scope_id in get_scope_ids(domain):
-        for item in get_asset_domain_by_id(scope_id):
-            if not is_valid_domain(domain):
-                continue
-
-            if item.endswith("." + domain):
-                domains.append(item)
+    suffix = f".{domain}"
+    domains = [
+        item
+        for task_id in get_task_ids(domain)
+        for item in get_domain_by_id(task_id)
+        if item.endswith(suffix)
+    ]
+    domains.extend(
+        item
+        for scope_id in get_scope_ids(domain)
+        for item in get_asset_domain_by_id(scope_id)
+        if item.endswith(suffix)
+    )
 
     return list(set(domains))
 
 
 def get_asset_domain_by_id(scope_id):
     query = {"scope_id": scope_id}
-    domains = []
-    for item in conn_db('asset_domain').find(query):
-        domains.append(item["domain"])
-
-    return domains
+    return [item["domain"] for item in conn_db('asset_domain').find(query)]
 
 
 def get_monitor_domain_by_id(scope_id):
     query = {"scope_id": scope_id}
-    items = conn_db('scheduler').find(query)
-    domains = []
-    for item in items:
-        domains.append(item["domain"])
-    return domains
+    return [item["domain"] for item in conn_db('scheduler').find(query)]
 
 
 def scope_data_by_id(scope_id):
@@ -71,11 +56,7 @@ def scope_data_by_id(scope_id):
 
 def get_scope_ids(domain):
     query = {"scope_array": domain}
-    scope_ids = []
-    for item in conn_db('asset_scope').find(query):
-        scope_ids.append(str(item["_id"]))
-
-    return scope_ids
+    return [str(item["_id"]) for item in conn_db('asset_scope').find(query)]
 
 
 def task_statistic(task_id=None):
@@ -168,5 +149,4 @@ def build_port_custom(port_custom):
             return item
 
     return port_list
-
 

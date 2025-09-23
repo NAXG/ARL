@@ -6,7 +6,7 @@ import time
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.BRUTE
         self.scheme = [SchemeType.COBALT_STRIKE]
         self.vul_name = "CobaltStrike 弱口令"
@@ -33,7 +33,7 @@ class Plugin(BasePlugin):
     def login(self, target, user, passwd):
         resp = self._login_cs(passwd)
         if resp == b'\x00\x00\xca\xfe':
-            self.logger.success("{} Found password {}".format(target, passwd))
+            self.logger.success(f"{target} Found password {passwd}")
             return True
         time.sleep(0.2)
         return False

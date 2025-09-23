@@ -1,11 +1,10 @@
 from xing.core import PluginType, SchemeType
 from xing.core.BasePlugin import BasePlugin
-from xing.utils import http_req, get_logger
 import socket
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.SNIFFER
         self.default_port = [1099]
         self.target_scheme = SchemeType.RMI

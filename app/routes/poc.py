@@ -1,11 +1,9 @@
-from bson import ObjectId
-from flask_restx import Resource, Api, reqparse, fields, Namespace
+from flask_restx import fields, Namespace
 from app.utils import get_logger, auth
 from . import base_query_fields, ARLResource, get_arl_parser
 from app.services.npoc import NPoC
-from app import utils, celerytask
-from app.modules import ErrorMsg, TaskStatus, CeleryAction
-import copy
+from app import utils
+from app.modules import ErrorMsg
 
 ns = Namespace('poc', description="PoC信息")
 

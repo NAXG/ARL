@@ -12,16 +12,15 @@ class ProbeHTTP(BaseThread):
         self.domains = domains
 
     def _build_targets(self, domains):
-        _targets = []
-        for item in domains:
-            domain = item
-            if hasattr(item, 'domain'):
-                domain = item.domain
+        def resolve_domain(item):
+            return item.domain if hasattr(item, 'domain') else item
 
-            _targets.append("https://{}".format(domain))
-            _targets.append("http://{}".format(domain))
-
-        return _targets
+        return [
+            f"{scheme}://{domain}"
+            for item in domains
+            for domain in (resolve_domain(item),)
+            for scheme in ("https", "http")
+        ]
 
     def work(self, target):
         conn = utils.http_req(target, 'get', timeout=(3, 2), stream=True)
@@ -35,21 +34,21 @@ class ProbeHTTP(BaseThread):
 
     def run(self):
         t1 = time.time()
-        logger.info("start ProbeHTTP {}".format(len(self.targets)))
+        logger.info(f"start ProbeHTTP {len(self.targets)}")
         self._run()
         # 去除https和http相同的
-        alive_site = []
-        for x in self.sites:
-            if x.startswith("https://"):
-                alive_site.append(x)
-
-            elif x.startswith("http://"):
-                x_temp = "https://" + x[7:]
-                if x_temp not in self.sites:
-                    alive_site.append(x)
+        alive_site = [
+            site
+            for site in self.sites
+            if site.startswith("https://")
+            or (
+                site.startswith("http://")
+                and f"https://{site[7:]}" not in self.sites
+            )
+        ]
 
         elapse = time.time() - t1
-        logger.info("end ProbeHTTP {} elapse {}".format(len(alive_site), elapse))
+        logger.info(f"end ProbeHTTP {len(alive_site)} elapse {elapse}")
 
         return alive_site
 

@@ -1,12 +1,11 @@
 from xing.core.BasePlugin import BasePlugin
 from xing.core import PluginType, SchemeType
-import ssl
 import time
 
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.BRUTE
         self.scheme = [SchemeType.REDIS]
         self.vul_name = "Redis 弱口令"
@@ -31,7 +30,7 @@ class Plugin(BasePlugin):
         return False
 
     def _login_redis(self, pwd):
-        send_data = 'auth {}\r\n'.format(pwd)
+        send_data = f'auth {pwd}\r\n'
         client = self.conn_target()
         client.send(send_data.encode(encoding='UTF-8'))
         data = client.recv(200)

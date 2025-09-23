@@ -1,4 +1,3 @@
-import json
 from xing.core.BasePlugin import BasePlugin
 from xing.utils import http_req
 from xing.core import PluginType, SchemeType
@@ -6,7 +5,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.BRUTE
         self.vul_name = "APISIX 弱口令"
         self.app_name = 'APISIX'

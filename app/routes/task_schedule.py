@@ -1,6 +1,5 @@
 from bson import ObjectId
 import time
-from datetime import datetime
 from flask_restx import fields, Namespace
 from app.utils import get_logger, auth
 from app import utils
@@ -117,7 +116,7 @@ class ARLTaskScheduleResult(ARLResource):
                 data["start_date"] = start_date
                 data["next_run_date"] = start_date
                 data["cron"] = ""
-            except Exception as e:
+            except Exception:
                 return utils.build_ret(ErrorMsg.DateInvalid, {"start_date": start_date})
 
         # 周期任务处理

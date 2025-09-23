@@ -1,16 +1,14 @@
-import base64
 import json
 import re
 import urllib.parse
 from xing.core.BasePlugin import BasePlugin
-from xing.core.BaseThread import BaseThread
-from xing.utils import http_req, get_logger
+from xing.utils import http_req
 from xing.core import PluginType, SchemeType, thread_map
 
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.BRUTE
         self.vul_name = "Gitlab 弱口令"
         self.app_name = 'Gitlab'
@@ -36,13 +34,13 @@ class Plugin(BasePlugin):
         data_tpl += "&authenticity_token={token}&user%5Blogin%5D={user}&user%5Bpassword%5D={password}"
         token, cookie = self._get_token_cookie()
         if not token or not cookie:
-            self.logger.info("not found gitlab token {}".format(target))
+            self.logger.info(f"not found gitlab token {target}")
             return
         token = urllib.parse.quote(token)
         user = urllib.parse.quote(user)
         passwd = urllib.parse.quote(passwd)
         headers = {
-            "Cookie": "{}={}".format(self._gitlab_session_name, cookie),
+            "Cookie": f"{self._gitlab_session_name}={cookie}",
             "Content-Type": "application/x-www-form-urlencoded"
         }
         data = data_tpl.format(token=token, user=user, password=passwd)
@@ -71,13 +69,13 @@ class Plugin(BasePlugin):
         if self.gen_user_skip:
             return
         try:
-            url = "{}/api/v4/users/{}".format(self.target, uid)
+            url = f"{self.target}/api/v4/users/{uid}"
             conn = http_req(url, "get")
             data = conn.json()
             if data.get("state") == "active":
                 return data.get("username")
-        except json.decoder.JSONDecodeError as e:
-            self.logger.info("skip gen user {}".format(self.target))
+        except json.decoder.JSONDecodeError:
+            self.logger.info(f"skip gen user {self.target}")
             self.gen_user_skip = True
 
     def gen_users(self):

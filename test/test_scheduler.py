@@ -1,12 +1,21 @@
-import unittest
-from app.helpers.scheduler import have_same_site_update_monitor
+from app.helpers.scheduler import have_same_site_update_monitor, have_same_wih_update_monitor
 
 
-class TestScheduler(unittest.TestCase):
-    def test_have_same_site_update_monitor(self):
-        data = have_same_site_update_monitor("5fb51bb26591e71df2d1f27c")
-        self.assertTrue(data)
+def test_have_same_site_update_monitor(monkeypatch):
+    class DummyScheduler:
+        def find_one(self, query):
+            return {"scope_id": query["scope_id"]}
+
+    monkeypatch.setattr("app.helpers.scheduler.utils.conn_db", lambda name: DummyScheduler())
+
+    assert have_same_site_update_monitor("scope") is True
 
 
-if __name__ == '__main__':
-    unittest.main()
+def test_have_same_wih_update_monitor(monkeypatch):
+    class DummyScheduler:
+        def find_one(self, query):
+            return None
+
+    monkeypatch.setattr("app.helpers.scheduler.utils.conn_db", lambda name: DummyScheduler())
+
+    assert have_same_wih_update_monitor("scope") is False

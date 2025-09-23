@@ -89,7 +89,7 @@ class AddFofaTask(ARLResource):
 
         task_data = {
             "name": name,
-            "target": "Fofa ip {}".format(len(ip_results)),
+            "target": f"Fofa ip {len(ip_results)}",
             "start_time": "-",
             "end_time": "-",
             "task_tag": "task",
@@ -138,7 +138,7 @@ def submit_fofa_task(task_data):
 
     celery_id = celerytask.arl_task.delay(options=task_options)
 
-    logger.info("target:{} celery_id:{}".format(task_id, celery_id))
+    logger.info(f"target:{task_id} celery_id:{celery_id}")
 
     values = {"$set": {"celery_id": str(celery_id)}}
     task_data["celery_id"] = str(celery_id)

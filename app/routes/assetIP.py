@@ -1,5 +1,5 @@
 from bson import ObjectId
-from flask_restx import Resource, Api, reqparse, fields, Namespace
+from flask_restx import fields, Namespace
 from app.utils import get_logger, auth
 from . import base_query_fields, ARLResource, get_arl_parser
 from app.modules import ErrorMsg
@@ -77,7 +77,7 @@ class ARLIPExportIp(ARLResource):
 
 
 @ns.route('/export_domain/')
-class ARLIPExportIp(ARLResource):
+class ARLIPExportDomain(ARLResource):
     parser = get_arl_parser(base_search_fields, location='args')
 
     @auth

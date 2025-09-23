@@ -22,12 +22,7 @@ class FingerPrintCache:
 
     def fetch_data_from_mongodb(self) -> [FingerPrint]:
         items = list(conn_db('fingerprint').find())
-        finger_list = []
-        for rule in items:
-            finger = FingerPrint(rule['name'], rule['human_rule'])
-            finger_list.append(finger)
-
-        return finger_list
+        return [FingerPrint(rule['name'], rule['human_rule']) for rule in items]
 
     def update_cache(self):
         # 手动更新缓存
@@ -46,7 +41,7 @@ def finger_db_identify(variables: dict) -> [str]:
             if finger.identify(variables):
                 finger_name_list.append(finger.app_name)
         except Exception as e:
-            logger.warning("error on identify {} {}".format(finger.app_name, e))
+            logger.warning(f"error on identify {finger.app_name} {e}")
 
     return finger_name_list
 
@@ -60,4 +55,3 @@ def have_human_rule_from_db(rule: str) -> bool:
         return True
     else:
         return False
-

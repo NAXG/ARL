@@ -77,16 +77,14 @@ def get_hostname(url):
 
 def rm_similar_url(all_url):
     # URL简单去似
-    filther_similar_url = []
-    tmp_url_value = []
-    for _url in all_url:
-        _url = normal_url(_url)
-        if not _url:
-            continue
-        url_value = urlsimilar(_url)
-        if url_value not in tmp_url_value:
-            tmp_url_value.append(url_value)
-            filther_similar_url.append(_url)
+    seen_values = set()
+    filther_similar_url = [
+        filtered_url
+        for raw_url in all_url
+        if (filtered_url := normal_url(raw_url))
+        and (url_value := urlsimilar(filtered_url)) not in seen_values
+        and not seen_values.add(url_value)
+    ]
     return filther_similar_url
 
 
@@ -108,10 +106,10 @@ def normal_url(url):
         path = "/"
 
     if o.port == scheme_map[o.scheme] or o.port is None:
-        ret_url = "{}://{}{}".format(scheme, hostname, path)
+        ret_url = f"{scheme}://{hostname}{path}"
 
     else:
-        ret_url = "{}://{}:{}{}".format(scheme, hostname, o.port, path)
+        ret_url = f"{scheme}://{hostname}:{o.port}{path}"
 
     if o.query:
         ret_url = ret_url + "?" + o.query
@@ -125,7 +123,7 @@ def cut_filename(url):
     dir_path = dir_path.rstrip("/")
     if not o.netloc:
         return ""
-    ret_url = "{}://{}{}".format(o.scheme, o.netloc, dir_path)
+    ret_url = f"{o.scheme}://{o.netloc}{dir_path}"
     return ret_url
 
 
@@ -140,7 +138,7 @@ def verify_cert(url):
     try:
         http_req(url, method='head', verify= True)
         return True
-    except Exception as e:
+    except Exception:
         return False
 
 

@@ -1,11 +1,11 @@
 from xing.core.BasePlugin import BasePlugin
-from xing.utils import http_req, get_logger
+from xing.utils import http_req
 from xing.core import PluginType, SchemeType
 
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.POC
         self.vul_name = "发现帆软 FineReport"
         self.app_name = 'FineReport'
@@ -21,6 +21,6 @@ class Plugin(BasePlugin):
             conn = http_req(url)
 
             if check in conn.content and b"<title>" not in conn.content:
-                self.logger.success("found FineReport {}".format(url))
+                self.logger.success(f"found FineReport {url}")
                 return target + path + "ReportServer"
 

@@ -1,6 +1,6 @@
 import subprocess
-import time
-import json
+import time  # noqa: F401
+import json  # noqa: F401
 import shlex
 import random
 import string
@@ -9,25 +9,25 @@ import inspect
 import colorlog
 import logging
 import urllib3
-import importlib
-import os
+import importlib  # noqa: F401
+import os  # noqa: F401
 from base64 import b64encode
 import re
 import sys
 from urllib.parse import urlparse, urlsplit
 from requests.models import PreparedRequest
-urllib3.disable_warnings()
 import requests
 import hashlib
-from xing.utils.file import load_file,append_file
+from xing.utils.file import load_file as load_file, append_file as append_file
 from xing.conf import Conf
+urllib3.disable_warnings()
 
 
 def exec_system(cmd, **kwargs):
     logger = get_logger()
 
     cmd = " ".join(cmd)
-    logger.debug("exec system : {}".format(cmd))
+    logger.debug(f"exec system : {cmd}")
     if "timeout" not in kwargs:
         kwargs["timeout"] = 4 * 60 * 60
 
@@ -45,7 +45,6 @@ def exec_system(cmd, **kwargs):
 
 def random_choices(k = 6):
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
-
 
 
 
@@ -84,7 +83,7 @@ def get_celery_logger():
         if 'celery' in sys.argv[0]:
             task_logger = get_task_logger(__name__)
             return task_logger
-    except Exception as e:
+    except Exception:
         pass
 
     return None
@@ -123,7 +122,7 @@ def http_req(url, method='get', **kwargs):
 
     headers.setdefault("User-Agent", UA)
 
-    random_ip = "10.0.{}.{}".format(random.randint(1, 254), random.randint(1, 254))
+    random_ip = f"10.0.{random.randint(1, 254)}.{random.randint(1, 254)}"
     headers.setdefault("X-Real-IP", random_ip)
     headers.setdefault("X-Forwarded-For", random_ip)
 
@@ -251,7 +250,7 @@ def get_title(body):
     if len(title) > 0:
         try:
             result = title[0].decode("utf-8")
-        except Exception as e:
+        except Exception:
             result = title[0].decode("gbk", errors="replace")
     return result.strip()
 
@@ -264,7 +263,7 @@ def run_exploit_cmd(plg, args):
 
     optional_args = dict(urllib.parse.parse_qsl(args.option))
     # 从配置文件读取 JNDI 平台信息
-    optional_args.setdefault("remote", "{}:{}".format(Conf.JNDI_HOST, Conf.JNDI_RMI_PORT))
+    optional_args.setdefault("remote", f"{Conf.JNDI_HOST}:{Conf.JNDI_RMI_PORT}")
     optional_args.setdefault("payload_type", "general")
     optional_args.setdefault("key", "default")
     optional_args.setdefault("alg", "default")
@@ -288,7 +287,7 @@ def run_exploit_cmd(plg, args):
     if lack_args:
         info = '=value&'.join(lack_args)
         info += "=value"
-        logger.info("额外参数: {}".format(optional_args))
+        logger.info(f"额外参数: {optional_args}")
         logger.info("{} 缺少参数：{}，请使用-o {} 提供".format(plg._plugin_name, " ".join(lack_args), info))
         return
 
@@ -296,7 +295,7 @@ def run_exploit_cmd(plg, args):
     for arg in exploit_args:
         run_args[arg] = optional_args[arg]
 
-    logger.debug("target: {}, execute cmd: {}".format(plg.target, args.cmd))
+    logger.debug(f"target: {plg.target}, execute cmd: {args.cmd}")
     plg.exploit_cmd(target=plg.target, cmd=args.cmd, **run_args)
 
 
@@ -318,7 +317,7 @@ def run_listener(plg, args):
     if lack_args:
         info = '=value&'.join(lack_args)
         info += "=value"
-        logger.info("额外参数: {}".format(optional_args))
+        logger.info(f"额外参数: {optional_args}")
         logger.info("{} 缺少参数：{}，请使用-o {} 提供".format(plg._plugin_name, " ".join(lack_args), info))
         return
 
@@ -330,9 +329,6 @@ def run_listener(plg, args):
     plg.listen(args.host, args.port, **run_args)
 
 
-
-
-
-from xing.utils.loader import load_all_plugin, load_plugins
-from xing.utils.filter import pattern_match
-from xing.utils.dnslog import xn_9tr_com_get, xn_9tr_com_verify
+from xing.utils.loader import load_all_plugin as load_all_plugin, load_plugins as load_plugins  # noqa: E402
+from xing.utils.filter import pattern_match as pattern_match  # noqa: E402
+from xing.utils.dnslog import xn_9tr_com_get as xn_9tr_com_get, xn_9tr_com_verify as xn_9tr_com_verify  # noqa: E402

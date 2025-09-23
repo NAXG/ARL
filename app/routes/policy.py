@@ -1,10 +1,10 @@
-from flask_restx import Resource, Api, reqparse, fields, Namespace
+from flask_restx import fields, Namespace
 from app.utils import get_logger, auth
 from . import base_query_fields, ARLResource, get_arl_parser
 from app.modules import ErrorMsg
 from app import utils
 from bson import ObjectId
-from flask_restx.fields import Nested, String, Boolean, List
+from flask_restx.fields import Nested
 from flask_restx.model import Model
 
 ns = Namespace('policy', description="策略信息")
@@ -302,7 +302,7 @@ def _update_plugin_config(config):
 
         plugin_info = plugin_name_in_arl(plugin_name)
         if not plugin_info:
-            return "没有找到 {} 插件".format(plugin_name)
+            return f"没有找到 {plugin_name} 插件"
 
         config_item = {
             "plugin_name": plugin_name,

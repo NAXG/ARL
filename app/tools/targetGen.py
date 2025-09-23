@@ -24,10 +24,10 @@ def normal_url(url):
 
 
     if port == scheme_map[o.scheme] or port is None:
-        ret_url = "{}://{}{}".format(scheme, hostname, path)
+        ret_url = f"{scheme}://{hostname}{path}"
 
     else:
-        ret_url = "{}://{}:{}{}".format(scheme, hostname, port, path)
+        ret_url = f"{scheme}://{hostname}:{port}{path}"
 
     if o.query:
         ret_url = ret_url + "?" + o.query
@@ -54,7 +54,7 @@ def base_url(url):
     base = os.path.dirname(o.path)
     base = base.rstrip("/") + "/"
 
-    ret = "{}://{}{}".format(o.scheme, o.netloc, base)
+    ret = f"{o.scheme}://{o.netloc}{base}"
 
     return ret
 
@@ -70,19 +70,16 @@ def main():
     targets = list(set(load_file(sys.argv[1])))
     dicts = list(set(load_file(sys.argv[2])))
 
-    results = []
-    for target in targets:
-        target = target.strip()
-        for dict in dicts:
-            dict = dict.strip()
-            url = "{}/{}".format(target, dict)
-            results.append(url)
+    results = [
+        f"{target.strip()}/{dictionary.strip()}"
+        for target in targets
+        for dictionary in dicts
+    ]
 
 
-    print("gen target {}".format(len(results)))
+    print(f"gen target {len(results)}")
 
     save_file(results)
 
 if __name__ == '__main__':
     main()
-

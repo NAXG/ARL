@@ -1,7 +1,7 @@
 import argparse
-import os
+import os  # noqa: F401
 import logging
-import importlib
+import importlib  # noqa: F401
 import xing
 from xing.conf import Conf
 
@@ -234,7 +234,7 @@ def update_conf(args):
         numeric_level = Conf.SUCCESS_LEVEL
 
     if not isinstance(numeric_level, int):
-        raise ValueError('Invalid log level:{0}'.format(loglevel))
+        raise ValueError(f'Invalid log level:{loglevel}')
 
     Conf.LOGGER_LEVEL = numeric_level
 
@@ -242,7 +242,7 @@ def update_conf(args):
         Conf.LOGGER_LEVEL = 1000
 
 
-from xing.core.const import PluginType, SchemeType, AppType, DEFAULT_PORT_SCHEME_LIST, SubParser
-from xing.core.PluginRunner import plugin_runner
-from xing.core.BruteRunner import brute_runner
-from xing.core.ThreadMap import thread_map
+from xing.core.const import PluginType as PluginType, SchemeType as SchemeType, AppType as AppType, DEFAULT_PORT_SCHEME_LIST as DEFAULT_PORT_SCHEME_LIST, SubParser as SubParser  # noqa: E402
+from xing.core.PluginRunner import plugin_runner as plugin_runner  # noqa: E402
+from xing.core.BruteRunner import brute_runner as brute_runner  # noqa: E402
+from xing.core.ThreadMap import thread_map as thread_map  # noqa: E402

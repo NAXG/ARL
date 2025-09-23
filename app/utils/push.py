@@ -3,7 +3,8 @@ import base64
 import hmac
 import urllib.parse
 import hashlib
-import smtplib, ssl
+import smtplib
+import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from app.utils import http_req, get_logger
@@ -12,11 +13,11 @@ from app.config import Config
 logger = get_logger()
 
 
-class Push(object):
+class Push:
     """docstring for ClassName"""
 
     def __init__(self, asset_map, asset_counter):
-        super(Push, self).__init__()
+        super().__init__()
         self.asset_map = asset_map
         self.asset_counter = asset_counter
         self._domain_info_list = None
@@ -51,112 +52,106 @@ class Push(object):
     def build_domain_info_list(self):
         if "domain" not in self.asset_map:
             return []
-        domain_info_list = []
-        for old in self.asset_map["domain"]:
-            domain_dict = dict()
-            domain_dict["域名"] = old["domain"]
-            domain_dict["解析类型"] = old["type"]
-            domain_dict["记录值"] = old["record"][0]
-            domain_info_list.append(domain_dict)
-
-        return domain_info_list
+        return [
+            {
+                "域名": old["domain"],
+                "解析类型": old["type"],
+                "记录值": old["record"][0],
+            }
+            for old in self.asset_map["domain"]
+        ]
 
     def build_ip_info_list(self):
         if "ip" not in self.asset_map:
             return []
-        ip_info_list = []
-        for old in self.asset_map["ip"]:
-            ip_dict = dict()
-            port_list = []
-            for port_info in old["port_info"]:
-                port_list.append(str(port_info["port_id"]))
-
-            ip_dict["IP"] = old["ip"]
-            ip_dict["端口数目"] = len(port_list)
-            ip_dict["开放端口"] = ",".join(port_list[:10])
-            ip_dict["组织"] = old["geo_asn"].get("organization")
-            ip_info_list.append(ip_dict)
-
-        return ip_info_list
+        return [
+            {
+                "IP": old["ip"],
+                "端口数目": len(port_list := [str(port_info["port_id"]) for port_info in old["port_info"]]),
+                "开放端口": ",".join(port_list[:10]),
+                "组织": old["geo_asn"].get("organization"),
+            }
+            for old in self.asset_map["ip"]
+        ]
 
     def build_site_info_list(self):
         if "site" not in self.asset_map:
             return []
-        site_info_list = []
-        for old in self.asset_map["site"]:
-            site_dict = dict()
-            site_dict["站点"] = old["site"]
-            site_dict["标题"] = old["title"]
-            site_dict["状态码"] = old["status"]
-            site_dict["favicon"] = old["favicon"].get("hash", "")
-            site_info_list.append(site_dict)
-        return site_info_list
+        return [
+            {
+                "站点": old["site"],
+                "标题": old["title"],
+                "状态码": old["status"],
+                "favicon": old["favicon"].get("hash", ""),
+            }
+            for old in self.asset_map["site"]
+        ]
 
     def _push_dingding(self):
         tpl = ""
         if self.domain_len > 0:
-            tpl = "[{}]新发现域名 `{}` , 站点 `{}`\n***\n".format(self.task_name, self.domain_len, self.site_len)
-            tpl = "{}\n{}".format(tpl, dict2dingding_mark(self.domain_info_list))
+            tpl = f"[{self.task_name}]新发现域名 `{self.domain_len}` , 站点 `{self.site_len}`\n***\n"
+            tpl = f"{tpl}\n{dict2dingding_mark(self.domain_info_list)}"
 
         if self.ip_len > 0:
-            tpl = "[{}]新发现 IP `{}` , 站点 `{}`\n***\n".format(self.task_name, self.ip_len, self.site_len)
-            tpl = "{}\n{}".format(tpl, dict2dingding_mark(self.ip_info_list))
+            tpl = f"[{self.task_name}]新发现 IP `{self.ip_len}` , 站点 `{self.site_len}`\n***\n"
+            tpl = f"{tpl}\n{dict2dingding_mark(self.ip_info_list)}"
 
         tpl += "\n***\n"
-        tpl = "{}\n{}".format(tpl, dict2dingding_mark(self.site_info_list))
+        tpl = f"{tpl}\n{dict2dingding_mark(self.site_info_list)}"
         ding_out = dingding_send(msg=tpl, access_token=Config.DINGDING_ACCESS_TOKEN,
                                  secret=Config.DINGDING_SECRET, msgtype="markdown")
         if ding_out["errcode"] != 0:
-            logger.warning("发送失败 \n{}\n {}".format(tpl, ding_out))
+            logger.warning(f"发送失败 \n{tpl}\n {ding_out}")
             return False
         return True
 
     def _push_wx_work(self):
         tpl = ""
         if self.domain_len > 0:
-            tpl = "[{}]新发现域名 `{}` , 站点 `{}`\n".format(self.task_name, self.domain_len, self.site_len)
-            tpl = "{}\n{}".format(tpl, dict2dingding_mark(self.domain_info_list))
+            tpl = f"[{self.task_name}]新发现域名 `{self.domain_len}` , 站点 `{self.site_len}`\n"
+            tpl = f"{tpl}\n{dict2dingding_mark(self.domain_info_list)}"
 
         if self.ip_len > 0:
-            tpl = "[{}]新发现 IP `{}` , 站点 `{}`\n".format(self.task_name, self.ip_len, self.site_len)
-            tpl = "{}\n{}".format(tpl, dict2dingding_mark(self.ip_info_list))
+            tpl = f"[{self.task_name}]新发现 IP `{self.ip_len}` , 站点 `{self.site_len}`\n"
+            tpl = f"{tpl}\n{dict2dingding_mark(self.ip_info_list)}"
 
         tpl += "\n"
-        tpl = "{}\n{}".format(tpl, dict2dingding_mark(self.site_info_list))
+        tpl = f"{tpl}\n{dict2dingding_mark(self.site_info_list)}"
         ding_out = wx_work_send(msg=tpl, webhook_url=Config.WX_WORK_WEBHOOK)
         if ding_out["errcode"] != 0:
-            logger.warning("发送失败 \n{}\n {}".format(tpl, ding_out))
+            logger.warning(f"发送失败 \n{tpl}\n {ding_out}")
             return False
         return True
 
     def _push_feishu(self):
         tpl = ""
         if self.domain_len > 0:
-            tpl = "[{}]新发现域名 {}, 站点 {}\n".format(self.task_name, self.domain_len, self.site_len)
-            tpl = "{}{}".format(tpl, dict2dingding_mark(self.domain_info_list))
+            tpl = f"[{self.task_name}]新发现域名 {self.domain_len}, 站点 {self.site_len}\n"
+            tpl = f"{tpl}{dict2dingding_mark(self.domain_info_list)}"
 
         if self.ip_len > 0:
-            tpl = "[{}]新发现 IP {}, 站点{}\n".format(self.task_name, self.ip_len, self.site_len)
-            tpl = "{}{}".format(tpl, dict2dingding_mark(self.ip_info_list))
+            tpl = f"[{self.task_name}]新发现 IP {self.ip_len}, 站点{self.site_len}\n"
+            tpl = f"{tpl}{dict2dingding_mark(self.ip_info_list)}"
 
-        tpl = "{}\n{}".format(tpl, dict2dingding_mark(self.site_info_list))
+        tpl = f"{tpl}\n{dict2dingding_mark(self.site_info_list)}"
         feishu_out = feishu_send(msg=tpl, webhook_url=Config.FEISHU_WEBHOOK,
                                  secret=Config.FEISHU_SECRET)
         if feishu_out["code"] != 0:
-            logger.warning("发送失败 \n{}\n {}".format(tpl[:50], feishu_out))
+            logger.warning(f"发送失败 \n{tpl[:50]}\n {feishu_out}")
             return False
         return True
 
     def _push_email(self):
         html = ""
         if self.domain_len > 0:
-            tpl = "<div> 新发现域名 {}, 站点 {}\n</div>".format(self.domain_len, self.site_len)
+            tpl = f"<div> 新发现域名 {self.domain_len}, 站点 {self.site_len}\n</div>"
             html = tpl
             html += "<br/>"
             html += dict2table(self.domain_info_list)
 
         if self.ip_len > 0:
-            tpl = "<div> 新发现 IP {}, 站点 {}\n</div>".format(self.ip_len, self.site_len)
+            tpl = f"<div> 新发现 IP {self.ip_len}, 站点 {self.site_len}\n</div>"
             html = tpl
             html += "<br/>"
             html += dict2table(self.ip_info_list)
@@ -164,7 +159,7 @@ class Push(object):
         html += "<br/><br/>"
         html += dict2table(self.site_info_list)
 
-        title = "[{}] 灯塔消息推送".format(self.task_name[:50])
+        title = f"[{self.task_name[:50]}] 灯塔消息推送"
         send_email(host=Config.EMAIL_HOST, port=Config.EMAIL_PORT, mail=Config.EMAIL_USERNAME,
                    password=Config.EMAIL_PASSWORD, to=Config.EMAIL_TO, title=title, html=html)
 
@@ -227,20 +222,20 @@ def dict2dingding_mark(info_list):
     for row in info_list:
         cnt += 1
         row = ' \t '.join(map(str, row.values()))
-        items_tpl += "{}. {}\n".format(cnt, row)
+        items_tpl += f"{cnt}. {row}\n"
 
-    return "{}\n{}".format(title_tpl, items_tpl)
+    return f"{title_tpl}\n{items_tpl}"
 
 
 def dingding_send(msg, access_token, secret, msgtype="text", title="灯塔消息推送"):
-    ding_url = "https://oapi.dingtalk.com/robot/send?access_token={}".format(access_token)
+    ding_url = f"https://oapi.dingtalk.com/robot/send?access_token={access_token}"
     timestamp = str(round(time.time() * 1000))
     secret_enc = secret.encode('utf-8')
-    string_to_sign = '{}\n{}'.format(timestamp, secret)
+    string_to_sign = f'{timestamp}\n{secret}'
     string_to_sign_enc = string_to_sign.encode('utf-8')
     hmac_code = hmac.new(secret_enc, string_to_sign_enc, digestmod=hashlib.sha256).digest()
     sign = urllib.parse.quote_plus(base64.b64encode(hmac_code))
-    param = "&timestamp={}&sign={}".format(timestamp, sign)
+    param = f"&timestamp={timestamp}&sign={sign}"
     ding_url = ding_url + param
     send_json = {
         "msgtype": msgtype,
@@ -279,12 +274,12 @@ def dict2table(info_list):
         return ""
     html = ""
     table_style = 'style="border-collapse: collapse;"'
-    table_start = '<table {}>\n'.format(table_style)
+    table_start = f'<table {table_style}>\n'
     table_end = '</table>\n'
     style = 'style="border: 0.5pt solid windowtext;"'
-    thead_start = '<thead><tr><th {}>序号</th><th {}>\n'.format(style, style)
+    thead_start = f'<thead><tr><th {style}>序号</th><th {style}>\n'
     thead_end = '\n</th></tr></thead>'
-    th_join_tpl = '</th>\n<th {}>'.format(style)
+    th_join_tpl = f'</th>\n<th {style}>'
     thead_tpl = th_join_tpl.join(map(str, info_list[0].keys()))
     html += table_start
     html += thead_start
@@ -295,8 +290,8 @@ def dict2table(info_list):
     cnt = 0
     for row in info_list:
         cnt += 1
-        td_join_tpl = '</td>\n<td {}>'.format(style)
-        row_start = '<tr><td {}>{}</td>\n<td {}>'.format(style, cnt, style)
+        td_join_tpl = f'</td>\n<td {style}>'
+        row_start = f'<tr><td {style}>{cnt}</td>\n<td {style}>'
         items = [str(x).replace('>', "&#x3e;").replace('<', "&#x3c;") for x in row.values()]
         row = td_join_tpl.join(items)
         row_end = '</td>\n</tr>'
@@ -310,7 +305,7 @@ def dict2table(info_list):
 
 def feishu_send(msg, webhook_url, secret, title="灯塔消息推送"):
     timestamp = str(int(time.time()))
-    string_to_sign = '{}\n{}'.format(timestamp, secret)
+    string_to_sign = f'{timestamp}\n{secret}'
     hmac_code = hmac.new(string_to_sign.encode("utf-8"), digestmod=hashlib.sha256).digest()
     # 对结果进行base64处理
     sign = base64.b64encode(hmac_code).decode('utf-8')

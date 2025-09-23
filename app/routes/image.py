@@ -23,8 +23,7 @@ class ARLImage(Resource):
         if not allowed_file(file_name):
             return
         imgpath = os.path.join(Config.SCREENSHOT_DIR,
-                               '{task_id}/{file_name}'.format(task_id=task_id,
-                                                              file_name=file_name))
+                               f'{task_id}/{file_name}')
         if os.path.exists(imgpath):
             image_data = open(imgpath, "rb").read()
             response = make_response(image_data)

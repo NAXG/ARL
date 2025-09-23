@@ -1,4 +1,3 @@
-import json
 import ssl
 import OpenSSL
 import socket
@@ -11,9 +10,9 @@ def parse_certs(certs):
     ospj = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, certs)
 
     subject = ospj.get_subject()
-    subject_dn = "C={C}, CN={CN}".format(C=subject.C,CN=subject.CN)
+    subject_dn = f"C={subject.C}, CN={subject.CN}"
     if subject.O:
-        subject_dn += " ,O={O}".format(O = subject.O)
+        subject_dn += f" ,O={subject.O}"
 
     issuer = ospj.get_issuer()
     issuser_obj = {}
@@ -25,7 +24,7 @@ def parse_certs(certs):
     issuser_obj['common_name'] = issuer.CN
     issuser_obj['email'] = issuer.emailAddress
 
-    issuer_dn = "C={C}, O={O}, OU={OU}, CN={CN}".format(C=issuer.CN, O=issuer.O, OU=issuer.OU, CN=issuer.CN)
+    issuer_dn = f"C={issuer.CN}, O={issuer.O}, OU={issuer.OU}, CN={issuer.CN}"
 
     signature_algorithm = bytes.decode(ospj.get_signature_algorithm()) # 返回证书使用的签名算法
     serial_number = ospj.get_serial_number() # 证书序列号
@@ -93,7 +92,7 @@ def get_cert(host, port):
         certs = ssl.get_server_certificate((host, port))
         return parse_certs(certs)
     except Exception as e:
-        logger.debug("get cert error {}:{} {}".format(host,port, e))
+        logger.debug(f"get cert error {host}:{port} {e}")
 
 
 

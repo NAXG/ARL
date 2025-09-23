@@ -1,12 +1,12 @@
 from xing.core.BaseThread import BaseThread
 from xing.core.BasePlugin import BasePlugin
 from xing.core import PluginType
-from xing.utils import get_logger, append_file
+from xing.utils import get_logger
 from xing.utils.save_result import save_result
 
 
 
-class PluginRunner(object):
+class PluginRunner:
     def __init__(self, plugins, targets, concurrency=6):
         self.plugins = plugins
         self.targets = targets
@@ -20,7 +20,7 @@ class PluginRunner(object):
             count = len(self.targets)
             for target in self.targets:
                 cnt += 1
-                self.logger.info("[{}/{}] PluginRunner {}".format(cnt, count, target))
+                self.logger.info(f"[{cnt}/{count}] PluginRunner {target}")
                 runner = ConcurrentByPlugin(plugins=self.plugins,
                                             target=target, runner=self,
                                             concurrency=self.concurrency)
@@ -30,7 +30,7 @@ class PluginRunner(object):
             count = len(self.plugins)
             for plugin in self.plugins:
                 cnt += 1
-                self.logger.info("[{}/{}] PluginRunner {}".format(cnt, count, plugin))
+                self.logger.info(f"[{cnt}/{count}] PluginRunner {plugin}")
                 runner = ConcurrentByTarget(targets=self.targets,
                                             plugin=plugin, runner=self, concurrency=self.concurrency)
                 runner.run()
@@ -41,7 +41,7 @@ def plugin_runner(plugins, targets, concurrency=6):
     return runner.run()
 
 
-class Mixin(object):
+class Mixin:
     def __init__(self, *args, **kwargs):
         self.result_map = {
             PluginType.SNIFFER: [],
@@ -55,14 +55,14 @@ class Mixin(object):
             if isinstance(ret, str) and "://" in ret:
                 msg = ret
             else:
-                msg = "{}----{}".format(target, ret)
+                msg = f"{target}----{ret}"
 
             self.result_map[PluginType.POC].append(msg)
 
 
 class ConcurrentByPlugin(BaseThread, Mixin):
     def __init__(self, plugins, target, runner, concurrency=6):
-        super(ConcurrentByPlugin, self).__init__(targets=plugins, concurrency=concurrency)
+        super().__init__(targets=plugins, concurrency=concurrency)
         Mixin.__init__(self)
         self.target = target
         self.runner = None
@@ -83,7 +83,7 @@ class ConcurrentByPlugin(BaseThread, Mixin):
 
 class ConcurrentByTarget(BaseThread, Mixin):
     def __init__(self, targets, plugin, runner, concurrency=6):
-        super(ConcurrentByTarget, self).__init__(targets=targets, concurrency=concurrency)
+        super().__init__(targets=targets, concurrency=concurrency)
         Mixin.__init__(self)
         self.plugin = plugin
         self.runner = None
@@ -104,7 +104,7 @@ class ConcurrentByTarget(BaseThread, Mixin):
 
 def run(plg, target, copy_flag=True):
     if not isinstance(plg, BasePlugin):
-        raise Exception("{} not xing plugin".format(plg))
+        raise Exception(f"{plg} not xing plugin")
 
     new_plg = plg
     if copy_flag:

@@ -1,6 +1,5 @@
-from bson import ObjectId
-from flask_restx import Resource, Api, reqparse, fields, Namespace
-from app.utils import get_logger, auth, truncate_string
+from flask_restx import fields, Namespace
+from app.utils import auth, truncate_string
 from app.modules import ErrorMsg
 from . import base_query_fields, ARLResource, get_arl_parser
 from app import scheduler as app_scheduler, utils

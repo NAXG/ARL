@@ -69,12 +69,14 @@
 			 * Log messages to console
 			 */
 			log: function(args) {
+				var stderr = require('system').stderr;
+
 				if ( args.type === 'error' ) {
 					if ( !quiet ) {
-						require('system').stderr.write(args.message + "\n");
+						stderr.write(args.message + "\n");
 					}
 				} else if ( debug || args.type !== 'debug' ) {
-					require('system').stdout.write(args.message + "\n");
+					stderr.write(args.message + "\n");
 				}
 			},
 
@@ -141,6 +143,12 @@
 				page.settings.loadImages      = false;
 				page.settings.userAgent       = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36';
 				page.settings.resourceTimeout = resourceTimeout;
+
+				page.onConsoleMessage = function(message) {
+					if ( !quiet ) {
+						require('system').stderr.write(message + "\n");
+					}
+				};
 
 				page.onError = function(message) {
 					wappalyzer.log(message, 'error');

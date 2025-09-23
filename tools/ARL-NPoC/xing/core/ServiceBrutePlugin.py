@@ -8,14 +8,14 @@ import re
 
 class ServiceBrutePlugin(BasePlugin):
     def __init__(self):
-        super(ServiceBrutePlugin, self).__init__()
+        super().__init__()
         self.gen_user_file = None
         self.gen_pass_file = None
         self.delay_scheme = [SchemeType.SSH, SchemeType.RDP]
 
     def _gen_user_pass_file(self):
         user_list, pass_list = self.load_dict()
-        self.logger.info("load auth pair {}".format(len(user_list)))
+        self.logger.info(f"load auth pair {len(user_list)}")
         random_str = random_choices(6)
         random_user_file = os.path.join(Conf.TEMP_DIR,  random_str + ".user.txt")
         random_pass_file = os.path.join(Conf.TEMP_DIR,  random_str + ".pass.txt")
@@ -43,16 +43,14 @@ class ServiceBrutePlugin(BasePlugin):
         random_out_file = os.path.join(Conf.TEMP_DIR, random_choices(6) + ".out.txt")
         cmd = [
             "ncrack",
-            "-oN", "'{}'".format(random_out_file),
+            "-oN", f"'{random_out_file}'",
             "-f",
-            "-d{}".format(self.debug_lever),
+            f"-d{self.debug_lever}",
             "-v",
-            "-g cl=1,CL={},at=1,cd={}ms,cr=5,to={}ms".format(self.max_connection_limit,
-                                                             self.connection_delay,
-                                                             self.timeout),
+            f"-g cl=1,CL={self.max_connection_limit},at=1,cd={self.connection_delay}ms,cr=5,to={self.timeout}ms",
             "--pairwise",
-            "-U '{}'".format(self.gen_user_file),
-            "-P '{}'".format(self.gen_pass_file),
+            f"-U '{self.gen_user_file}'",
+            f"-P '{self.gen_pass_file}'",
             self.target
         ]
 

@@ -1,4 +1,3 @@
-# -*- coding:utf8 -*-
 import re
 
 
@@ -29,19 +28,15 @@ def translate(pattern):
                     stuff = '^' + stuff[1:]
                 elif stuff[0] == '^':
                     stuff = '\\' + stuff
-                res = '%s[%s]' % (res, stuff)
+                res = f'{res}[{stuff}]'
         else:
             res = res + re.escape(c)
-    return res + '\Z(?ms)'
+    return res + r'\Z(?ms)'
 
 
 def pattern_match(pattern, name):
     split_list = pattern.split(",")
-    pattern_list = []
-    for item in split_list:
-        item = item.strip()
-        if item:
-            pattern_list.append("*{}*".format(item))
+    pattern_list = [f"*{item.strip()}*" for item in split_list if item.strip()]
 
     if not name:
         pattern_list.append("*")

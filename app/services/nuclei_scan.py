@@ -9,7 +9,7 @@ from app import utils
 logger = utils.get_logger()
 
 
-class NucleiScan(object):
+class NucleiScan:
     def __init__(self, targets: list):
         self.targets = targets
 
@@ -17,10 +17,10 @@ class NucleiScan(object):
         rand_str = utils.random_choices()
 
         self.nuclei_target_path = os.path.join(tmp_path,
-                                               "nuclei_target_{}.txt".format(rand_str))
+                                               f"nuclei_target_{rand_str}.txt")
 
         self.nuclei_result_path = os.path.join(tmp_path,
-                                               "nuclei_result_{}.json".format(rand_str))
+                                               f"nuclei_result_{rand_str}.json")
 
         self.nuclei_bin_path = "nuclei"
 
@@ -31,7 +31,7 @@ class NucleiScan(object):
         json_flag = ["-json", "-jsonl"]
         for x in json_flag:
             command = [self.nuclei_bin_path, "-duc", x, "-version"]
-            pro = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            pro = subprocess.run(command, capture_output=True)
             if pro.returncode == 0:
                 self.nuclei_json_flag = x
                 return
@@ -50,11 +50,11 @@ class NucleiScan(object):
     def check_have_nuclei(self) -> bool:
         command = [self.nuclei_bin_path, "-version"]
         try:
-            pro = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            pro = subprocess.run(command, capture_output=True)
             if pro.returncode == 0:
                 return True
         except Exception as e:
-            logger.debug("{}".format(str(e)))
+            logger.debug(f"{str(e)}")
 
         return False
 
@@ -68,7 +68,7 @@ class NucleiScan(object):
 
     def dump_result(self) -> list:
         results = []
-        with open(self.nuclei_result_path, "r") as f:
+        with open(self.nuclei_result_path) as f:
             while True:
                 line = f.readline()
                 if not line:
@@ -95,11 +95,11 @@ class NucleiScan(object):
                    "-tags cve",
                    "-severity low,medium,high,critical",
                    "-type http",
-                   "-l {}".format(self.nuclei_target_path),
+                   f"-l {self.nuclei_target_path}",
                    self.nuclei_json_flag,  # 在nuclei 2.9.1 中 将 -json 参数改成了 -jsonl 参数
                    "-stats",
                    "-stats-interval 60",
-                   "-o {}".format(self.nuclei_result_path),
+                   f"-o {self.nuclei_result_path}",
                    ]
 
         logger.info(" ".join(command))

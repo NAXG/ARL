@@ -1,4 +1,3 @@
-import base64
 from xing.core.BasePlugin import BasePlugin
 from xing.utils import http_req, random_choices
 from xing.core import PluginType, SchemeType
@@ -6,7 +5,7 @@ from xing.core import PluginType, SchemeType
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.BRUTE
         self.vul_name = "Openfire 弱口令"
         self.app_name = 'Openfire'
@@ -24,10 +23,10 @@ class Plugin(BasePlugin):
         csrf = random_choices(10)
         location_url = random_choices(6) + ".jsp"
         headers = {
-            "Cookie": "csrf={}".format(csrf)
+            "Cookie": f"csrf={csrf}"
         }
         data = {
-            "url": "/{}".format(location_url),
+            "url": f"/{location_url}",
             "login": "true",
             "csrf": csrf,
             "username": user,

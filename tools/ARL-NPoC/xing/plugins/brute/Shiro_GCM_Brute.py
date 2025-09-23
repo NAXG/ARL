@@ -2,13 +2,13 @@ import base64
 from Cryptodome.Cipher import AES
 import uuid
 from xing.core.BasePlugin import BasePlugin
-from xing.utils import http_req, get_logger, random_choices
+from xing.utils import http_req, random_choices
 from xing.core import PluginType, SchemeType
 
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.BRUTE
         self.vul_name = "Shiro GCM 弱密钥"
         self.app_name = 'Shiro'
@@ -29,9 +29,9 @@ class Plugin(BasePlugin):
         count = set_cookie.count(self._check_value)
         if count > 0:
             self._remember_me_count = count
-            self.logger.debug("found shiro {}  count {}".format(target, count))
+            self.logger.debug(f"found shiro {target}  count {count}")
             if self.check_key('dGhpc25vdGFrZXlhYWN6eg=='):
-                self.logger.info("{} may be have waf".format(target))
+                self.logger.info(f"{target} may be have waf")
                 return False
 
             return True
@@ -42,7 +42,7 @@ class Plugin(BasePlugin):
         url = self.target + "/"
         url = url + "?" + random_choices() + "=" + random_choices()
         headers = {
-            "Cookie": '{}={}'.format(self._cookie_name, data)
+            "Cookie": f'{self._cookie_name}={data}'
         }
         set_cookie = http_req(url, headers=headers).headers.get('Set-Cookie', "")
         return set_cookie

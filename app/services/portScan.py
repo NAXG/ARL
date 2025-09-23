@@ -1,6 +1,8 @@
+import nmap
+
 from app import utils
-from app.utils import nmap, is_valid_exclude_ports
 from app.config import Config
+from app.utils import is_valid_exclude_ports
 
 logger = utils.get_logger()
 
@@ -30,7 +32,7 @@ class PortScan:
             self.nmap_arguments += " -O"
 
         if len(self.ports.split(",")) > 60:
-            self.nmap_arguments += " -PE -PS{}".format(self.alive_port)
+            self.nmap_arguments += f" -PE -PS{self.alive_port}"
             self.max_retries = 2
         else:
             if self.ports != "0-65535":
@@ -41,31 +43,30 @@ class PortScan:
             self.min_rate = max(self.min_rate, 800)
             self.parallelism = max(self.parallelism, 128)
 
-            self.nmap_arguments += " -PE -PS{}".format(self.alive_port)
+            self.nmap_arguments += f" -PE -PS{self.alive_port}"
             self.host_timeout += 60 * 5
             self.max_retries = 2
 
         self.nmap_arguments += " --max-rtt-timeout 800ms"
-        self.nmap_arguments += " --min-rate {}".format(self.min_rate)
+        self.nmap_arguments += f" --min-rate {self.min_rate}"
         self.nmap_arguments += " --script-timeout 6s"
-        self.nmap_arguments += " --max-hostgroup {}".format(self.max_host_group)
+        self.nmap_arguments += f" --max-hostgroup {self.max_host_group}"
 
         # 依据传过来的超时为准
         if custom_host_timeout is not None:
             if int(custom_host_timeout) > 0:
                 self.host_timeout = custom_host_timeout
-        self.nmap_arguments += " --host-timeout {}s".format(self.host_timeout)
-        self.nmap_arguments += " --min-parallelism {}".format(self.parallelism)
-        self.nmap_arguments += " --max-retries {}".format(self.max_retries)
+        self.nmap_arguments += f" --host-timeout {self.host_timeout}s"
+        self.nmap_arguments += f" --min-parallelism {self.parallelism}"
+        self.nmap_arguments += f" --max-retries {self.max_retries}"
 
         if self.exclude_ports is not None:
             if self.exclude_ports != "" and\
                     is_valid_exclude_ports(self.exclude_ports):
-                self.nmap_arguments += " --exclude-ports {}".format(self.exclude_ports)
+                self.nmap_arguments += f" --exclude-ports {self.exclude_ports}"
 
     def run(self):
-        logger.info("nmap target {}  ports {}  arguments {}".format(
-            self.targets[:20], self.ports[:20], self.nmap_arguments))
+        logger.info(f"nmap target {self.targets[:20]}  ports {self.ports[:20]}  arguments {self.nmap_arguments}")
         nm = nmap.PortScanner()
         nm.scan(hosts=self.targets, ports=self.ports, arguments=self.nmap_arguments)
         ip_info_list = []

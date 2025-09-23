@@ -1,5 +1,3 @@
-import time
-import json
 from app import utils
 from app.modules import SiteAutoTag
 logger = utils.get_logger()

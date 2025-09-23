@@ -10,11 +10,11 @@ from app.config import Config
 logger = utils.get_logger()
 
 
-class NPoC(object):
+class NPoC:
     """docstring for ClassName"""
 
     def __init__(self, concurrency=6, tmp_dir="./"):
-        super(NPoC, self).__init__()
+        super().__init__()
         self._plugins = None
         self._poc_info_list = None
         self.concurrency = concurrency
@@ -34,7 +34,7 @@ class NPoC(object):
 
         if self._plugin_name_list is None:
             # 触发下调用
-            x = self.poc_info_list
+            self.poc_info_list
             self._plugin_name_list = list(self.plugin_name_set)
 
         return self._plugin_name_list
@@ -43,9 +43,9 @@ class NPoC(object):
     def db_plugin_name_list(self) -> list:
         """ 数据库中插件名称列表 """
         if self._db_plugin_name_list is None:
-            self._db_plugin_name_list = []
-            for item in utils.conn_db('poc').find({}):
-                self._db_plugin_name_list.append(item["plugin_name"])
+            self._db_plugin_name_list = [
+                item["plugin_name"] for item in utils.conn_db('poc').find({})
+            ]
 
         return self._db_plugin_name_list
 
@@ -67,18 +67,12 @@ class NPoC(object):
 
     def load_all_poc(self):
         plugins = load_plugins(os.path.join(npoc_conf.PROJECT_DIRECTORY, "plugins"))
-        pocs = []
-        for plugin in plugins:
-            if plugin.plugin_type == PluginType.POC:
-                pocs.append(plugin)
-
-            if plugin.plugin_type == PluginType.BRUTE:
-                pocs.append(plugin)
-
-            if plugin.plugin_type == PluginType.SNIFFER:
-                pocs.append(plugin)
-
-        return pocs
+        return [
+            plugin
+            for plugin in plugins
+            if plugin.plugin_type
+            in {PluginType.POC, PluginType.BRUTE, PluginType.SNIFFER}
+        ]
 
     def gen_poc_info(self):
         info_list = []
@@ -121,7 +115,7 @@ class NPoC(object):
             if plugin_name in self.db_plugin_name_list:
                 continue
 
-            logger.info("insert {} info to db".format(plugin_name))
+            logger.info(f"insert {plugin_name} info to db")
             utils.conn_db('poc').insert_one(new)
 
         return True
@@ -137,7 +131,7 @@ class NPoC(object):
     def run_poc(self, plugin_name_list, targets):
         self.result = []
         npoc_conf.SAVE_TEXT_RESULT_FILENAME = ""
-        random_file = os.path.join(self.tmp_dir, "npoc_result_{}.txt".format(utils.random_choices()))
+        random_file = os.path.join(self.tmp_dir, f"npoc_result_{utils.random_choices()}.txt")
         npoc_conf.SAVE_JSON_RESULT_FILENAME = random_file
         plugins = self.filter_plugin_by_name(plugin_name_list)
 
@@ -148,8 +142,7 @@ class NPoC(object):
         if not os.path.exists(random_file):
             return self.result
 
-        for item in utils.load_file(random_file):
-            self.result.append(json.loads(item))
+        self.result = [json.loads(item) for item in utils.load_file(random_file)]
 
         os.unlink(random_file)
 
@@ -159,14 +152,12 @@ class NPoC(object):
         return self.run_poc(self.plugin_name_list, targets)
 
     def filter_plugin_by_name(self, plugin_name_list):
-        plugins = []
-        for plugin in self.plugins:
-            curr_name = getattr(plugin, "_plugin_name", "")
-            if not curr_name:
-                continue
-            if curr_name in plugin_name_list:
-                plugins.append(plugin)
-        return plugins
+        return [
+            plugin
+            for plugin in self.plugins
+            if (curr_name := getattr(plugin, "_plugin_name", ""))
+            and curr_name in plugin_name_list
+        ]
 
 
 def sync_to_db(del_flag=False):
@@ -184,37 +175,31 @@ def run_risk_cruising(plugins, targets):
 
 def run_sniffer(targets):
     n = NPoC(concurrency=15, tmp_dir=Config.TMP_PATH)
-    x = n.plugin_name_list
-    new_targets = []
-
+    n.plugin_name_list
     #  跳过80 和 443 的识别
-    for t in targets:
-        t = t.strip()
-        if t.endswith(":80"):
-            continue
-        if t.endswith(":443"):
-            continue
-        new_targets.append(t)
+    new_targets = [
+        stripped
+        for t in targets
+        for stripped in (t.strip(),)
+        if not stripped.endswith(":80")
+        and not stripped.endswith(":443")
+    ]
 
     items = n.run_poc(n.sniffer_plugin_name_set, new_targets)
-    ret = []
-    for x in items:
-        target = x["verify_data"]
-        if "://" not in target:
-            continue
 
-        split = target.split("://")
-        scheme = split[0]
-        split = split[1].split(":")
+    def _parse_target(target):
+        scheme, rest = target.split("://", 1)
+        host, port = rest.split(":", 1)
+        return scheme, host, port
 
-        host = split[0]
-        port = split[1]
-        item = {
+    return [
+        {
             "scheme": scheme,
             "host": host,
             "port": port,
-            "target": target
+            "target": target,
         }
-        ret.append(item)
-
-    return ret
+        for result in items
+        if (target := result["verify_data"]) and "://" in target
+        for scheme, host, port in (_parse_target(target),)
+    ]

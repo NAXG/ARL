@@ -1,11 +1,38 @@
-import unittest
-from app.services import domain_site_update
+from types import SimpleNamespace
+
+from app.services.domainSiteUpdate import DomainSiteUpdate
 
 
-class TestDomainSiteUpdate(unittest.TestCase):
-    def test_domain_site_update(self):
-        domain_site_update("64b7d749c97bead7f83d0de4", ["www.qq.com","qqgame.qq.com","mail.weread.qq.com"], "test")
+def test_set_and_check_domains_filters_existing(monkeypatch):
+    monitor = DomainSiteUpdate("task", ["a", "b"], "manual")
+
+    monkeypatch.setattr("app.services.domainSiteUpdate.find_domain_by_task_id", lambda task_id: ["a"])
+
+    monitor.set_and_check_domains()
+
+    assert monitor.domains == ["b"]
 
 
-if __name__ == '__main__':
-    unittest.main()
+def test_save_domain_info_inserts_records(monkeypatch):
+    inserted = []
+
+    class DummyCollection:
+        def insert_one(self, data):
+            inserted.append(data)
+
+    monkeypatch.setattr("app.services.domainSiteUpdate.utils.conn_db", lambda name: DummyCollection())
+    monkeypatch.setattr("app.services.domainSiteUpdate.utils.domain_parsed", lambda domain: {"fld": "example.com"})
+
+    domain_obj = SimpleNamespace(
+        domain="demo.example.com",
+        dump_json=lambda flag: {"domain": "demo.example.com", "record": ["1.1.1.1"]},
+    )
+
+    monkeypatch.setattr("app.services.domainSiteUpdate.build_domain_info", lambda domains: [domain_obj])
+
+    monitor = DomainSiteUpdate("task", ["demo.example.com"], "manual")
+    monitor.save_domain_info()
+
+    assert monitor.domain_info_list == [domain_obj]
+    assert inserted[0]["task_id"] == "task"
+    assert inserted[0]["source"] == "manual"

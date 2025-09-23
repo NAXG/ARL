@@ -1,5 +1,3 @@
-from typing import List
-import subprocess
 from app import utils
 from app.config import Config
 import os
@@ -9,7 +7,7 @@ from app.modules import WihRecord
 logger = utils.get_logger()
 
 
-class InfoHunter(object):
+class InfoHunter:
     # 从JS中收集，子域名，AK SK 等信息
     def __init__(self, sites: list):
         self.sites = set(sites)
@@ -18,10 +16,10 @@ class InfoHunter(object):
         rand_str = utils.random_choices()
 
         # wih 目标文件
-        self.wih_target_path = os.path.join(tmp_path, "wih_target_{}.txt".format(rand_str))
+        self.wih_target_path = os.path.join(tmp_path, f"wih_target_{rand_str}.txt")
 
         # wih 结果文件
-        self.wih_result_path = os.path.join(tmp_path, "wih_result_{}.json".format(rand_str))
+        self.wih_result_path = os.path.join(tmp_path, f"wih_result_{rand_str}.json")
 
         self.wih_bin_path = "wih"
 
@@ -41,18 +39,18 @@ class InfoHunter(object):
 
     def exec_wih(self):
         command = [self.wih_bin_path,
-                   "-r {}".format(Config.WIH_RULE_PATH),
+                   f"-r {Config.WIH_RULE_PATH}",
                    "-J",
-                   "-o {}".format(self.wih_result_path),
+                   f"-o {self.wih_result_path}",
                    "--concurrency 3",  # 并发数
                    "--log-level zero",  # 不输出日志
                    "--concurrency-per-site 1",  # 每个站点的并发数
                    "--disable-ak-sk-output",  # 禁止 AK/SK 单独保存
-                   "-t {}".format(self.wih_target_path),
+                   f"-t {self.wih_target_path}",
                    ]
 
         if Config.PROXY_URL:
-            command.append("--proxy {}".format(Config.PROXY_URL))
+            command.append(f"--proxy {Config.PROXY_URL}")
 
         logger.info(" ".join(command))
         utils.exec_system(command, timeout=5 * 24 * 60 * 60)
@@ -64,7 +62,7 @@ class InfoHunter(object):
             if "version:" in str(output):
                 return True
         except Exception as e:
-            logger.debug("{}".format(str(e)))
+            logger.debug(f"{str(e)}")
 
         return False
 
@@ -75,7 +73,7 @@ class InfoHunter(object):
         if not os.path.exists(self.wih_result_path):
             return results
 
-        with open(self.wih_result_path, "r") as f:
+        with open(self.wih_result_path) as f:
             while True:
                 line = f.readline()
                 if not line:
@@ -114,11 +112,11 @@ class InfoHunter(object):
         return results
 
 
-def run_wih(sites: List[str]) -> List[WihRecord]:
-    logger.info("run webInfoHunter, sites: {}".format(len(sites)))
+def run_wih(sites: list[str]) -> list[WihRecord]:
+    logger.info(f"run webInfoHunter, sites: {len(sites)}")
     hunter = InfoHunter(sites)
     results = hunter.run()
 
-    logger.info("webInfoHunter result: {}".format(len(results)))
+    logger.info(f"webInfoHunter result: {len(results)}")
 
     return results

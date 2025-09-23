@@ -1,12 +1,12 @@
 from xing.core.BasePlugin import BasePlugin
-from xing.utils import http_req, get_logger
+from xing.utils import http_req
 from xing.core import PluginType, SchemeType
 
 
 # header="X-ClickHouse-Summary"
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.POC
         self.vul_name = "发现 Clickhouse REST API"
         self.app_name = 'Clickhouse'
@@ -21,5 +21,5 @@ class Plugin(BasePlugin):
             return
 
         if b'Ok.' in conn.content:
-            self.logger.success("found {} {}".format(self.app_name, url))
+            self.logger.success(f"found {self.app_name} {url}")
             return True

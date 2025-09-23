@@ -34,14 +34,14 @@ def submit_github_task(task_data, action, delay_flag=True):
             celery_id = "fake_celery_id"
             celerytask.arl_github(options=task_options)
 
-        logger.info("target:{} task_id:{} celery_id:{}".format(keyword, task_id, celery_id))
+        logger.info(f"target:{keyword} task_id:{task_id} celery_id:{celery_id}")
         values = {"$set": {"celery_id": str(celery_id)}}
         task_data["celery_id"] = str(celery_id)
         utils.conn_db(collection).update_one({"_id": ObjectId(task_id)}, values)
 
     except Exception as e:
         utils.conn_db(collection).delete_one({"_id": ObjectId(task_id)})
-        logger.info("Github 任务下发失败 {}".format(keyword))
+        logger.info(f"Github 任务下发失败 {keyword}")
         return str(e)
 
     return task_data

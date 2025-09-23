@@ -6,14 +6,14 @@ import os
 
 class Query(DNSQueryBase):
     def __init__(self):
-        super(Query, self).__init__()
+        super().__init__()
         self.source_name = "subfinder"
         self.subfinder_path = Config.SUBFINDER_BIN
         self.config_path = Config.SUBFINDER_CONFIG
 
     def sub_domains(self, target):
         if not os.path.exists(self.subfinder_path):
-            self.logger.warning("Subfinder binary not found at: {}".format(self.subfinder_path))
+            self.logger.warning(f"Subfinder binary not found at: {self.subfinder_path}")
             return []
 
 
@@ -42,7 +42,7 @@ class Query(DNSQueryBase):
             if process.returncode != 0:
                 raise subprocess.CalledProcessError(process.returncode, command)
 
-            with open(temp_path, 'r', encoding='utf-8', errors='ignore') as f:
+            with open(temp_path, encoding='utf-8', errors='ignore') as f:
                 output = f.read().strip()
 
             subdomains = output.split('\n')
@@ -59,13 +59,13 @@ class Query(DNSQueryBase):
             self.logger.warning(f"Subfinder command timed out for target: {target}")
             try:
                 process.kill()
-            except:
+            except Exception:
                 pass
             return []
         except FileNotFoundError:
-            self.logger.error("Subfinder binary not found at path: {}".format(self.subfinder_path))
+            self.logger.error(f"Subfinder binary not found at path: {self.subfinder_path}")
             return []
-        except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError:
             self.logger.error(f"Subfinder execution failed for target {target}")
             return []
         except Exception as e:

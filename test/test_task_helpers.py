@@ -1,20 +1,43 @@
-import unittest
 from app.helpers.task import restart_task
+from app.modules import TaskStatus, TaskTag, TaskType
 
 
-class TestTaskHelpers(unittest.TestCase):
-    def test_restart_task_error(self):
-        task_id = "618121a56591e7084d649acb"
-        try:
-            restart_task(task_id)
-        except Exception as e:
-            self.assertTrue(task_id in str(e))
+def test_restart_task_requires_existing(monkeypatch):
+    monkeypatch.setattr("app.helpers.task.get_task_data", lambda task_id: None)
 
-    def test_restart_task(self):
-        task_id = "618267646591e708cdff207f"
-        data = restart_task(task_id)
-        self.assertTrue(isinstance(data, dict))
+    try:
+        restart_task("missing")
+    except Exception as exc:
+        assert "missing" in str(exc)
+    else:
+        assert False, "expected exception"
 
 
-if __name__ == '__main__':
-    unittest.main()
+def test_restart_task_returns_prefixed_copy(monkeypatch):
+    task = {
+        "name": "demo",
+        "target": "example",
+        "type": TaskType.DOMAIN,
+        "task_tag": TaskTag.TASK,
+        "options": {},
+        "start_time": "2020",
+        "status": "done",
+        "end_time": "2020",
+        "service": [1],
+        "celery_id": "abc",
+        "_id": "0" * 24,
+    }
+
+    monkeypatch.setattr("app.helpers.task.get_task_data", lambda task_id: task.copy())
+    def fake_submit(task_data):
+        task_data["task_id"] = "new"
+        return task_data
+
+    monkeypatch.setattr("app.helpers.task.submit_task", fake_submit)
+
+    result = restart_task("task")
+
+    assert result["name"] == "重新运行-" + task["name"]
+    assert result["status"] == TaskStatus.WAITING
+    assert result["service"] == []
+    assert result["task_id"] == "new"

@@ -51,7 +51,7 @@ def get_cdn_name_by_ip(ip):
                         return item["name"]
 
     except Exception as e:
-        logger.warning("{} {}".format(e, ip))
+        logger.warning(f"{e} {ip}")
         return ""
 
 
@@ -69,7 +69,7 @@ def _get_cdn_name_by_cname(cname):
                     return item["name"]
 
     except Exception as e:
-        logger.warning("{} {}".format(e, cname))
+        logger.warning(f"{e} {cname}")
         return ""
 
 

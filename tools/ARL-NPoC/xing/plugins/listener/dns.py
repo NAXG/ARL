@@ -1,6 +1,6 @@
 import datetime
 import dnslib
-from dnslib import *
+from dnslib import DNSRecord, QTYPE, RR, A
 from xing.core import PluginType
 from xing.core.BasePlugin import BasePlugin
 from xing.conf import Conf
@@ -9,7 +9,7 @@ import sqlite3
 
 class Plugin(BasePlugin):
     def __init__(self):
-        super(Plugin, self).__init__()
+        super().__init__()
         self.plugin_type = PluginType.LISTENER
         self.app_name = 'DNS log listener'
         self.vul_name = 'DNS Logging Listener'
@@ -41,7 +41,7 @@ class Plugin(BasePlugin):
         qtype = data['type']
         qtime = data['time']
 
-        cur.execute(f'''INSERT INTO RECORD VALUES (?, ?, ?, ?)''', (src, domain, qtype, qtime))
+        cur.execute('''INSERT INTO RECORD VALUES (?, ?, ?, ?)''', (src, domain, qtype, qtime))
         conn.commit()
         conn.close()
 
@@ -54,7 +54,7 @@ class Plugin(BasePlugin):
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             s.bind((host, port))
 
-        except os.error:
+        except OSError:
             self.logger.error(f'Port {port} is already being used')
             exit()
 
