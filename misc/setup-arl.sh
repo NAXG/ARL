@@ -244,7 +244,7 @@ systemctl restart arl-scheduler
 systemctl enable nginx
 systemctl restart nginx
 
-python tools/add_finger.py
-python tools/add_finger_ehole.py
+#python tools/add_finger.py
+#python tools/add_finger_ehole.py
 
 echo "install done"
