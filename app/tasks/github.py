@@ -23,16 +23,12 @@ class GithubTaskTask:
 
     def save_content(self):
         self.update_status(f"fetch content-{len(self.results)}")
-        items_to_insert = []
-        for result in self.results:
-            if not isinstance(result, GithubResult):
-                continue
-
-            if self.filter_result(result):
-                continue
-
-            item = self.result_to_dict(result)
-            items_to_insert.append(item)
+        items_to_insert = [
+            self.result_to_dict(result)
+            for result in self.results
+            if isinstance(result, GithubResult)
+            and not self.filter_result(result)
+        ]
 
         if items_to_insert:
             utils.conn_db("github_result").insert_many(items_to_insert)

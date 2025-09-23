@@ -146,10 +146,7 @@ def find_job(job_id):
 
 
 def all_job():
-    items = []
-    for item in conn('scheduler').find():
-        items.append(item)
-    return items
+    return list(conn('scheduler').find())
 
 
 def submit_job(domain, job_id, scope_id, options=None, name="", scope_type=AssetScopeType.DOMAIN):

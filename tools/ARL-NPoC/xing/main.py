@@ -30,18 +30,12 @@ def show_plugins(args):
 
 
 def load_plugin_by_filter(plugin_type, filter_name):
-    filter_plugins = []
-    for plugin in plugins:
-        plugin_name = plugin._plugin_name
-        if plugin.plugin_type != plugin_type:
-            continue
-        
-        if not pattern_match(filter_name, plugin_name):
-            continue
-
-        filter_plugins.append(plugin)
-
-    return filter_plugins
+    return [
+        plugin
+        for plugin in plugins
+        if plugin.plugin_type == plugin_type
+        and pattern_match(filter_name, plugin._plugin_name)
+    ]
 
 
 def scan(args):
@@ -69,11 +63,7 @@ def exploit(args):
     filter_plugins = load_plugin_by_filter(PluginType.POC,
                                            args.plugin_name)
 
-    plg_list = []
-    for plg in filter_plugins:
-        if not getattr(plg, "exploit_cmd", None):
-            continue
-        plg_list.append(plg)
+    plg_list = [plg for plg in filter_plugins if getattr(plg, "exploit_cmd", None)]
 
     logger.info(f"load plugin {len(plg_list)} ")
     for plg in plg_list:
@@ -230,4 +220,3 @@ def main():
 
 if __name__ == '__main__':  # pragma: no cover
     main()
-

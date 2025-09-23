@@ -319,15 +319,13 @@ class Domain2SiteMonitor:
 
         logger.info(f"load {len(domains)} domain, scope_id:{self.scope_id}")
 
-        have_domain_site_list = []
-        for site in sites:
-            netloc = utils.get_hostname(site)
-            curr_domain = netloc.split(":")[0]
-            have_domain_site_list.append(curr_domain)
+        have_domain_site_list = [
+            utils.get_hostname(site).split(":")[0]
+            for site in sites
+        ]
 
         no_domain_site_list = set(domains) - set(have_domain_site_list)
-        for domain in no_domain_site_list:
-            ret.append(f"https://{domain}")
+        ret = [f"https://{domain}" for domain in no_domain_site_list]
 
         logger.info(f"load {len(ret)} no_domain_site_list, scope_id:{self.scope_id}")
 
@@ -400,4 +398,3 @@ class Domain2SiteMonitor:
 def asset_site_monitor(scope_id):
     monitor = AssetSiteMonitor(scope_id=scope_id)
     monitor.run()
-

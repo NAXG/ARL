@@ -70,13 +70,11 @@ def main():
     targets = list(set(load_file(sys.argv[1])))
     dicts = list(set(load_file(sys.argv[2])))
 
-    results = []
-    for target in targets:
-        target = target.strip()
-        for dict in dicts:
-            dict = dict.strip()
-            url = f"{target}/{dict}"
-            results.append(url)
+    results = [
+        f"{target.strip()}/{dictionary.strip()}"
+        for target in targets
+        for dictionary in dicts
+    ]
 
 
     print(f"gen target {len(results)}")
@@ -85,4 +83,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

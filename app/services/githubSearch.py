@@ -108,10 +108,7 @@ def github_search_code(query, order="desc", sort="indexed", per_page=100, page=1
 
     data = github_client(url, params=params)
     logger.info("search {} count {}".format(query, data["total_count"]))
-    ret_list = []
-    for item in data["items"]:
-        result = GithubResult(item=item)
-        ret_list.append(result)
+    ret_list = [GithubResult(item=item) for item in data["items"]]
 
     total_count = data["total_count"]
     if data["total_count"] > 0 and len(ret_list) == 0 and page == 1:

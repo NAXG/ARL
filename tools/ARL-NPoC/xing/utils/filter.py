@@ -36,11 +36,7 @@ def translate(pattern):
 
 def pattern_match(pattern, name):
     split_list = pattern.split(",")
-    pattern_list = []
-    for item in split_list:
-        item = item.strip()
-        if item:
-            pattern_list.append(f"*{item}*")
+    pattern_list = [f"*{item.strip()}*" for item in split_list if item.strip()]
 
     if not name:
         pattern_list.append("*")

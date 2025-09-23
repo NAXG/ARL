@@ -52,46 +52,40 @@ class Push:
     def build_domain_info_list(self):
         if "domain" not in self.asset_map:
             return []
-        domain_info_list = []
-        for old in self.asset_map["domain"]:
-            domain_dict = dict()
-            domain_dict["域名"] = old["domain"]
-            domain_dict["解析类型"] = old["type"]
-            domain_dict["记录值"] = old["record"][0]
-            domain_info_list.append(domain_dict)
-
-        return domain_info_list
+        return [
+            {
+                "域名": old["domain"],
+                "解析类型": old["type"],
+                "记录值": old["record"][0],
+            }
+            for old in self.asset_map["domain"]
+        ]
 
     def build_ip_info_list(self):
         if "ip" not in self.asset_map:
             return []
-        ip_info_list = []
-        for old in self.asset_map["ip"]:
-            ip_dict = dict()
-            port_list = []
-            for port_info in old["port_info"]:
-                port_list.append(str(port_info["port_id"]))
-
-            ip_dict["IP"] = old["ip"]
-            ip_dict["端口数目"] = len(port_list)
-            ip_dict["开放端口"] = ",".join(port_list[:10])
-            ip_dict["组织"] = old["geo_asn"].get("organization")
-            ip_info_list.append(ip_dict)
-
-        return ip_info_list
+        return [
+            {
+                "IP": old["ip"],
+                "端口数目": len(port_list := [str(port_info["port_id"]) for port_info in old["port_info"]]),
+                "开放端口": ",".join(port_list[:10]),
+                "组织": old["geo_asn"].get("organization"),
+            }
+            for old in self.asset_map["ip"]
+        ]
 
     def build_site_info_list(self):
         if "site" not in self.asset_map:
             return []
-        site_info_list = []
-        for old in self.asset_map["site"]:
-            site_dict = dict()
-            site_dict["站点"] = old["site"]
-            site_dict["标题"] = old["title"]
-            site_dict["状态码"] = old["status"]
-            site_dict["favicon"] = old["favicon"].get("hash", "")
-            site_info_list.append(site_dict)
-        return site_info_list
+        return [
+            {
+                "站点": old["site"],
+                "标题": old["title"],
+                "状态码": old["status"],
+                "favicon": old["favicon"].get("hash", ""),
+            }
+            for old in self.asset_map["site"]
+        ]
 
     def _push_dingding(self):
         tpl = ""

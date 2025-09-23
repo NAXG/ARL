@@ -39,31 +39,17 @@ class DNSQueryBase:
             return []
 
         """下面是过滤掉不合法的数据"""
-        subdomains = []
-
-        for domain in domains:
-            domain = domain.strip("*.")
-            domain = domain.lower()
-            if not domain:
-                continue
-
-            if not domain.endswith(f".{target}"):
-                continue
-
-            # 删除掉过长的域名
-            if len(domain) - len(target) >= Config.DOMAIN_MAX_LEN:
-                continue
-
-            if not utils.is_valid_domain(domain):
-                continue
-
-            # 屏蔽和谐域名和黑名单域名
-            if utils.check_domain_black(domain):
-                continue
-
-            if utils.domain_parsed(domain):
-                subdomains.append(domain)
-
+        subdomains = [
+            cleaned_domain
+            for domain in domains
+            for cleaned_domain in (domain.strip("*.").lower(),)
+            if cleaned_domain
+            if cleaned_domain.endswith(f".{target}")
+            if len(cleaned_domain) - len(target) < Config.DOMAIN_MAX_LEN
+            if utils.is_valid_domain(cleaned_domain)
+            if not utils.check_domain_black(cleaned_domain)
+            if utils.domain_parsed(cleaned_domain)
+        ]
         subdomains = list(set(subdomains))
 
         t2 = time.time()

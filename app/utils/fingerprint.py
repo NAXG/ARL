@@ -91,13 +91,10 @@ web_app_rules = json.loads("\n".join(load_file(Config.web_app_rule)))
 
 # 这里只是加载本地指纹规则
 def load_fingerprint():
-    items = []
-    for rule in web_app_rules:
-        new_rule = dict()
-        new_rule["name"] = rule
-        new_rule["rule"] = web_app_rules[rule]
-        items.append(new_rule)
-    return items
+    return [
+        {"name": rule, "rule": web_app_rules[rule]}
+        for rule in web_app_rules
+    ]
 
 
 # 根据规则列表来获取应用名，单个规则字段是或的关系

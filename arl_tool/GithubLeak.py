@@ -79,12 +79,7 @@ def github_search_code(query, order="desc", sort="indexed", per_page=100, page=1
 
     data = github_client(url, params=params)
     logger.info("search {} count {}".format(query, data["total_count"]))
-    ret_list = []
-    for item in data["items"]:
-        result = GithubResult(item=item)
-        ret_list.append(result)
-
-    return ret_list
+    return [GithubResult(item=item) for item in data["items"]]
 
 
 def github_client(url, params=None):

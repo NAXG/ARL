@@ -11,11 +11,4 @@ def append_file(path, msgs):
 
 def clear_empty(buf):
     """对数组删除空白符"""
-    new_buf = []
-    for item in buf:
-        item = item.strip()
-        if not item:
-            continue
-        new_buf.append(item)
-
-    return new_buf
+    return [item.strip() for item in buf if item.strip()]
