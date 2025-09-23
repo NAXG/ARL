@@ -39,7 +39,7 @@ ARL资产侦察灯塔系统备份项目，**已跑通**
 sudo docker run --privileged -it -d -p 5003:5003 --name=arl --restart=always rockylinux/rockylinux:9-ubi-init /usr/sbin/init
 docker exec -it arl bash
 # docker内运行，通过源码安装ARL
-curl https://raw.githubusercontent.com/naxg/ARL/2.6.7/misc/setup-arl.sh >install.sh
+curl https://raw.githubusercontent.com/naxg/ARL/main/misc/setup-arl.sh >install.sh
 bash install.sh
 exit
 ```

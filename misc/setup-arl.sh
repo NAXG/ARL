@@ -96,7 +96,7 @@ fi
 if ! command -v nuclei &> /dev/null
 then
   echo "install nuclei"
-  wget -c https://github.com/naxg/ARL/raw/2.6.7/tools/nuclei.zip -O nuclei.zip
+  wget -c https://github.com/naxg/ARL/raw/main/tools/nuclei.zip -O nuclei.zip
   unzip nuclei.zip -d /opt/nuclei/ && mv /opt/nuclei/nuclei /usr/bin/ && rm -rf nuclei.zip /opt/nuclei/
   nuclei -ut
 fi
@@ -106,7 +106,7 @@ if ! command -v wih &> /dev/null
 then
   echo "install wih ..."
   ## 安装 WIH
-  wget -c https://github.com/naxg/ARL/raw/2.6.7/tools/wih/wih_linux_amd64 -O /usr/bin/wih && chmod +x /usr/bin/wih
+  wget -c https://github.com/naxg/ARL/raw/main/tools/wih/wih_linux_amd64 -O /usr/bin/wih && chmod +x /usr/bin/wih
   wih --version
 fi
 
@@ -123,7 +123,7 @@ systemctl restart rabbitmq-server
 cd /opt
 if [ ! -d ARL ]; then
   echo "git clone ARL proj"
-  git clone -b 2.6.7 --depth 1 https://github.com/naxg/ARL
+  git clone -b main --depth 1 https://github.com/naxg/ARL
 fi
 
 if [ ! -d "ARL-NPoC" ]; then
@@ -139,25 +139,25 @@ cd ../
 
 if [ ! -f /usr/local/bin/ncrack ]; then
   echo "Download ncrack ..."
-  wget -c https://github.com/naxg/ARL/raw/2.6.7/tools/ncrack -O /usr/local/bin/ncrack
+  wget -c https://github.com/naxg/ARL/raw/main/tools/ncrack -O /usr/local/bin/ncrack
   chmod +x /usr/local/bin/ncrack
 fi
 
 mkdir -p /usr/local/share/ncrack
 if [ ! -f /usr/local/share/ncrack/ncrack-services ]; then
   echo "Download ncrack-services ..."
-  wget -c https://github.com/naxg/ARL/raw/2.6.7/tools/ncrack-services -O /usr/local/share/ncrack/ncrack-services
+  wget -c https://github.com/naxg/ARL/raw/main/tools/ncrack-services -O /usr/local/share/ncrack/ncrack-services
 fi
 
 mkdir -p /data/GeoLite2
 if [ ! -f /data/GeoLite2/GeoLite2-ASN.mmdb ]; then
   echo "download GeoLite2-ASN.mmdb ..."
-  wget -c https://github.com/naxg/ARL/raw/2.6.7/tools/GeoLite2-ASN.mmdb -O /data/GeoLite2/GeoLite2-ASN.mmdb
+  wget -c https://github.com/naxg/ARL/raw/main/tools/GeoLite2-ASN.mmdb -O /data/GeoLite2/GeoLite2-ASN.mmdb
 fi
 
 if [ ! -f /data/GeoLite2/GeoLite2-City.mmdb ]; then
   echo "download GeoLite2-City.mmdb ..."
-  wget -c https://github.com/naxg/ARL/raw/2.6.7/tools/GeoLite2-City.mmdb -O /data/GeoLite2/GeoLite2-City.mmdb
+  wget -c https://github.com/naxg/ARL/raw/main/tools/GeoLite2-City.mmdb -O /data/GeoLite2/GeoLite2-City.mmdb
 fi
 
 cd /opt/ARL
