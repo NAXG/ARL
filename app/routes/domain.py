@@ -20,6 +20,14 @@ base_search_fields = {
 
 base_search_fields.update(base_query_fields)
 
+prefix_stat_fields = {
+    'prefix': fields.String(required=False, description="域名前缀"),
+    'count__gt': fields.Integer(description="数量大于"),
+    'count__lt': fields.Integer(description="数量小于")
+}
+
+prefix_stat_fields.update(base_query_fields)
+
 
 @ns.route('/')
 class ARLDomain(ARLResource):
@@ -51,6 +59,22 @@ class ARLDomainExport(ARLResource):
         response = self.send_export_file(args=args, _type="domain")
 
         return response
+
+
+@ns.route('/prefix_stat/')
+class ARLDomainPrefixStat(ARLResource):
+    parser = get_arl_parser(prefix_stat_fields, location='args')
+
+    @auth
+    @ns.expect(parser)
+    def get(self):
+        """
+        域名前缀统计查询
+        """
+        args = self.parser.parse_args()
+        data = self.build_data(args=args, collection='domain_prefix_stat')
+
+        return data
 
 
 delete_domain_fields = ns.model('deleteDomainFields',  {
