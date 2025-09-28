@@ -19,6 +19,36 @@ ARL资产侦察灯塔系统备份项目，**已跑通**
 
 **subfinder 配置文件路径：** `/opt/ARL/app/services/dns_query_plugin/provider-config.yaml`
 
+例子：
+```yaml
+binaryedge:
+  - 0bf8919b-aab9-42e4-9574-d3b639324597
+  - ac244e2f-b635-4581-878a-33f4e79a2c13
+censys:
+  - ac244e2f-b635-4581-878a-33f4e79a2c13:dd510d6e-1b6e-4655-83f6-f347b363def9
+certspotter: []
+passivetotal:
+  - sample-email@user.com:sample_password
+redhuntlabs:
+  - ENDPOINT:API_TOKEN
+  - https://reconapi.redhuntlabs.com/community/v1/domains/subdomains:joEPzJJp2AuOCw7teAj63HYrPGnsxuPQ
+securitytrails: []
+shodan:
+  - AAAAClP1bJJSRMEYJazgwhJKrggRwKA
+github:
+  - ghp_lkyJGU3jv1xmwk4SDXavrLDJ4dl2pSJMzj4X
+  - ghp_gkUuhkIYdQPj13ifH4KA3cXRn8JD2lqir2d4
+zoomeyeapi:
+  - zoomeye.hk:4f73021d-ff95-4f53-937f-83d6db719eec
+quake:
+  - 0cb9030c-0a40-48a3-b8c4-fca28e466ba3
+facebook:
+  - APP_ID:APP_SECRET
+intelx:
+  - HOST:API_KEY
+  - 2.intelx.io:s4324-b98b-41b2-220e8-3320f6a1284d
+```
+
 **API 配置说明：** 详细的 API 配置方法请参考 [subfinder 官方文档](https://docs.projectdiscovery.io/opensource/subfinder/install#post-install-configuration)
 
 默认端口5003 (https), 默认用户名密码admin/arlpass 
