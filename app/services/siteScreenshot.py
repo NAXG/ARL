@@ -28,7 +28,7 @@ class SiteScreenshot(BaseThread):
                           ]
         logger.debug("screenshot {}".format(" ".join(cmd_parameters)))
 
-        utils.exec_system(cmd_parameters)
+        utils.exec_system(cmd_parameters, timeout=90)
 
         self.screenshot_map[site] = file_name
 
