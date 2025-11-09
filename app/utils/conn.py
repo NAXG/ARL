@@ -9,14 +9,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 UA = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
 
 
-proxies = {
-    'https': "http://127.0.0.1:8080",
-    'http': "http://127.0.0.1:8080"
-}
-
-SET_PROXY = False
-
-
 def http_req(url, method='get', **kwargs):
     kwargs.setdefault('verify', False)
     kwargs.setdefault('timeout', (10.1, 30.1))
@@ -32,9 +24,10 @@ def http_req(url, method='get', **kwargs):
     kwargs["stream"] = True
 
     if Config.PROXY_URL:
-        proxies['https'] = Config.PROXY_URL
-        proxies['http'] = Config.PROXY_URL
-        kwargs["proxies"] = proxies
+        kwargs["proxies"] = {
+            'https': Config.PROXY_URL,
+            'http': Config.PROXY_URL
+        }
 
     conn = getattr(requests, method)(url, **kwargs)
     if not kwargs.get('stream'):
