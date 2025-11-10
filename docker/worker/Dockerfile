@@ -6,9 +6,15 @@ RUN dnf install epel-release python3.12  fontconfig wqy-microhei-fonts -y
 
 RUN python3.12 -m ensurepip --default-pip
 
-RUN pip3.12 install pip --upgrade
-
 RUN dnf install nmap -y
+
+RUN pip3.12 install --upgrade pip
+RUN pip3.12 install playwright
+RUN playwright install-deps
+# Install Chromium via Playwright (for screenshots)
+RUN playwright install chromium
+# Install Firefox via dnf (for wappalyzer full mode)
+RUN dnf install firefox -y
 
 RUN dnf install python3.12-devel gcc-c++ -y
 
@@ -17,8 +23,6 @@ RUN dnf install nginx unzip wget -y
 COPY app/ app/
 
 COPY test/ test/
-
-RUN ln -s /code/app/tools/phantomjs  /usr/bin/phantomjs
 
 COPY docker/frontend/ frontend/
 

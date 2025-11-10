@@ -54,24 +54,6 @@ def _normalize_cmd(cmd):
     return shlex.split(cmd_str)
 
 
-def _ensure_phantom_env(cmd_args, kwargs):
-    if not cmd_args:
-        return
-
-    executable = os.path.basename(cmd_args[0])
-    if executable != 'phantomjs':
-        return
-
-    env = kwargs.get('env')
-    if env is None:
-        env = os.environ.copy()
-    else:
-        env = dict(env)
-
-    env['OPENSSL_CONF'] = os.devnull
-    kwargs['env'] = env
-
-
 def load_file(path):
     with open(path, "r+", encoding="utf-8") as f:
         return f.readlines()
@@ -80,8 +62,6 @@ def load_file(path):
 def exec_system(cmd, **kwargs):
     cmd_args = _normalize_cmd(cmd)
     timeout = kwargs.pop('timeout', 4 * 60 * 60)
-
-    _ensure_phantom_env(cmd_args, kwargs)
 
     completed = subprocess.run(cmd_args, timeout=timeout, check=False, close_fds=True, **kwargs)
 
@@ -94,8 +74,6 @@ def check_output(cmd, **kwargs):
 
     if 'stdout' in kwargs:
         raise ValueError('stdout argument not allowed, it will be overridden.')
-
-    _ensure_phantom_env(cmd_args, kwargs)
 
     output = subprocess.run(cmd_args, stdout=subprocess.PIPE, timeout=timeout, check=False,
                **kwargs).stdout

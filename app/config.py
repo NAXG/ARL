@@ -17,10 +17,8 @@ class Config:
     SUBFINDER_BIN = os.path.join(basedir, 'services/dns_query_plugin/subfinder')
     SUBFINDER_CONFIG = os.path.join(basedir, 'services/dns_query_plugin/provider-config.yaml')
     MASSDNS_BIN = os.path.join(basedir, 'tools/massdns')
-    SCREENSHOT_JS = os.path.join(basedir, 'tools/screenshot.js')
     SCREENSHOT_DIR = os.path.join(basedir, 'tmp_screenshot')
     SCREENSHOT_FAIL_IMG = os.path.join(basedir, 'dicts/noscreenshot.jpg')
-    DRIVER_JS = os.path.join(basedir, 'tools/driver.js')
 
     DOMAIN_DICT_TEST = os.path.join(basedir, 'dicts/domain_dict_test.txt')
     DOMAIN_DICT_2W = os.path.join(basedir, 'dicts/domain_2w.txt')

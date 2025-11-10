@@ -70,10 +70,7 @@ EOF
 echo "install dependencies ..."
 cd /opt/
 dnf update -y
-dnf install epel-release -y
-dnf install systemd -y
-dnf install rabbitmq-server -y
-dnf install python3.12 mongodb-org-server mongodb-mongosh python3.12-devel gcc-c++ git nginx fontconfig unzip wget -y
+dnf install epel-release systemd rabbitmq-server python3.12 mongodb-org-server mongodb-mongosh python3.12-devel gcc-c++ git nginx fontconfig unzip wget -y
 
 
 if [ ! -f /usr/local/bin/pip3.12 ]; then
@@ -109,6 +106,20 @@ then
   wget -c https://github.com/naxg/ARL/raw/main/tools/wih/wih_linux_amd64 -O /usr/bin/wih && chmod +x /usr/bin/wih
   wih --version
 fi
+
+if ! command -v geckodriver &> /dev/null
+then
+  echo "install geckodriver ..."
+  wget -c https://github.com/mozilla/geckodriver/releases/download/v0.36.0/geckodriver-v0.36.0-linux64.tar.gz -O geckodriver.tar.gz
+  tar -xzf geckodriver.tar.gz
+  mv geckodriver /usr/local/bin/
+  chmod +x /usr/local/bin/geckodriver
+  rm geckodriver.tar.gz
+fi
+
+# Verify geckodriver installation
+echo "verify geckodriver installation..."
+geckodriver -V
 
 
 echo "start services ..."
@@ -178,11 +189,6 @@ pip install -r requirements.txt
 if [ ! -f app/config.yaml ]; then
   echo "create config.yaml"
   cp app/config.yaml.example  app/config.yaml
-fi
-
-if [ ! -f /usr/bin/phantomjs ]; then
-  echo "install phantomjs"
-  ln -s `pwd`/app/tools/phantomjs  /usr/bin/phantomjs
 fi
 
 if [ ! -f /etc/nginx/conf.d/arl.conf ]; then

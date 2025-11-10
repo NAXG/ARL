@@ -21,3 +21,5 @@ lxml==6.0.2
 pyparsing==3.2.5
 pytest==8.4.2
 python-nmap==0.7.1
+playwright==1.44.0
+wappalyzer==1.0.17
