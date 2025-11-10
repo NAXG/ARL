@@ -161,14 +161,30 @@ if [ ! -f /usr/local/share/ncrack/ncrack-services ]; then
 fi
 
 mkdir -p /data/GeoLite2
-if [ ! -f /data/GeoLite2/GeoLite2-ASN.mmdb ]; then
-  echo "download GeoLite2-ASN.mmdb ..."
-  wget -c https://github.com/naxg/ARL/raw/main/tools/GeoLite2-ASN.mmdb -O /data/GeoLite2/GeoLite2-ASN.mmdb
+
+# 获取最新版本号
+echo "获取最新 GeoLite2 版本..."
+LATEST_TAG=$(curl -s https://api.github.com/repos/P3TERX/GeoLite.mmdb/releases/latest | grep '"tag_name":' | cut -d'"' -f4)
+
+if [ -z "$LATEST_TAG" ]; then
+  echo "⚠️  无法获取最新版本，使用本地版本"
+  LATEST_TAG="2024.01.01"  # fallback
 fi
 
+echo "📅 最新版本: $LATEST_TAG"
+
+# 下载 GeoLite2-ASN.mmdb
+if [ ! -f /data/GeoLite2/GeoLite2-ASN.mmdb ]; then
+  echo "下载 GeoLite2-ASN.mmdb (v$LATEST_TAG) ..."
+  wget -c "https://github.com/P3TERX/GeoLite.mmdb/releases/download/$LATEST_TAG/GeoLite2-ASN.mmdb" \
+    -O /data/GeoLite2/GeoLite2-ASN.mmdb
+fi
+
+# 下载 GeoLite2-City.mmdb
 if [ ! -f /data/GeoLite2/GeoLite2-City.mmdb ]; then
-  echo "download GeoLite2-City.mmdb ..."
-  wget -c https://github.com/naxg/ARL/raw/main/tools/GeoLite2-City.mmdb -O /data/GeoLite2/GeoLite2-City.mmdb
+  echo "下载 GeoLite2-City.mmdb (v$LATEST_TAG) ..."
+  wget -c "https://github.com/P3TERX/GeoLite.mmdb/releases/download/$LATEST_TAG/GeoLite2-City.mmdb" \
+    -O /data/GeoLite2/GeoLite2-City.mmdb
 fi
 
 cd /opt/ARL
