@@ -92,9 +92,16 @@ fi
 
 if ! command -v nuclei &> /dev/null
 then
-  echo "install nuclei"
-  wget -c https://github.com/naxg/ARL/raw/main/tools/nuclei.zip -O nuclei.zip
-  unzip nuclei.zip -d /opt/nuclei/ && mv /opt/nuclei/nuclei /usr/bin/ && rm -rf nuclei.zip /opt/nuclei/
+  echo "install nuclei (latest version)..."
+  # 获取最新版本号
+  LATEST_TAG=$(curl -s https://api.github.com/repos/projectdiscovery/nuclei/releases/latest | grep '"tag_name":' | cut -d'"' -f4)
+  echo "📅 Nuclei latest version: $LATEST_TAG"
+
+  # 下载最新版本
+  wget -c "https://github.com/projectdiscovery/nuclei/releases/download/$LATEST_TAG/nuclei_${LATEST_TAG}_linux_amd64.zip" -O nuclei.zip
+  unzip -q nuclei.zip -d /opt/nuclei/
+  mv /opt/nuclei/nuclei /usr/bin/
+  rm -rf nuclei.zip /opt/nuclei/
   nuclei -ut
 fi
 
