@@ -177,14 +177,12 @@ try:
     # *** 域名爆破并发数 ***
     domain_concurrent = y["ARL"].get("DOMAIN_BRUTE_CONCURRENT")
     if domain_concurrent:
-        int(domain_concurrent)
-        Config.DOMAIN_BRUTE_CONCURRENT = domain_concurrent
+        Config.DOMAIN_BRUTE_CONCURRENT = int(domain_concurrent)
 
     # *** 组合生成的域名爆破并发数 ***
     alt_dns_concurrent = y["ARL"].get("ALT_DNS_CONCURRENT")
     if alt_dns_concurrent:
-        int(alt_dns_concurrent)
-        Config.ALT_DNS_CONCURRENT = alt_dns_concurrent
+        Config.ALT_DNS_CONCURRENT = int(alt_dns_concurrent)
 
     # *** 代理配置 ***
     if y.get("PROXY"):

@@ -15,7 +15,11 @@ from app.services.findVhost import find_vhost
 from app.services.dns_query import run_query_plugin
 from app.services.searchEngines import search_engines
 from app.services import domain_site_update
-from app.helpers.stat import update_domain_prefix_counts_bulk
+from app.helpers.stat import (
+    update_domain_prefix_counts_bulk,
+    extract_domain_prefixes,
+    bulk_update_domain_prefix_counts,
+)
 
 logger = utils.get_logger()
 
@@ -428,6 +432,8 @@ MAX_MAP_COUNT = 35
 
 
 class DomainTask(CommonTask):
+    DOMAIN_PREFIX_STATS_BATCH_SIZE = 1000
+
     def __init__(self, base_domain=None, task_id=None, options=None):
         super().__init__(task_id=task_id)
 
@@ -445,6 +451,10 @@ class DomainTask(CommonTask):
         self.service_info_list = []
         # 用来区分是正常任务还是监控任务
         self.task_tag = "task"
+
+        # 延迟到任务结束再统计域名前缀计数
+        self.defer_domain_prefix_stats = True
+        self._has_new_domains_for_prefix_stats = False
 
         # 用来存放泛解析域名映射的IP
         self._not_found_domain_ips = None
@@ -533,12 +543,57 @@ class DomainTask(CommonTask):
         if domains_to_insert:
             utils.conn_db('domain').insert_many(domains_to_insert)
 
-            # 更新域名前缀统计
-            try:
-                domain_strings = [item["domain"] for item in domains_to_insert]
-                update_domain_prefix_counts_bulk(domain_strings)
-            except Exception as e:
-                logger.error(f"Failed to bulk update domain prefix counts: {e}")
+            self._has_new_domains_for_prefix_stats = True
+
+            if not self.defer_domain_prefix_stats:
+                try:
+                    domain_strings = [item["domain"] for item in domains_to_insert]
+                    update_domain_prefix_counts_bulk(domain_strings)
+                except Exception as e:
+                    logger.error(f"Failed to bulk update domain prefix counts: {e}")
+
+    def _merge_prefix_counts(self, domains, counter):
+        prefixes = extract_domain_prefixes(domains)
+        for prefix in prefixes:
+            counter[prefix] += 1
+
+    def aggregate_domain_prefix_stats(self):
+        if not self.defer_domain_prefix_stats or not self._has_new_domains_for_prefix_stats:
+            return
+
+        prefix_counter = Counter()
+        batch = []
+        cursor = utils.conn_db('domain').find({"task_id": self.task_id}, {"domain": 1})
+
+        try:
+            for item in cursor:
+                domain = item.get("domain")
+                if not isinstance(domain, str):
+                    continue
+
+                batch.append(domain)
+                if len(batch) >= self.DOMAIN_PREFIX_STATS_BATCH_SIZE:
+                    self._merge_prefix_counts(batch, prefix_counter)
+                    batch.clear()
+
+            if batch:
+                self._merge_prefix_counts(batch, prefix_counter)
+
+        except Exception as e:
+            logger.error(f"Failed to gather domain prefix stats for task {self.task_id}: {e}")
+            return
+        finally:
+            self._has_new_domains_for_prefix_stats = False
+
+        if not prefix_counter:
+            logger.debug(f"No domain prefixes collected for task {self.task_id}")
+            return
+
+        logger.info(f"finalizing domain prefix stats for task {self.task_id}, prefixes:{len(prefix_counter)}")
+        try:
+            bulk_update_domain_prefix_counts(prefix_counter)
+        except Exception as e:
+            logger.error(f"Failed to finalize domain prefix stats for task {self.task_id}: {e}")
 
     def domain_brute(self):
         # 调用工具去进行域名爆破，如果存在泛解析，会把包含泛解析的IP的域名给删除
@@ -1105,6 +1160,9 @@ class DomainTask(CommonTask):
 
         # 执行统计和同步操作
         self.common_run()
+
+        # 在任务结束前汇总域名前缀统计
+        self.aggregate_domain_prefix_stats()
 
         self.update_task_field("status", TaskStatus.DONE)
         self.update_task_field("end_time", utils.curr_date())
