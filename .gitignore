@@ -5,3 +5,8 @@ GEMINI.md
 *.mmdb
 /data/GeoLite2/
 
+# Nuclei scanner (auto-downloaded by setup-arl.sh)
+nuclei.zip
+nuclei_*.zip
+/opt/nuclei/
+
