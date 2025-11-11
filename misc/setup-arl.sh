@@ -67,37 +67,30 @@ sslcacert=/etc/pki/tls/certs/ca-bundle.crt
 metadata_expire=300
 EOF
 
-echo "install dependencies ..."
+echo "安装依赖 ..."
 cd /opt/
 dnf update -y
-dnf install epel-release systemd rabbitmq-server python3.12 mongodb-org-server mongodb-mongosh python3.12-devel gcc-c++ git nginx fontconfig unzip wget nss nspr atk at-spi2-atk cups-libs libdrm at-spi2-core libX11 libXcomposite libXdamage libXext libXfixes libXrandr libgbm libxcb libxkbcommon pango cairo alsa-lib -y
+dnf install epel-release systemd rabbitmq-server python3.12 mongodb-org-server mongodb-mongosh python3.12-devel gcc-c++ git nginx fontconfig unzip wget nss nspr atk at-spi2-atk cups-libs libdrm at-spi2-core libX11 libXcomposite libXdamage libXext libXfixes libXrandr libgbm libxcb libxkbcommon pango cairo alsa-lib firefox nmap -y
 
 
 if [ ! -f /usr/local/bin/pip3.12 ]; then
-  echo "install  pip3.12"
+  echo "安装 pip3.12"
   python3.12 -m venv /opt/venv
   source /opt/venv/bin/activate
   python3.12 -m ensurepip --default-pip
   python3.12 -m pip install --upgrade pip
-  echo "check virtualenv pip version ..."
+  echo "检查 virtualenv pip 版本 ..."
   pip --version
 fi
 
-if ! command -v nmap &> /dev/null
-then
-    echo "install nmap ..."
-    dnf install nmap -y
-fi
-
-
 if ! command -v nuclei &> /dev/null
 then
-  echo "install nuclei (latest version)..."
+  echo "安装 nuclei (最新版本)..."
   # 获取最新版本号
   LATEST_TAG=$(curl -s https://api.github.com/repos/projectdiscovery/nuclei/releases/latest | grep '"tag_name":' | cut -d'"' -f4)
   # 去掉版本号中的 "v" 前缀
   LATEST_VERSION=${LATEST_TAG#v}
-  echo "📅 Nuclei latest version: $LATEST_TAG"
+  echo "Nuclei 最新版本: $LATEST_TAG"
 
   # 下载最新版本
   wget -c "https://github.com/projectdiscovery/nuclei/releases/download/$LATEST_TAG/nuclei_${LATEST_VERSION}_linux_amd64.zip" -O nuclei.zip
@@ -110,28 +103,32 @@ fi
 
 if ! command -v wih &> /dev/null
 then
-  echo "install wih ..."
+  echo "安装 wih ..."
   ## 安装 WIH
   wget -c https://github.com/naxg/ARL/raw/main/tools/wih/wih_linux_amd64 -O /usr/bin/wih && chmod +x /usr/bin/wih
   wih --version
 fi
 
+# 验证 Firefox 安装
+echo "验证 Firefox 安装 ..."
+firefox --version
+
 if ! command -v geckodriver &> /dev/null
 then
-  echo "install geckodriver ..."
+  echo "安装 geckodriver ..."
   wget -c https://github.com/mozilla/geckodriver/releases/download/v0.36.0/geckodriver-v0.36.0-linux64.tar.gz -O geckodriver.tar.gz
   tar -xzf geckodriver.tar.gz
   mv geckodriver /usr/local/bin/
   chmod +x /usr/local/bin/geckodriver
   rm geckodriver.tar.gz
 
-  # Verify geckodriver installation
-  echo "verify geckodriver installation..."
+  # 验证 geckodriver 安装
+  echo "验证 geckodriver 安装 ..."
   geckodriver -V
 fi
 
 
-echo "start services ..."
+echo "启动服务 ..."
 mkdir -p /etc/rabbitmq && \
 echo 'vm_memory_high_watermark.relative = 0.6' >> /etc/rabbitmq/rabbitmq.conf
 
@@ -142,45 +139,45 @@ systemctl restart rabbitmq-server
 
 cd /opt
 if [ ! -d ARL ]; then
-  echo "git clone ARL proj"
+  echo "克隆 ARL 项目 ..."
   git clone -b main --depth 1 https://github.com/naxg/ARL
 fi
 
 if [ ! -d "ARL-NPoC" ]; then
-  echo "move ARL-NPoC proj"
+  echo "移动 ARL-NPoC 项目 ..."
   mv ARL/tools/ARL-NPoC ARL-NPoC
 fi
 
 cd /opt/ARL-NPoC
-echo "install poc requirements ..."
+echo "安装 PoC 依赖 ..."
 pip install -r requirements.txt
 pip install -e .
 cd ../
 
 if [ ! -f /usr/local/bin/ncrack ]; then
-  echo "Download ncrack ..."
+  echo "下载 ncrack ..."
   if wget -c https://github.com/naxg/ARL/raw/main/tools/ncrack -O /usr/local/bin/ncrack; then
     chmod +x /usr/local/bin/ncrack
-    echo "✅ ncrack 下载成功"
+    echo "ncrack 下载成功"
   else
-    echo "❌ ncrack 下载失败"
+    echo "ncrack 下载失败"
   fi
 fi
 
 mkdir -p /usr/local/share/ncrack
 if [ ! -f /usr/local/share/ncrack/ncrack-services ]; then
-  echo "Download ncrack-services ..."
+  echo "下载 ncrack-services ..."
   if wget -c https://github.com/naxg/ARL/raw/main/tools/ncrack-services -O /usr/local/share/ncrack/ncrack-services; then
-    echo "✅ ncrack-services 下载成功"
+    echo "ncrack-services 下载成功"
   else
-    echo "❌ ncrack-services 下载失败"
+    echo "ncrack-services 下载失败"
   fi
 fi
 
 mkdir -p /data/GeoLite2
 
 # 获取最新版本号
-echo "获取最新 GeoLite2 版本..."
+echo "获取最新 GeoLite2 版本 ..."
 LATEST_TAG=$(curl -s https://api.github.com/repos/P3TERX/GeoLite.mmdb/releases/latest | grep '"tag_name":' | cut -d'"' -f4)
 
 if [ -z "$LATEST_TAG" ]; then
@@ -215,40 +212,40 @@ fi
 cd /opt/ARL
 
 if [ ! -f rabbitmq_user ]; then
-  echo "add rabbitmq user"
+  echo "添加 rabbitmq 用户"
   rabbitmqctl add_user arl arlpassword
   rabbitmqctl add_vhost arlv2host
   rabbitmqctl set_user_tags arl arltag
   rabbitmqctl set_permissions -p arlv2host arl ".*" ".*" ".*"
-  echo "init arl user"
+  echo "初始化 arl 用户"
   mongosh 127.0.0.1:27017/arl docker/mongo-init.js
 fi
 
-echo "install arl requirements ..."
+echo "安装 arl 依赖 ..."
 pip install -r requirements.txt
 
 # 检查 playwright 是否安装成功
 if python3 -m playwright --version &> /dev/null; then
-  echo "install playwright browsers ..."
+  echo "安装 playwright 浏览器 ..."
   playwright install chromium
 else
   echo "⚠️ playwright not found, skipping browser installation"
 fi
 
 if [ ! -f app/config.yaml ]; then
-  echo "create config.yaml"
+  echo "创建 config.yaml"
   cp app/config.yaml.example  app/config.yaml
 fi
 
 if [ ! -f /etc/nginx/conf.d/arl.conf ]; then
-  echo "copy arl.conf"
+  echo "复制 arl.conf"
   cp misc/arl.conf /etc/nginx/conf.d
 fi
 
 
 
 if [ ! -f /etc/ssl/certs/dhparam.pem ]; then
-  echo "download dhparam.pem"
+  echo "下载 dhparam.pem"
   curl https://ssl-config.mozilla.org/ffdhe2048.txt > /etc/ssl/certs/dhparam.pem
 fi
 
@@ -257,35 +254,35 @@ fi
 
 cd /opt/ARL/
 
-echo "gen cert ..."
+echo "生成证书 ..."
 chmod +x docker/worker/gen_crt.sh
 ./docker/worker/gen_crt.sh
 
 
 if [ ! -f /etc/systemd/system/arl-web.service ]; then
-  echo  "copy arl-web.service"
+  echo  "复制 arl-web.service"
   cp misc/arl-web.service /etc/systemd/system/
 fi
 
 if [ ! -f /etc/systemd/system/arl-worker.service ]; then
-  echo  "copy arl-worker.service"
+  echo  "复制 arl-worker.service"
   cp misc/arl-worker.service /etc/systemd/system/
 fi
 
 
 if [ ! -f /etc/systemd/system/arl-worker-github.service ]; then
-  echo  "copy arl-worker-github.service"
+  echo  "复制 arl-worker-github.service"
   cp misc/arl-worker-github.service /etc/systemd/system/
 fi
 
 if [ ! -f /etc/systemd/system/arl-scheduler.service ]; then
-  echo  "copy arl-scheduler.service"
+  echo  "复制 arl-scheduler.service"
   cp misc/arl-scheduler.service /etc/systemd/system/
 fi
 
 chmod +x /opt/ARL/app/tools/*
 
-echo "start arl services ..."
+echo "启动 arl 服务 ..."
 
 systemctl enable arl-web
 systemctl restart arl-web
@@ -301,4 +298,4 @@ systemctl restart nginx
 #python tools/add_finger.py
 #python tools/add_finger_ehole.py
 
-echo "install done"
+echo "安装完成"
