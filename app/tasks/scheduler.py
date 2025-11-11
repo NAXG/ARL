@@ -51,18 +51,19 @@ def wrap_domain_executors(base_domain=None, job_id=None, scope_id=None, options=
             'arl_search': True,
             'port_scan_type': 'test',
             'port_scan': True,
-            'service_detection': False,
+            'service_detection': True,  # 默认开启服务识别
             'service_brute': False,
             'os_detection': False,
             'site_identify': True,  # 默认开启站点识别
-            'site_capture': False,
+            'site_capture': True,  # 默认开启站点截图
             'file_leak': False,
             'site_spider': False,
-            'search_engines': False,
+            'search_engines': True,  # 默认开启搜索引擎调用
             'ssl_cert': False,
             'fofa_search': False,
             'dns_query_plugin': False,
             'web_info_hunter': False,
+            'findvhost': True,  # 默认开启 Host 碰撞
             'scope_id': scope_id
         },
         'celery_id': celery_id
@@ -223,14 +224,16 @@ class IPExecutor(IPTask):
             'options': {
                 "port_scan_type": "test",
                 "port_scan": True,
-                "service_detection": False,
+                "service_detection": True,  # 默认开启服务识别
                 "os_detection": False,
                 "site_identify": True,  # 默认开启站点识别
-                "site_capture": False,
+                "site_capture": True,  # 默认开启站点截图
                 "file_leak": False,
                 "site_spider": False,
+                "search_engines": True,  # 默认开启搜索引擎调用
                 "ssl_cert": False,
                 'web_info_hunter': False,
+                'findvhost': True,  # 默认开启 Host 碰撞
                 'scope_id': self.scope_id
             },
             'celery_id': celery_id
