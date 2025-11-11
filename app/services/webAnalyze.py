@@ -17,7 +17,7 @@ class WebAnalyze(BaseThread):
             # Full scan requires Firefox browser for better detection
             # The analyze function returns a dictionary where keys are URLs
             # and values are dictionaries of detected technologies.
-            results = analyze(url=site)
+            results = analyze(url=site,threads=2,scan_type="balanced")
 
             apps = []
             # The result format is {url: {app_name: {version, confidence, categories, website}}}

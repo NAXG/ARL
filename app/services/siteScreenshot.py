@@ -79,7 +79,7 @@ class BrowserPool:
 
 
 class SiteScreenshot:
-    def __init__(self, sites, concurrency=10, capture_dir="./", pool_size=5):
+    def __init__(self, sites, concurrency=6, capture_dir="./", pool_size=3):
         self.sites = sites
         self.concurrency = concurrency
         self.capture_dir = capture_dir
@@ -211,7 +211,7 @@ class SiteScreenshot:
         logger.info(f"end screen shot elapse {elapse}")
 
 
-def site_screenshot(sites, concurrency=10, capture_dir="./", pool_size=5):
+def site_screenshot(sites, concurrency=6, capture_dir="./", pool_size=3):
     """同步接口，包装异步实现
     Args:
         sites: 要截图的站点列表
