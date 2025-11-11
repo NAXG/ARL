@@ -69,12 +69,12 @@ metadata_expire=300
 EOF
 
 echo "安装依赖 ..."
-cd /opt/
-dnf update -y
+dnf makecache
 dnf install epel-release systemd rabbitmq-server python3.12 mongodb-org-server mongodb-mongosh python3.12-devel gcc-c++ git nginx fontconfig unzip wget nss nspr atk at-spi2-atk cups-libs libdrm at-spi2-core libX11 libXcomposite libXdamage libXext libXfixes libXrandr libgbm libxcb libxkbcommon pango cairo alsa-lib firefox nmap -y
 
 
 if [ ! -f /usr/local/bin/pip3.12 ]; then
+  cd /opt/
   echo "安装 pip3.12"
   python3.12 -m venv /opt/venv
   source /opt/venv/bin/activate
@@ -138,7 +138,6 @@ systemctl restart mongod
 systemctl enable rabbitmq-server
 systemctl restart rabbitmq-server
 
-cd /opt
 if [ ! -d ARL ]; then
   echo "克隆 ARL 项目 ..."
   git clone -b main --depth 1 https://github.com/naxg/ARL
