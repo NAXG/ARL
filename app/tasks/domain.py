@@ -29,7 +29,7 @@ logger = utils.get_logger()
 
 
 class DomainBrute:
-    def __init__(self, base_domain, word_file=Config.DOMAIN_DICT_2W, wildcard_domain_ip=None):
+    def __init__(self, base_domain, word_file=Config.BIG_DOMAIN_DICT, wildcard_domain_ip=None):
         if wildcard_domain_ip is None:
             wildcard_domain_ip = []
         self.base_domain = base_domain
@@ -377,7 +377,7 @@ class AltDNS:
         return out
 
 
-def domain_brute(base_domain, word_file=Config.DOMAIN_DICT_2W, wildcard_domain_ip=None):
+def domain_brute(base_domain, word_file=Config.BIG_DOMAIN_DICT, wildcard_domain_ip=None):
     if wildcard_domain_ip is None:
         wildcard_domain_ip = []
 

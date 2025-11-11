@@ -21,7 +21,7 @@ class Config:
     SCREENSHOT_FAIL_IMG = os.path.join(basedir, 'dicts/noscreenshot.jpg')
 
     DOMAIN_DICT_TEST = os.path.join(basedir, 'dicts/domain_dict_test.txt')
-    DOMAIN_DICT_2W = os.path.join(basedir, 'dicts/domain_2w.txt')
+    BIG_DOMAIN_DICT = os.path.join(basedir, 'dicts/TOP_Subdomains.txt')
     DNS_SERVER = os.path.join(basedir, 'dicts/dnsserver.txt')
 
     CDN_JSON_PATH = os.path.join(basedir, 'dicts/cdn_info.json')
@@ -138,7 +138,7 @@ try:
     if y["ARL"].get("DOMAIN_DICT"):
         domain_dict = y["ARL"]["DOMAIN_DICT"]
         if os.path.isfile(domain_dict):
-            Config.DOMAIN_DICT_2W = domain_dict
+            Config.BIG_DOMAIN_DICT = domain_dict
         else:
             print(f"Warning {domain_dict} is not file")
 
