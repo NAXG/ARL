@@ -77,8 +77,8 @@ if [ ! -f /usr/local/bin/pip3.12 ]; then
   echo "install  pip3.12"
   python3.12 -m venv /opt/venv
   source /opt/venv/bin/activate
-  ensurepip --default-pip
-  pip install --upgrade pip
+  python3.12 -m ensurepip --default-pip
+  python3.12 -m pip install --upgrade pip
   echo "check virtualenv pip version ..."
   pip --version
 fi
