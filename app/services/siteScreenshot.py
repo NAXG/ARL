@@ -6,6 +6,14 @@ from playwright.async_api import async_playwright
 
 logger = utils.get_logger()
 
+# 浏览器启动参数常量（避免重复）
+BROWSER_ARGS = [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-gpu'
+]
+
 
 class BrowserPool:
     """浏览器池管理器 - 复用浏览器实例以提升性能"""
@@ -25,12 +33,7 @@ class BrowserPool:
                 for _ in range(self.pool_size):
                     browser = await self.playwright.chromium.launch(
                         headless=True,
-                        args=[
-                            '--no-sandbox',
-                            '--disable-setuid-sandbox',
-                            '--disable-dev-shm-usage',
-                            '--disable-gpu'
-                        ]
+                        args=BROWSER_ARGS
                     )
                     self.browsers.append(browser)
 
@@ -41,12 +44,7 @@ class BrowserPool:
                 # 如果池为空，创建新的浏览器实例
                 return await self.playwright.chromium.launch(
                     headless=True,
-                    args=[
-                        '--no-sandbox',
-                        '--disable-setuid-sandbox',
-                        '--disable-dev-shm-usage',
-                        '--disable-gpu'
-                    ]
+                    args=BROWSER_ARGS
                 )
             return self.browsers.pop()
 
@@ -91,20 +89,11 @@ class SiteScreenshot:
         # 截图配置参数 - 直接在代码中配置
         self.screenshot_config = {
             'full_page': False,  # 固定大小截图，不使用全页面（与PhantomJS一致）
-            'quality': 70,  # JPEG 质量，范围 0-100，数值越大质量越高文件越大
+            'quality': 60,  # JPEG 质量，范围 0-100，数值越大质量越高文件越大（默认60节省空间）
             'viewport_width': 1280,  # 视口宽度（固定尺寸）
             'viewport_height': 1024,  # 视口高度（固定尺寸）
-            'max_file_size_mb': 2,  # 最大文件大小（MB），超过则自动降低质量
             'timeout': 40000  # 截图超时时间（毫秒）- 40秒
         }
-
-    def check_file_size(self, file_path):
-        """检查文件大小，如果超过限制返回True"""
-        if not os.path.exists(file_path):
-            return True
-        file_size = os.path.getsize(file_path)
-        max_size = self.screenshot_config['max_file_size_mb'] * 1024 * 1024
-        return file_size > max_size
 
     async def work(self, site):
         """异步截图任务 - 使用浏览器池复用实例"""
@@ -123,54 +112,26 @@ class SiteScreenshot:
                     java_script_enabled=True
                 )
 
-                # 设置视口大小（固定尺寸，与PhantomJS一致）
-                viewport_width = self.screenshot_config['viewport_width']
-                viewport_height = self.screenshot_config['viewport_height']
-                await page.set_viewport_size({"width": viewport_width, "height": viewport_height})
-
-                # 使用配置中的超时时间
-                timeout_ms = self.screenshot_config['timeout']
+                # 设置视口大小（直接使用配置值）
+                await page.set_viewport_size({
+                    "width": self.screenshot_config['viewport_width'],
+                    "height": self.screenshot_config['viewport_height']
+                })
 
                 # 设置用户代理，避免被反爬
                 await page.set_extra_http_headers({
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
                 })
 
-                # 3秒内完成截图，无论是否加载完成
-                try:
-                    # 尝试访问页面并截图，最多等待3秒
-                    await asyncio.wait_for(
-                        self._screenshot_with_load(page, file_name, site),
-                        timeout=3.0  # 3秒超时
-                    )
-                except asyncio.TimeoutError:
-                    # 3秒内未完成，强制截图
-                    logger.warning(f"Timeout after 3s, force screenshot for {site}")
-                    await page.screenshot(
-                        path=file_name,
-                        full_page=False,
-                        type='jpeg',
-                        quality=self.screenshot_config['quality'],
-                        timeout=5000  # 截图操作本身最多5秒
-                    )
+                # 直接执行截图（DOM完成+50ms等待后立即截图）
+                await self._screenshot_with_load(page, file_name, site)
 
-                # 检查文件大小，如果超过限制则降低质量重新截图
-                if self.check_file_size(file_name):
-                    logger.info(f"File too large, reducing quality for {site}")
-                    await page.screenshot(
-                        path=file_name,
-                        full_page=False,
-                        type='jpeg',
-                        quality=60,  # 降低质量到60
-                        timeout=timeout_ms
-                    )
-
-                # 最终检查：如果文件存在且大小合理，则记录
-                if os.path.exists(file_name) and not self.check_file_size(file_name):
+                # 最终检查：如果文件存在则记录（默认质量60一般不会超过2MB限制）
+                if os.path.exists(file_name):
                     self.screenshot_map[site] = file_name
                     logger.debug(f"screenshot successful for {site}")
                 else:
-                    logger.warning(f"screenshot too large or failed for {site}")
+                    logger.warning(f"screenshot failed for {site}")
 
             except Exception as e:
                 logger.warning(f"screenshot failed for {site}: {e}")
@@ -186,22 +147,29 @@ class SiteScreenshot:
                     await self.browser_pool.release(browser)
 
     async def _screenshot_with_load(self, page, file_name, site):
-        """内部方法：尝试加载页面并截图"""
-        # 尝试访问页面（不等待domcontentloaded，尽快截图）
+        """内部方法：等待DOM完成后立即截图"""
         try:
-            await page.goto(site, wait_until='commit', timeout=2500)
-            # 等待一小段时间让页面开始渲染
-            await asyncio.sleep(0.5)
-        except Exception as e:
-            logger.debug(f"Page load incomplete for {site}: {e}")
+            # 等待DOM内容加载完成，然后立即截图
+            await page.goto(site, wait_until='domcontentloaded', timeout=2500)
 
-        # 截图
-        await page.screenshot(
+            # DOM解析完成后立即截图，不额外等待
+            # 确保页面基本的JavaScript执行完成
+            await asyncio.sleep(0.05)  # 仅等待50ms确保JS开始执行
+        except Exception as e:
+            logger.debug(f"DOM load timeout for {site}, force screenshot: {e}")
+
+        # DOM完成或超时后立即截图
+        await self._take_screenshot(page, file_name)
+
+    def _take_screenshot(self, page, file_name, quality=None):
+        """内部方法：执行截图操作（避免重复代码）"""
+        screenshot_config = self.screenshot_config
+        return page.screenshot(
             path=file_name,
-            full_page=False,
+            full_page=screenshot_config['full_page'],
             type='jpeg',
-            quality=self.screenshot_config['quality'],
-            timeout=5000
+            quality=quality if quality is not None else screenshot_config['quality'],
+            timeout=5000  # 截图操作超时
         )
 
     def gen_filename(self, site):
