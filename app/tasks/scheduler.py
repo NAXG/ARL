@@ -54,7 +54,7 @@ def wrap_domain_executors(base_domain=None, job_id=None, scope_id=None, options=
             'service_detection': False,
             'service_brute': False,
             'os_detection': False,
-            'site_identify': False,
+            'site_identify': True,  # 默认开启站点识别
             'site_capture': False,
             'file_leak': False,
             'site_spider': False,
@@ -225,7 +225,7 @@ class IPExecutor(IPTask):
                 "port_scan": True,
                 "service_detection": False,
                 "os_detection": False,
-                "site_identify": False,
+                "site_identify": True,  # 默认开启站点识别
                 "site_capture": False,
                 "file_leak": False,
                 "site_spider": False,

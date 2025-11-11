@@ -17,13 +17,13 @@ domain_monitor_options = {
     'port_scan_type': 'test',
     'port_scan': True,
     'dns_query_plugin': True,
-    'site_identify': False
+    'site_identify': True  # 默认开启站点识别
 }
 
 ip_monitor_options = {
     'port_scan_type': 'test',
     'port_scan': True,
-    'site_identify': False
+    'site_identify': True  # 默认开启站点识别
 }
 
 
