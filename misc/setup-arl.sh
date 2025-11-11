@@ -209,6 +209,10 @@ fi
 echo "install arl requirements ..."
 pip install -r requirements.txt
 
+echo "install playwright browsers ..."
+playwright install-deps
+playwright install chromium
+
 if [ ! -f app/config.yaml ]; then
   echo "create config.yaml"
   cp app/config.yaml.example  app/config.yaml
