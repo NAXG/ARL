@@ -230,8 +230,6 @@ pip install -r requirements.txt
 # 检查 playwright 是否安装成功
 if python3 -m playwright --version &> /dev/null; then
   echo "install playwright browsers ..."
-  # 注意：在Rocky Linux中，系统依赖已通过dnf安装，只需安装chromium
-  # 如果是Debian/Ubuntu系统，可手动运行: playwright install-deps
   playwright install chromium
 else
   echo "⚠️ playwright not found, skipping browser installation"
