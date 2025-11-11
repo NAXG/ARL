@@ -145,7 +145,12 @@ class WebSiteFetch:
     def site_screenshot(self):
         # ***站点截图***
         capture_save_dir = Config.SCREENSHOT_DIR + "/" + self.task_id
-        services.site_screenshot(self.available_sites, concurrency=6, capture_dir=capture_save_dir)
+        services.site_screenshot(
+            self.available_sites,
+            concurrency=3,
+            capture_dir=capture_save_dir,
+            pool_size=1
+        )
 
     def site_spider(self):
         # *** 执行静态爬虫

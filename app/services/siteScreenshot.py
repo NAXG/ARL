@@ -95,7 +95,7 @@ class SiteScreenshot:
             'viewport_width': 1280,  # 视口宽度（固定尺寸）
             'viewport_height': 1024,  # 视口高度（固定尺寸）
             'max_file_size_mb': 2,  # 最大文件大小（MB），超过则自动降低质量
-            'timeout': 90000  # 截图超时时间（毫秒）
+            'timeout': 40000  # 截图超时时间（毫秒）- 40秒
         }
 
     def check_file_size(self, file_path):
@@ -136,20 +136,23 @@ class SiteScreenshot:
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
                 })
 
-                # 访问页面
-                await page.goto(site, wait_until='domcontentloaded', timeout=timeout_ms)
-
-                # 等待页面加载完成（额外等待500ms确保动态内容加载）
-                await asyncio.sleep(0.5)
-
-                # 固定大小截图（非全页面）
-                await page.screenshot(
-                    path=file_name,
-                    full_page=False,  # 固定大小截图
-                    type='jpeg',
-                    quality=self.screenshot_config['quality'],
-                    timeout=timeout_ms
-                )
+                # 3秒内完成截图，无论是否加载完成
+                try:
+                    # 尝试访问页面并截图，最多等待3秒
+                    await asyncio.wait_for(
+                        self._screenshot_with_load(page, file_name, site),
+                        timeout=3.0  # 3秒超时
+                    )
+                except asyncio.TimeoutError:
+                    # 3秒内未完成，强制截图
+                    logger.warning(f"Timeout after 3s, force screenshot for {site}")
+                    await page.screenshot(
+                        path=file_name,
+                        full_page=False,
+                        type='jpeg',
+                        quality=self.screenshot_config['quality'],
+                        timeout=5000  # 截图操作本身最多5秒
+                    )
 
                 # 检查文件大小，如果超过限制则降低质量重新截图
                 if self.check_file_size(file_name):
@@ -182,6 +185,25 @@ class SiteScreenshot:
                     # 归还浏览器到池中，而不是关闭
                     await self.browser_pool.release(browser)
 
+    async def _screenshot_with_load(self, page, file_name, site):
+        """内部方法：尝试加载页面并截图"""
+        # 尝试访问页面（不等待domcontentloaded，尽快截图）
+        try:
+            await page.goto(site, wait_until='commit', timeout=2500)
+            # 等待一小段时间让页面开始渲染
+            await asyncio.sleep(0.5)
+        except Exception as e:
+            logger.debug(f"Page load incomplete for {site}: {e}")
+
+        # 截图
+        await page.screenshot(
+            path=file_name,
+            full_page=False,
+            type='jpeg',
+            quality=self.screenshot_config['quality'],
+            timeout=5000
+        )
+
     def gen_filename(self, site):
         filename = site.replace('://', '_')
         return re.sub(r'[^\w\-_\. ]', '_', filename)
@@ -211,7 +233,7 @@ class SiteScreenshot:
         logger.info(f"end screen shot elapse {elapse}")
 
 
-def site_screenshot(sites, concurrency=6, capture_dir="./", pool_size=3):
+def site_screenshot(sites, concurrency=3, capture_dir="./", pool_size=1):
     """同步接口，包装异步实现
     Args:
         sites: 要截图的站点列表
