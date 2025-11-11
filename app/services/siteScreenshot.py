@@ -1,6 +1,8 @@
 import os
 import re
 import time
+import asyncio
+import concurrent.futures
 from app import utils
 from .baseThread import BaseThread
 from playwright.sync_api import sync_playwright
@@ -89,20 +91,33 @@ class SiteScreenshot(BaseThread):
         t1 = time.time()
         logger.info(f"start screen shot {len(self.targets)}")
 
-        # 在 run() 中启动资源，确保能正确关闭
-        # Use Chromium for faster screenshot (more performant)
-        self.playwright = sync_playwright().start()
-        self.browser = self.playwright.chromium.launch(headless=True)
-        os.makedirs(self.capture_dir, 0o777, True)
+        # 使用线程池运行 Playwright 同步 API，避免与 asyncio 事件循环冲突
+        def _run_with_thread():
+            # 在 run() 中启动资源，确保能正确关闭
+            # Use Chromium for faster screenshot (more performant)
+            self.playwright = sync_playwright().start()
+            self.browser = self.playwright.chromium.launch(headless=True)
+            os.makedirs(self.capture_dir, 0o777, True)
 
+            try:
+                self._run()
+            finally:
+                # 确保资源被正确释放
+                if self.browser:
+                    self.browser.close()
+                if self.playwright:
+                    self.playwright.stop()
+
+        # 检查是否在事件循环中
         try:
-            self._run()
-        finally:
-            # 确保资源被正确释放
-            if self.browser:
-                self.browser.close()
-            if self.playwright:
-                self.playwright.stop()
+            loop = asyncio.get_running_loop()
+            # 在事件循环中，使用线程池执行
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_run_with_thread)
+                future.result()
+        except RuntimeError:
+            # 不在事件循环中，直接执行
+            _run_with_thread()
 
         elapse = time.time() - t1
         logger.info(f"end screen shot elapse {elapse}")

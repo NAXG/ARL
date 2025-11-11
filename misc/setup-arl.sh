@@ -70,7 +70,7 @@ EOF
 echo "install dependencies ..."
 cd /opt/
 dnf update -y
-dnf install epel-release systemd rabbitmq-server python3.12 mongodb-org-server mongodb-mongosh python3.12-devel gcc-c++ git nginx fontconfig unzip wget -y
+dnf install epel-release systemd rabbitmq-server python3.12 mongodb-org-server mongodb-mongosh python3.12-devel gcc-c++ git nginx fontconfig unzip wget nss nspr atk at-spi2-atk cups-libs libdrm at-spi2-core libX11 libXcomposite libXdamage libXext libXfixes libXrandr libgbm libxcb libxkbcommon pango cairo alsa-lib -y
 
 
 if [ ! -f /usr/local/bin/pip3.12 ]; then
