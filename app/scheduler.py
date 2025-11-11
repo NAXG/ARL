@@ -17,21 +17,21 @@ domain_monitor_options = {
     'port_scan_type': 'test',
     'port_scan': True,
     'dns_query_plugin': True,
-    'site_identify': True,  # 默认开启站点识别
-    'search_engines': True,  # 默认开启搜索引擎调用
-    'site_capture': True,  # 默认开启站点截图
-    'service_detection': True,  # 默认开启服务识别
-    'findvhost': True  # 默认开启 Host 碰撞
+    'site_identify': False,  # 站点识别
+    'search_engines': False,  # 搜索引擎调用
+    'site_capture': False,  # 站点截图
+    'service_detection': False,  # 服务识别
+    'findvhost': False  # Host 碰撞
 }
 
 ip_monitor_options = {
     'port_scan_type': 'test',
     'port_scan': True,
-    'site_identify': True,  # 默认开启站点识别
-    'search_engines': True,  # 默认开启搜索引擎调用
-    'site_capture': True,  # 默认开启站点截图
-    'service_detection': True,  # 默认开启服务识别
-    'findvhost': True  # 默认开启 Host 碰撞
+    'site_identify': False,  # 站点识别
+    'search_engines': False,  # 搜索引擎调用
+    'site_capture': False,  # 站点截图
+    'service_detection': False,  # 服务识别
+    'findvhost': False  # Host 碰撞
 }
 
 
