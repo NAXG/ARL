@@ -130,8 +130,10 @@ fi
 
 
 echo "启动服务 ..."
-mkdir -p /etc/rabbitmq && \
-echo 'vm_memory_high_watermark.relative = 0.6' >> /etc/rabbitmq/rabbitmq.conf
+mkdir -p /etc/rabbitmq
+# 幂等追加 RabbitMQ 配置：内存水位与消费者超时
+grep -q '^vm_memory_high_watermark\.relative' /etc/rabbitmq/rabbitmq.conf 2>/dev/null || echo 'vm_memory_high_watermark.relative = 0.6' >> /etc/rabbitmq/rabbitmq.conf
+grep -q '^consumer_timeout' /etc/rabbitmq/rabbitmq.conf 2>/dev/null || echo 'consumer_timeout = 14400000' >> /etc/rabbitmq/rabbitmq.conf
 
 systemctl enable mongod
 systemctl restart mongod
