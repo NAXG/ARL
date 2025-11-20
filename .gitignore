@@ -10,4 +10,4 @@ CLAUDE.md
 nuclei.zip
 nuclei_*.zip
 /opt/nuclei/
-
+__pycache__

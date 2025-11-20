@@ -82,7 +82,7 @@ class GithubResult:
             index += 1
 
         after_lines = lines[index:index + max_len]
-        return "{}\n{}".format("\n".join(before_lines), "\n".join(after_lines))
+        return f"{'\n'.join(before_lines)}\n{'\n'.join(after_lines)}"
 
     def to_dict(self):
         item = {
@@ -107,7 +107,7 @@ def github_search_code(query, order="desc", sort="indexed", per_page=100, page=1
     }
 
     data = github_client(url, params=params)
-    logger.info("search {} count {}".format(query, data["total_count"]))
+    logger.info(f"search {query} count {data['total_count']}")
     ret_list = [GithubResult(item=item) for item in data["items"]]
 
     total_count = data["total_count"]

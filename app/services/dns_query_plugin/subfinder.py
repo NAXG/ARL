@@ -29,7 +29,7 @@ class Query(DNSQueryBase):
             "-o", temp_path
         ]
 
-        self.logger.debug("Running subfinder command: {}".format(" ".join(command)))
+        self.logger.debug(f"Running subfinder command: {' '.join(command)}")
 
         try:
             process = subprocess.Popen(

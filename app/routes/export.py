@@ -171,7 +171,7 @@ class SaveTask:
             for port_info in item["port_info"]:
                 row = []
                 row.append(item["ip"])
-                row.append("{}".format(port_info["port_id"]))
+                row.append(f"{port_info['port_id']}")
                 row.append(port_info["service_name"])
                 row.append(port_info.get("product", ""))
                 row.append(port_info.get("version", ""))
@@ -198,8 +198,7 @@ class SaveTask:
                 row.append(" \r\n".join(port_ids))
                 row.append(len(item["port_info"]))
                 if "country_name" in item["geo_city"]:
-                    row.append("{}/{}".format(item["geo_city"]["country_name"],
-                                              item["geo_city"]["region_name"]))
+                    row.append(f"{item['geo_city']['country_name']}/{item['geo_city']['region_name']}")
                     row.append(item["geo_asn"].get("organization", ""))
                 else:
                     row.append("")
@@ -230,8 +229,7 @@ class SaveTask:
 
                 row.append(len(item["port_info"]))
                 if "country_name" in item["geo_city"]:
-                    row.append("{}/{}".format(item["geo_city"]["country_name"],
-                                              item["geo_city"]["region_name"]))
+                    row.append(f"{item['geo_city']['country_name']}/{item['geo_city']['region_name']}")
                     row.append(item["geo_asn"].get("organization", ""))
                 else:
                     row.append("")

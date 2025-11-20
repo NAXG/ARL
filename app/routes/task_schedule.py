@@ -79,7 +79,7 @@ class ARLTaskScheduleResult(ARLResource):
                 if not ip_list and not domain_list:
                     return utils.build_ret(ErrorMsg.TaskTargetIsEmpty, {"target": target})
 
-                target = "{} {}".format(" ".join(ip_list), " ".join(domain_list))
+                target = f"{' '.join(ip_list)} {' '.join(domain_list)}"
 
             # 风险巡航任务, 目标可以是URL
             if task_tag == TaskTag.RISK_CRUISING:

@@ -85,7 +85,7 @@ class ARLAssetSite(ARLResource):
         if not_in_scope_sites:
             return utils.build_ret(ErrorMsg.TaskTargetNotInScope, {"not_in_scope_sites": site})
 
-        name = "添加站点-{}".format(scope_data["name"])
+        name = f"添加站点-{scope_data['name']}"
 
         options = {
             'site_identify': False,

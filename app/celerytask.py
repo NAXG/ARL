@@ -68,8 +68,7 @@ def run_task(options):
     start_time = time.time()
     # 这里监控任务 task_id 和 target 是空的
     logger.info(f"run_task action:{action} time: {start_time}")
-    logger.info("name:{}, target:{}, task_id:{}".format(
-        data.get("name"), data.get("target"), data.get("task_id")))
+    logger.info(f"name:{data.get('name')}, target:{data.get('target')}, task_id:{data.get('task_id')}")
     try:
         fun = action_map.get(action)
         if fun:

@@ -180,16 +180,12 @@ class AssetSiteMonitor:
                     <tbody>\n'''
         html += table_start
 
-        tr_cnt = 0
-        for item in self.status_change_list:
-            tr_cnt += 1
-            tr_tag = '<tr><td {}> {} </td><td {}> {} </td><td {}>' \
-                     '{}</td> <td {}> {} </td></tr>\n'.format(
-                style, tr_cnt, style, item["site"], style, item["old_status"], style, item["status"])
-
-            html += tr_tag
-            if tr_cnt > 10:
-                break
+        rows = [
+            f'<tr><td {style}> {i + 1} </td><td {style}> {item["site"]} </td><td {style}>'
+            f'{item["old_status"]}</td> <td {style}> {item["status"]} </td></tr>\n'
+            for i, item in enumerate(self.status_change_list[:10])
+        ]
+        html += ''.join(rows)
 
         html += '</tbody></table>'
         return html
@@ -210,18 +206,17 @@ class AssetSiteMonitor:
                     <tbody>\n'''
         html += table_start
 
-        tr_cnt = 0
-        for item in self.title_change_list:
-            tr_cnt += 1
-            title = item["title"].replace('>', "&#x3e;").replace('<', "&#x3c;")
-            old_title = item["old_title"].replace('>', "&#x3e;").replace('<', "&#x3c;")
-            tr_tag = '<tr><td {}> {} </td><td {}> {} </td><td {}>' \
-                     '{}</td> <td {}> {} </td></tr>\n'.format(
-                style, tr_cnt, style, item["site"], style, old_title, style, title)
-
-            html += tr_tag
-            if tr_cnt > 10:
-                break
+        rows = [
+            (
+                lambda t, o: f'<tr><td {style}> {i + 1} </td><td {style}> {item["site"]} </td><td {style}>'
+                f'{o}</td> <td {style}> {t} </td></tr>\n'
+            )(
+                item["title"].replace('>', "&#x3e;").replace('<', "&#x3c;"),
+                item["old_title"].replace('>', "&#x3e;").replace('<', "&#x3c;")
+            )
+            for i, item in enumerate(self.title_change_list[:10])
+        ]
+        html += ''.join(rows)
 
         html += '</tbody></table>'
         return html
@@ -242,37 +237,19 @@ class AssetSiteMonitor:
         return html
 
     def build_status_markdown_report(self):
-        tr_cnt = 0
         markdown = "状态码变化\n\n"
-
-        for item in self.status_change_list:
-            tr_cnt += 1
-            markdown += "{}. [{}]({})  {} => {} \n".format(tr_cnt,
-                                                           item["site"],
-                                                           item["site"],
-                                                           item["old_status"],
-                                                           item["status"]
-                                                           )
-            if tr_cnt > 5:
-                break
-
+        markdown += ''.join(
+            f"{i + 1}. [{item['site']}]({item['site']})  {item['old_status']} => {item['status']} \n"
+            for i, item in enumerate(self.status_change_list[:5])
+        )
         return markdown
 
     def build_title_markdown_report(self):
-        tr_cnt = 0
         markdown = "标题变化\n\n"
-
-        for item in self.title_change_list:
-            tr_cnt += 1
-            markdown += "{}. [{}]({})  {} => {} \n".format(tr_cnt,
-                                                           item["site"],
-                                                           item["site"],
-                                                           item["old_title"],
-                                                           item["title"]
-                                                           )
-            if tr_cnt > 5:
-                break
-
+        markdown += ''.join(
+            f"{i + 1}. [{item['site']}]({item['site']})  {item['old_title']} => {item['title']} \n"
+            for i, item in enumerate(self.title_change_list[:5])
+        )
         return markdown
 
     def build_markdown_report(self):

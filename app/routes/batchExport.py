@@ -101,7 +101,7 @@ class BatchExportIpPort(ARLResource):
             for item in items:
                 curr_ip = item["ip"]
                 for port_info in item.get("port_info", []):
-                    items_set.add("{}:{}".format(curr_ip, port_info["port_id"]))
+                    items_set.add(f"{curr_ip}:{port_info['port_id']}")
 
         response = self.send_file(items_set, "ip_port")
 

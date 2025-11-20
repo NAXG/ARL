@@ -257,7 +257,7 @@ class IPExecutor(IPTask):
         for item in items:
             self.asset_ip_info_map[item["ip"]] = item
             for port_info in item["port_info"]:
-                ip_port = "{}:{}".format(item["ip"], port_info["port_id"])
+                ip_port = f"{item['ip']}:{port_info['port_id']}"
                 self.asset_ip_port_set.add(ip_port)
 
     def async_ip_info(self):
@@ -281,7 +281,7 @@ class IPExecutor(IPTask):
             # 保存新发现的端口
             new_port_info_list = []
             for port_info in ip_info["port_info"]:
-                ip_port = "{}:{}".format(curr_ip, port_info["port_id"])
+                ip_port = f"{curr_ip}:{port_info['port_id']}"
                 if ip_port in self.asset_ip_port_set:
                     continue
 

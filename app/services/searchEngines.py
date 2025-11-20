@@ -120,11 +120,7 @@ class BingSearch:
             raise Exception("获取Bing结果异常")
 
         dom = pq(html)
-        result_items = dom(self.pq_query).items()
-        urls_result = [item.attr("href") for item in result_items]
-        urls = set()
-        for u in urls_result:
-            urls.add(u)
+        urls = {item.attr("href") for item in dom(self.pq_query).items()}
         return list(urls)
 
     def run(self):

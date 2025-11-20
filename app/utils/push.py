@@ -295,10 +295,10 @@ def dict2table(info_list):
         items = [str(x).replace('>', "&#x3e;").replace('<', "&#x3c;") for x in row.values()]
         row = td_join_tpl.join(items)
         row_end = '</td>\n</tr>'
-        row_tpl = row_start + row + row_end
-        tbody = tbody + row_tpl + "\n"
+        row_tpl = f"{row_start}{row}{row_end}"
+        tbody = f"{tbody}{row_tpl}\n"
 
-    html = html + tbody + "</tbody>" + table_end
+    html = f"{html}{tbody}</tbody>{table_end}"
 
     return html
 

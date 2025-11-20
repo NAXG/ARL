@@ -95,7 +95,7 @@ class ARLAssetDomain(ARLResource):
             return utils.build_ret(ErrorMsg.DomainNotFoundNotInScope, ret_data)
 
         target = " ".join(add_domain_list)
-        name = "添加域名-{}".format(scope_data["name"])
+        name = f"添加域名-{scope_data['name']}"
 
         options = {
             'domain_brute': True,

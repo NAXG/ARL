@@ -905,8 +905,7 @@ class IP(IPint):
             s.reverse()
             first_byte_index = int(4 - (self._prefixlen // 8))
             if self._prefixlen % 8 != 0:
-                nibblepart = "{}-{}".format(
-                s[3 - (self._prefixlen // 8)], intToIp(self.ip + self.len() - 1, 4).split('.')[-1])
+                nibblepart = f"{s[3 - (self._prefixlen // 8)]}-{intToIp(self.ip + self.len() - 1, 4).split('.')[-1]}"
                 nibblepart += '.'
             else:
                 nibblepart = ""

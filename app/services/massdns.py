@@ -122,8 +122,7 @@ def mass_dns(based_domain, words, wildcard_domain_ip=None):
     if not is_fuzz_domain:
         domains.append(based_domain)
 
-    logger.info("start brute:{} words:{} wildcard_record:{}".format(
-        based_domain, len(domains), ",".join(wildcard_domain_ip)))
+    logger.info(f"start brute:{based_domain} words:{len(domains)} wildcard_record:{','.join(wildcard_domain_ip)}")
 
     mass = MassDNS(domains, mass_dns_bin=Config.MASSDNS_BIN,
                    dns_server=Config.DNS_SERVER, tmp_dir=Config.TMP_PATH,

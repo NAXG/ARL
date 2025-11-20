@@ -43,7 +43,7 @@ class Plugin(BasePlugin):
             "Cookie": f"{self._gitlab_session_name}={cookie}",
             "Content-Type": "application/x-www-form-urlencoded"
         }
-        data = data_tpl.format(token=token, user=user, password=passwd)
+        data = f"utf8=%E2%9C%93&user%5Bremember_me%5D=0&authenticity_token={token}&user%5Blogin%5D={user}&user%5Bpassword%5D={passwd}"
         conn = http_req(url, "post", headers=headers, data=data)
         if b'You are being' not in conn.content:
             return False

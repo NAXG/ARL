@@ -85,7 +85,7 @@ def github_task_scheduler():
             entry = CronTab(item["cron"])
             next_sec = entry.next(default_utc=False)
             if next_sec < 60 and abs(time.time() - item["last_run_time"]) > 60*3:
-                logger.info("github_cron_run {} {}".format(item["keyword"], str(item["_id"])))
+                logger.info(f"github_cron_run {item['keyword']} {str(item['_id'])}")
                 github_cron_run(item)
 
         except Exception as e:

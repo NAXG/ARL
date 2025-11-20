@@ -106,7 +106,7 @@ class AddARLScheduler(ARLResource):
             for x in domains:
                 curr_name = name
                 if not name:
-                    curr_name = "监控-{}-{}".format(scope_data["name"], x)
+                    curr_name = f"监控-{scope_data['name']}-{x}"
 
                 curr_name = truncate_string(curr_name)
 
@@ -120,7 +120,7 @@ class AddARLScheduler(ARLResource):
             curr_name = name
             ip_target = " ".join(domains)
             if not name:
-                curr_name = "监控-{}-{}".format(scope_data["name"], ip_target)
+                curr_name = f"监控-{scope_data['name']}-{ip_target}"
 
             curr_name = truncate_string(curr_name)
 
@@ -318,7 +318,7 @@ class AddSiteScheduler(ARLResource):
                                                                "scope_name": scope_data['name']})
 
         if not name:
-            name = "站点监控-{}".format(scope_data["name"])
+            name = f"站点监控-{scope_data['name']}"
 
         _id = app_scheduler.add_asset_site_monitor_job(scope_id=scope_id,
                                                        name=name,
@@ -361,7 +361,7 @@ class AddWihScheduler(ARLResource):
                                                                "scope_name": scope_data['name']})
 
         if not name:
-            name = "WIH 监控-{}".format(scope_data["name"])
+            name = f"WIH 监控-{scope_data['name']}"
 
         _id = app_scheduler.add_asset_wih_monitor_job(scope_id=scope_id,
                                                       name=name,

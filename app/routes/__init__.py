@@ -229,7 +229,7 @@ class ARLResource(Resource):
                 if filed_name == "ip":
                     curr_ip = item[filed_name]
                     for port_info in item.get("port_info", []):
-                        items_set.add("{}:{}".format(curr_ip, port_info["port_id"]))
+                        items_set.add(f"{curr_ip}:{port_info['port_id']}")
                 else:
                     items_set.add(item[filed_name])
 

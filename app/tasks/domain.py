@@ -1058,10 +1058,7 @@ class DomainTask(CommonTask):
             save_item["vul_name"] = "发现Host碰撞漏洞"
             save_item["app_name"] = "web"
             save_item["target"] = result["url"]
-            save_item["verify_data"] = "{}-{}-{}-{}".format(result["domain"],
-                                                            result["title"],
-                                                            result["status_code"],
-                                                            result["body_length"])
+            save_item["verify_data"] = f"{result['domain']}-{result['title']}-{result['status_code']}-{result['body_length']}"
             save_item["verify_obj"] = result
             save_item["task_id"] = self.task_id
             save_item["save_date"] = utils.curr_date()

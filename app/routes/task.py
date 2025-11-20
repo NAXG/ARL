@@ -346,7 +346,7 @@ class TaskByPolicy(ARLResource):
         task_tag_enum = task_by_policy_fields["task_tag"].enum
 
         if task_tag not in task_tag_enum:
-            return utils.build_ret("task_tag 只能取 {}".format(",".join(task_tag_enum)), {})
+            return utils.build_ret(f"task_tag 只能取 {','.join(task_tag_enum)}", {})
 
         options = get_options_by_policy_id(policy_id, task_tag)
 

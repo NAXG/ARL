@@ -42,8 +42,7 @@ class Plugin(BasePlugin):
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
         }
 
-        data_tpl = "user_name={}&user_password={}&browser_name=Chrome&browser_version=120&browser_os=Windows&user_TZO=8"
-        data = data_tpl.format(user, passwd)
+        data = f"user_name={user}&user_password={passwd}&browser_name=Chrome&browser_version=120&browser_os=Windows&user_TZO=8"
         conn = http_req(url, "post", headers=headers, data = data)
 
         return conn

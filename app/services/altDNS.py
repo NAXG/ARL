@@ -57,7 +57,7 @@ class DnsGen:
 
                 tmp_parts = parts[:-1]
                 tmp_parts.insert(i, w)
-                domains.append('{}.{}'.format('.'.join(tmp_parts), parts[-1]))
+                domains.append(f"{'.'.join(tmp_parts)}.{parts[-1]}")
 
         return domains
 
@@ -78,7 +78,7 @@ class DnsGen:
                 # single digit
                 tmp_parts = parts[:-1]
                 tmp_parts[i] = f'{tmp_parts[i]}{num}'
-                domains.append('{}.{}'.format('.'.join(tmp_parts), '.'.join(parts[-1:])))
+                domains.append(f"{'.'.join(tmp_parts)}.{'.'.join(parts[-1:])}")
 
         return domains
 
@@ -101,12 +101,12 @@ class DnsGen:
 
                 tmp_parts = parts[:-1]
                 tmp_parts[i] = f'{w}{tmp_parts[i]}'
-                domains.append('{}.{}'.format('.'.join(tmp_parts), parts[-1]))
+                domains.append(f"{'.'.join(tmp_parts)}.{parts[-1]}")
 
                 # prepend with dash
                 tmp_parts = parts[:-1]
                 tmp_parts[i] = f'{w}-{tmp_parts[i]}'
-                domains.append('{}.{}'.format('.'.join(tmp_parts), parts[-1]))
+                domains.append(f"{'.'.join(tmp_parts)}.{parts[-1]}")
 
         return domains
 
@@ -129,12 +129,12 @@ class DnsGen:
 
                 tmp_parts = parts[:-1]
                 tmp_parts[i] = f'{tmp_parts[i]}{w}'
-                domains.append('{}.{}'.format('.'.join(tmp_parts), '.'.join(parts[-1:])))
+                domains.append(f"{'.'.join(tmp_parts)}.{'.'.join(parts[-1:])}")
 
                 # append with dash
                 tmp_parts = parts[:-1]
                 tmp_parts[i] = f'{tmp_parts[i]}-{w}'
-                domains.append('{}.{}'.format('.'.join(tmp_parts), '.'.join(parts[-1:])))
+                domains.append(f"{'.'.join(tmp_parts)}.{'.'.join(parts[-1:])}")
 
         return domains
 
@@ -160,10 +160,7 @@ class DnsGen:
                     if w_alt in parts[:-1]:
                         continue
 
-                    domains.append('{}.{}'.format(
-                        '.'.join(parts[:-1]).replace(w, w_alt),
-                        '.'.join(parts[-1:])
-                    ))
+                    domains.append(f"{'.'.join(parts[:-1]).replace(w, w_alt)}.{'.'.join(parts[-1:])}")
 
         return domains
 
@@ -198,8 +195,7 @@ class AltDNS:
         domains = DnsGen(set(self.subdomains), self.words,
                          base_domain=self.base_domain).run()
 
-        logger.info("start AltDNS:{} wildcard_record:{}".format(
-            self.base_domain, ",".join(self.wildcard_domain_ip)))
+        logger.info(f"start AltDNS:{self.base_domain} wildcard_record:{','.join(self.wildcard_domain_ip)}")
 
         mass = MassDNS(domains, mass_dns_bin=Config.MASSDNS_BIN,
                        dns_server=Config.DNS_SERVER, tmp_dir=Config.TMP_PATH,

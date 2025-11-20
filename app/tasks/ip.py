@@ -16,7 +16,7 @@ def ssl_cert(ip_info_list):
             for port_info in ip_info["port_info"]:
                 if port_info["port_id"] == 80:
                     continue
-                targets.append("{}:{}".format(ip_info["ip"], port_info["port_id"]))
+                targets.append(f"{ip_info['ip']}:{port_info['port_id']}")
 
         f = fetchCert.SSLCert(targets)
         return f.run()
@@ -212,7 +212,7 @@ class IPTask(CommonTask):
                 if port_info["port_id"] in skip_port_list:
                     continue
 
-                targets.append("{}:{}".format(ip_info["ip"], port_info["port_id"]))
+                targets.append(f"{ip_info['ip']}:{port_info['port_id']}")
 
         result = run_sniffer(targets)
         items_to_insert = []

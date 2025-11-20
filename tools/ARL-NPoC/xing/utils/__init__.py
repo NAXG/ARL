@@ -270,7 +270,7 @@ def run_exploit_cmd(plg, args):
     if plg.interact:
         rmi_payload_key = optional_args["payload_type"].strip("01")
         if rmi_payload_key not in Conf.RMI_PAYLOAD.keys() and optional_args["payload_type"] != "general":
-            logger.warning("指定 payload {} 不存在".format(optional_args["payload_type"]))
+            logger.warning(f"指定 payload {optional_args['payload_type']} 不存在")
             logger.warning(Conf.JNDI_PAYLOAD_INFO)
 
         if optional_args["payload_type"] == "general":
@@ -288,7 +288,7 @@ def run_exploit_cmd(plg, args):
         info = '=value&'.join(lack_args)
         info += "=value"
         logger.info(f"额外参数: {optional_args}")
-        logger.info("{} 缺少参数：{}，请使用-o {} 提供".format(plg._plugin_name, " ".join(lack_args), info))
+        logger.info(f"{plg._plugin_name} 缺少参数：{' '.join(lack_args)}，请使用-o {info} 提供")
         return
 
     run_args = dict()
@@ -318,7 +318,7 @@ def run_listener(plg, args):
         info = '=value&'.join(lack_args)
         info += "=value"
         logger.info(f"额外参数: {optional_args}")
-        logger.info("{} 缺少参数：{}，请使用-o {} 提供".format(plg._plugin_name, " ".join(lack_args), info))
+        logger.info(f"{plg._plugin_name} 缺少参数：{' '.join(lack_args)}，请使用-o {info} 提供")
         return
 
     run_args = dict()

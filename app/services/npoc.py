@@ -100,7 +100,7 @@ class NPoC:
                     info["category"] = PoCCategory.SYSTEM_BRUTE
 
             if info["plugin_name"] in self.plugin_name_set:
-                logger.warning("plugin {} already exists".format(info["plugin_name"]))
+                logger.warning(f"plugin {info['plugin_name']} already exists")
                 continue
             self.plugin_name_set.add(info["plugin_name"])
             info_list.append(info)

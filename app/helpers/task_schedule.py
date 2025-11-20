@@ -28,13 +28,13 @@ def task_scheduler():
                 entry = CronTab(item["cron"])
                 next_sec = entry.next(default_utc=False)
                 if next_sec < 60 and abs(time.time() - item.get("last_run_time", 0)) > 60*3:
-                    logger.info("run_recurrent_scan {} {}".format(item["target"], str(item["_id"])))
+                    logger.info(f"run_recurrent_scan {item['target']} {str(item['_id'])}")
                     run_recurrent_scan(item)
 
             elif item["schedule_type"] == "future_scan":
                 start_time = item["start_time"]
                 if 0 < start_time <= time.time():
-                    logger.info("run_future_scan {} {}".format(item["target"], str(item["_id"])))
+                    logger.info(f"run_future_scan {item['target']} {str(item['_id'])}")
                     run_future_scan(item)
 
         except Exception as e:
@@ -132,10 +132,10 @@ def change_task_schedule_status(_id, status):
     old_status = item["status"]
 
     if old_status == TaskScheduleStatus.ERROR:
-        return "{} 不可改变状态".format(item["name"])
+        return f"{item['name']} 不可改变状态"
 
     if old_status == status:
-        return "{} 已经处于 {} ".format(item["name"], status)
+        return f"{item['name']} 已经处于 {status} "
 
     item["status"] = status
 

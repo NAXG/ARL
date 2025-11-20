@@ -85,7 +85,7 @@ class InfoHunter:
                 for item in records:
                     content = item["content"]
                     if item["tag"]:
-                        content = "{} ({})".format(content, item["tag"])
+                        content = f"{content} ({item['tag']})"
 
                     record_dict = {
                         "record_type": item["id"],
