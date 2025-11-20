@@ -1,11 +1,54 @@
 ## ARL(Asset Reconnaissance Lighthouse)资产侦察灯塔系统
 <a href="https://github.com/adysec/ARL/stargazers"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/adysec/ARL?color=yellow&logo=riseup&logoColor=yellow&style=flat-square"></a>
-<a href="https://github.com/adysec/ARL/network/members"><img alt="GitHub forks" src="https://img.shields.io/github/forks/adysec/ARL?color=orange&style=flat-square"></a>
-<a href="https://github.com/adysec/ARL/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/adysec/ARL?color=red&style=flat-square"></a>
+<a href="https://github.com/naxg/ARL/network/members"><img alt="GitHub forks" src="https://img.shields.io/github/forks/naxg/ARL?color=orange&style=flat-square"></a>
+<a href="https://github.com/naxg/ARL/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/naxg/ARL?color=red&style=flat-square"></a>
 
 ARL资产侦察灯塔系统备份项目，**已跑通**
 
 本项目基于 [https://github.com/adysec/ARL](https://github.com/adysec/ARL) 的二次修改
+
+
+### 简介
+旨在快速侦察与目标关联的互联网资产，构建基础资产信息库。
+协助甲方安全团队或者渗透测试人员有效侦察和检索资产，发现存在的薄弱点和攻击面。
+
+### 系统要求
+
+建议采用**Docker内源码安装**方式运行。系统配置建议：CPU:4线程 内存:8G 带宽:10M。
+由于自动资产发现过程中会有大量的的发包，建议采用云服务器可以带来更好的体验。
+
+### Docker 内源码安装（最新版，需要为境外网络环境，且网络稳定）
+
+```bass
+sudo docker run --privileged -it -d -p 5003:5003 --name=arl --restart=always rockylinux/rockylinux:9-ubi-init /usr/sbin/init
+docker exec -it arl bash
+# docker内运行，通过源码安装ARL
+curl https://raw.githubusercontent.com/naxg/ARL/main/misc/setup-arl.sh >install.sh
+bash install.sh
+exit
+```
+
+docker内执行后直接exit退出即可
+
+
+默认端口5003 (https), 默认用户名密码admin/arlpass 
+
+
+### ARL修改
+
+```
+# 一键删站
+docker stop arl && docker rm arl
+
+# 删除镜像
+docker rmi arl
+
+# 改poc，poc位置/opt/ARL-NPoC
+docker exec -it arl bash
+systemctl restart arl*
+```
+ 
+
 
 ### 二次修改说明
 
@@ -50,43 +93,3 @@ intelx:
 ```
 
 **API 配置说明：** 详细的 API 配置方法请参考 [subfinder 官方文档](https://docs.projectdiscovery.io/opensource/subfinder/install#post-install-configuration)
-
-默认端口5003 (https), 默认用户名密码admin/arlpass 
-
-
-### 简介
-旨在快速侦察与目标关联的互联网资产，构建基础资产信息库。
-协助甲方安全团队或者渗透测试人员有效侦察和检索资产，发现存在的薄弱点和攻击面。
-
-### 系统要求
-
-建议采用**Docker内源码安装**方式运行。系统配置建议：CPU:4线程 内存:8G 带宽:10M。
-由于自动资产发现过程中会有大量的的发包，建议采用云服务器可以带来更好的体验。
-
-### Docker 内源码安装（最新版，需要为境外网络环境，且网络稳定）
-
-```bass
-sudo docker run --privileged -it -d -p 5003:5003 --name=arl --restart=always rockylinux/rockylinux:9-ubi-init /usr/sbin/init
-docker exec -it arl bash
-# docker内运行，通过源码安装ARL
-curl https://raw.githubusercontent.com/naxg/ARL/main/misc/setup-arl.sh >install.sh
-bash install.sh
-exit
-```
-
-docker内执行后直接exit退出即可
-
-### ARL修改
-
-```
-# 一键删站
-docker stop arl && docker rm arl
-
-# 删除镜像
-docker rmi arl
-
-# 改poc，poc位置/opt/ARL-NPoC
-docker exec -it arl bash
-systemctl restart arl*
-```
- 
