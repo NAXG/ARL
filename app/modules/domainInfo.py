@@ -2,6 +2,8 @@ from .baseInfo import BaseInfo
 
 
 class DomainInfo(BaseInfo):
+    __slots__ = ('record_list', 'domain', 'type', 'ip_list')
+
     def __init__(self, domain, record, type, ips):
         self.record_list = record
         self.domain = domain

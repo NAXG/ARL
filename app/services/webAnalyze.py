@@ -1,43 +1,54 @@
 import time
+import re
 from wappalyzer import analyze
 from app import utils
 from .baseThread import BaseThread
 
 logger = utils.get_logger()
 
+# 预编译正则表达式模式
+VERSION_PATTERN = re.compile(r'^[\d\.\-a-zA-Z]+$')
+CONFIDENCE_PATTERN = re.compile(r'^\d+$')
+
 
 class WebAnalyze(BaseThread):
+    __slots__ = ('analyze_map',)
     def __init__(self, sites, concurrency=3):
         super().__init__(sites, concurrency=concurrency)
         self.analyze_map = {}
 
     def work(self, site):
         try:
+            # 使用局部变量优化频繁调用的函数
+            analyze_func = analyze
+            logger_debug = logger.debug
+            logger_warning = logger.warning
+
             # Use wappalyzer-next's analyze function with 'full' scan_type
             # Full scan requires Firefox browser for better detection
             # The analyze function returns a dictionary where keys are URLs
             # and values are dictionaries of detected technologies.
-            results = analyze(url=site,threads=2,scan_type="balanced")
+            results = analyze_func(url=site,threads=2,scan_type="balanced")
 
-            apps = []
-            # The result format is {url: {app_name: {version, confidence, categories, website}}}
-            # We need to extract the applications list in the format expected by the original code.
+            # 使用推导式替代循环构建列表（PEP 709 优化）
             site_results = results.get(site, {})
-            if site_results:
-                for app_name, details in site_results.items():
-                    apps.append({
-                        "name": app_name,
-                        "confidence": str(details.get('confidence', 0)),  # Convert to string as original code expects string
-                        "version": details.get('version', ''),
-                        "website": details.get('website', ''),  # wappalyzer-next provides website per app
-                        "categories": details.get('categories', [])
-                    })
+            apps = [
+                {
+                    "name": app_name,
+                    "confidence": str(details.get('confidence', 0)),  # 保持类型一致：始终为 str
+                    "version": str(details.get('version', '')),       # 保持类型一致：始终为 str
+                    "website": str(details.get('website', '')),       # 保持类型一致：始终为 str
+                    "categories": list(details.get('categories', [])) # 保持类型一致：始终为 list
+                }
+                for app_name, details in site_results.items()
+                if app_name and isinstance(app_name, str)  # 添加有效性检查
+            ] if site_results else []
 
             self.analyze_map[site] = apps
-            logger.debug(f"WebAnalyze successful for {site}")
+            logger_debug(f"WebAnalyze successful for {site}")
 
         except Exception as exc:
-            logger.warning(f"WebAnalyze failed on {site}: {exc}")
+            logger_warning(f"WebAnalyze failed on {site}: {exc}")
             self.analyze_map[site] = []
 
     def run(self):

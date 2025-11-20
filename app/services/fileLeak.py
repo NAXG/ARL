@@ -19,6 +19,8 @@ bool_ratio = 0.8
 concurrency_count = 6
 
 class URL:
+    __slots__ = ('url', 'payload', '_scope', '_path')
+
     def __init__(self, url, payload):
         self.url = url
         self.payload = payload

@@ -14,36 +14,50 @@ logger = utils.get_logger()
 
 
 class FetchSite(BaseThread):
+    __slots__ = ('site_info_list', 'fingerprint_list', 'http_timeout')
+
     def __init__(self, sites, concurrency=6, http_timeout=None):
         super().__init__(sites, concurrency)
         self.site_info_list = []
         self.fingerprint_list = load_fingerprint()
-        self.http_timeout = http_timeout
+        # 保持类型一致：http_timeout 始终为 tuple
         if http_timeout is None:
+            self.http_timeout = (10.1, 30.1)
+        elif isinstance(http_timeout, (int, float)):
+            self.http_timeout = (float(http_timeout), float(http_timeout) * 3)
+        elif isinstance(http_timeout, (list, tuple)) and len(http_timeout) == 2:
+            self.http_timeout = (float(http_timeout[0]), float(http_timeout[1]))
+        else:
             self.http_timeout = (10.1, 30.1)
 
     def fetch_fingerprint(self, item, content):
-        favicon_hash = item["favicon"].get("hash", 0)
+        """保持 favicon_hash 类型一致（始终为 str）"""
+        # 保持类型一致：favicon_hash 始终为 str
+        favicon_hash_raw = item["favicon"].get("hash", 0)
+        favicon_hash = str(favicon_hash_raw)  # 统一转换为 str 类型
+
         result = fetch_fingerprint(content=content, headers=item["headers"],
                                    title=item["title"], favicon_hash=favicon_hash,
                                    finger_list=self.fingerprint_list)
 
         result_db = finger_identify(content=content, header=item["headers"],
-                                    title=item["title"], favicon_hash=str(favicon_hash))
+                                    title=item["title"], favicon_hash=favicon_hash)  # 使用一致的 str 类型
 
         result = set(result + result_db)
 
-        finger = []
-        for name in result:
-            finger_item = {
+        # 使用推导式替代循环（PEP 709 优化）
+        finger = [
+            {
                 "icon": "default.png",
-                "name": name,
-                "confidence": "80",
-                "version": "",
-                "website": "https://www.riskivy.com",
-                "categories": []
+                "name": str(name),  # 保持类型一致：始终为 str
+                "confidence": "80",  # 保持类型一致：始终为 str
+                "version": "",  # 保持类型一致：始终为 str
+                "website": "https://www.riskivy.com",  # 保持类型一致：始终为 str
+                "categories": []  # 保持类型一致：始终为 list
             }
-            finger.append(finger_item)
+            for name in result
+            if name and isinstance(name, str)  # 确保数据有效性
+        ]
 
         if finger:
             item["finger"] = finger

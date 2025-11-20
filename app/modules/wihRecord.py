@@ -1,4 +1,6 @@
 class WihRecord:
+    __slots__ = ('recordType', 'content', 'source', 'site', 'fnv_hash')
+
     def __init__(self, record_type, content, source, site, fnv_hash):
         self.recordType = record_type
         self.content = content

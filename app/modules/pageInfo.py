@@ -1,6 +1,8 @@
 from .baseInfo import BaseInfo
 
 class PageInfo(BaseInfo):
+    __slots__ = ('title', 'url', 'content_length', 'status_code')
+
     def __init__(self, title, url, content_length, status_code):
         self.title = title
         self.url = url

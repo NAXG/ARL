@@ -6,14 +6,26 @@ logger = utils.get_logger()
 
 
 class MassDNS:
+    __slots__ = ('domains', 'tmp_dir', 'dns_server', 'domain_gen_output_path', 'mass_dns_output_path',
+                 'mass_dns_bin', 'wildcard_domain_ip', 'concurrent')
+
     def __init__(self, domains=None, mass_dns_bin=None,
                  dns_server=None, tmp_dir=None, wildcard_domain_ip=None, concurrent=0):
 
+        # 保持类型一致：wildcard_domain_ip 始终为 list
         if wildcard_domain_ip is None:
             wildcard_domain_ip = []
+        elif not isinstance(wildcard_domain_ip, list):
+            wildcard_domain_ip = list(wildcard_domain_ip) if hasattr(wildcard_domain_ip, '__iter__') else []
 
+        # 保持类型一致：concurrent 始终为 int
         if concurrent == 0:
             concurrent = 100
+        else:
+            try:
+                concurrent = int(concurrent)
+            except (ValueError, TypeError):
+                concurrent = 100
 
         self.domains = domains
         self.tmp_dir = tmp_dir
@@ -68,10 +80,11 @@ class MassDNS:
                 if record in self.wildcard_domain_ip:
                     continue
 
+                # 保持类型一致：所有字段都转换为 str 类型
                 item = {
-                    "domain": domain.strip("."),
-                    "type": _type,
-                    "record": record
+                    "domain": str(domain.strip(".")),      # 保持 str 类型
+                    "type": str(_type),                     # 保持 str 类型
+                    "record": str(record)                   # 保持 str 类型
                 }
                 output.append(item)
 

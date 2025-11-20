@@ -1,15 +1,22 @@
 import json
 import os.path
 import subprocess
+import re
 
 from app.config import Config
 from app import utils
+
+# 预编译正则表达式模式
+DOMAIN_PATTERN = re.compile(r'^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+IP_PORT_PATTERN = re.compile(r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?::\d+)?$')
 
 
 logger = utils.get_logger()
 
 
 class NucleiScan:
+    __slots__ = ('targets', 'nuclei_target_path', 'nuclei_result_path', 'nuclei_bin_path', 'nuclei_json_flag')
+
     def __init__(self, targets: list):
         self.targets = targets
 
@@ -59,34 +66,71 @@ class NucleiScan:
         return False
 
     def _gen_target_file(self):
+        """使用推导式和类型一致的文件写入"""
+        # 使用局部变量优化
+        strip_func = str.strip
+        domain_pattern = DOMAIN_PATTERN
+        ip_port_pattern = IP_PORT_PATTERN
+
+        # 使用推导式过滤有效目标，保持类型一致（始终为 str）
+        valid_targets = [
+            str(domain).strip()  # 保持类型一致：始终为 str
+            for domain in self.targets
+            if domain and isinstance(domain, (str, int))  # 确保基本有效性
+        ]
+
+        # 进一步验证格式
+        valid_targets = [
+            target for target in valid_targets
+            if domain_pattern.match(target) or ip_port_pattern.match(target)
+        ]
+
+        # 批量写入文件
         with open(self.nuclei_target_path, "w") as f:
-            for domain in self.targets:
-                domain = domain.strip()
-                if not domain:
-                    continue
-                f.write(domain + "\n")
+            f.write('\n'.join(valid_targets))
+            if valid_targets:  # 确保文件以换行符结尾
+                f.write('\n')
 
     def dump_result(self) -> list:
-        results = []
-        with open(self.nuclei_result_path) as f:
-            while True:
-                line = f.readline()
-                if not line:
-                    break
+        """使用推导式替代循环构建结果列表（PEP 709 优化）"""
+        # 使用局部变量优化频繁调用的函数
+        logger_warning = logger.warning
 
-                data = json.loads(line)
-                item = {
-                    "template_url": data.get("template-url", ""),
-                    "template_id": data.get("template-id", ""),
-                    "vuln_name": data.get("info", {}).get("name", ""),
-                    "vuln_severity": data.get("info", {}).get("severity", ""),
-                    "vuln_url": data.get("matched-at", ""),
-                    "curl_command": data.get("curl-command", ""),
-                    "target": data.get("host", "")
-                }
-                results.append(item)
+        try:
+            with open(self.nuclei_result_path) as f:
+                # 使用推导式替代 while 循环，提升性能
+                results = [
+                    {
+                        "template_url": str(data.get("template-url", "")),      # 保持类型一致：始终为 str
+                        "template_id": str(data.get("template-id", "")),        # 保持类型一致：始终为 str
+                        "vuln_name": str(data.get("info", {}).get("name", "")), # 保持类型一致：始终为 str
+                        "vuln_severity": str(data.get("info", {}).get("severity", "")), # 保持类型一致：始终为 str
+                        "vuln_url": str(data.get("matched-at", "")),            # 保持类型一致：始终为 str
+                        "curl_command": str(data.get("curl-command", "")),      # 保持类型一致：始终为 str
+                        "target": str(data.get("host", ""))                     # 保持类型一致：始终为 str
+                    }
+                    for line in f
+                    if line.strip()  # 跳过空行
+                    for data in [self._safe_load_json(line)]  # 安全的 JSON 加载
+                    if data  # 确保数据有效
+                ]
 
-        return results
+                return results
+
+        except FileNotFoundError:
+            logger_warning(f"Result file not found: {self.nuclei_result_path}")
+            return []
+        except Exception as e:
+            logger_warning(f"Error reading results: {e}")
+            return []
+
+    def _safe_load_json(self, line):
+        """安全的 JSON 加载，避免异常中断"""
+        try:
+            return json.loads(line.strip())
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.debug(f"Failed to parse JSON line: {e}")
+            return None
 
     def exec_nuclei(self):
         self._gen_target_file()

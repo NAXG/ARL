@@ -12,6 +12,8 @@ logger = utils.get_logger()
 
 # 任务类中一些相关公共类
 class CommonTask:
+    __slots__ = ('task_id',)
+
     def __init__(self, task_id):
         self.task_id = task_id
 
@@ -83,6 +85,10 @@ class CommonTask:
 
 # *** 对用户提交的站点或者是发现的站点进行后续处理
 class WebSiteFetch:
+    __slots__ = ('task_id', 'sites', 'options', 'base_update_task', 'site_info_list', 'available_sites',
+                 'web_analyze_map', 'wih_domain_set', 'wih_record_set', 'scope_domain', 'page_url_set',
+                 'search_engines_result', '_poc_sites', '_task_domain_set')
+
     def __init__(self, task_id: str, sites: list, options: dict, scope_domain: list = None):
         self.task_id = task_id
         self.sites = sites  # ** 这个是用户提交的目标
@@ -94,9 +100,11 @@ class WebSiteFetch:
         self.wih_domain_set = set()  # 用于保存来自wih的域名，已添加的域名不再添加
         self.wih_record_set = set()  # 用于保存来自wih的记录，已添加的记录不再添加
 
-        # 用于判断应该收集的子域名
+        # 用于判断应该收集的子域名，保持类型一致：始终为 list
         if not scope_domain:
             scope_domain = []
+        elif not isinstance(scope_domain, list):
+            scope_domain = list(scope_domain) if hasattr(scope_domain, '__iter__') else []
 
         self.scope_domain = scope_domain
         self.page_url_set = set()

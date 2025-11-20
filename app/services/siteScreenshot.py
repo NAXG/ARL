@@ -14,6 +14,9 @@ BROWSER_ARGS = [
     '--disable-gpu'
 ]
 
+# 预编译正则表达式模式
+FILENAME_CLEAN_PATTERN = re.compile(r'[^\w\-_\. ]')
+
 
 class BrowserPool:
     """浏览器池管理器 - 复用浏览器实例以提升性能"""
@@ -173,8 +176,9 @@ class SiteScreenshot:
         )
 
     def gen_filename(self, site):
+        """使用预编译正则表达式生成安全的文件名"""
         filename = site.replace('://', '_')
-        return re.sub(r'[^\w\-_\. ]', '_', filename)
+        return FILENAME_CLEAN_PATTERN.sub('_', filename)
 
     async def run(self):
         """运行异步截图任务"""

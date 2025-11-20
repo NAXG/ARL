@@ -1,5 +1,8 @@
 import re
 
+# 预编译正则表达式模式，提升性能
+TITLE_PATTERN = re.compile(rb'<title>([^<]{1,200})</title>', re.I)
+
 
 def get_title(body):
     """
@@ -8,9 +11,9 @@ def get_title(body):
     :return: sss
     """
     result = ''
-    title_patten = re.compile(rb'<title>([^<]{1,200})</title>', re.I)
-    title = title_patten.findall(body)
-    if len(title) > 0:
+    # 使用预编译的正则表达式模式
+    title = TITLE_PATTERN.findall(body)
+    if title:  # 更 Pythonic 的判断方式，避免 len() 函数调用
         try:
             result = title[0].decode("utf-8")
         except Exception:

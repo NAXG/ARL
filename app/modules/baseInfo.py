@@ -2,6 +2,8 @@ import json
 
 
 class BaseInfo:
+    __slots__ = ()
+
     def __str__(self):
         return self.dump_json()
 

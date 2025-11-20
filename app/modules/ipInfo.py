@@ -3,6 +3,8 @@ from app import utils
 
 
 class IPInfo(BaseInfo):
+    __slots__ = ('ip', 'port_info_list', 'os_info', 'domain', '_geo_asn', '_geo_city', '_ip_type', 'cdn_name')
+
     def __init__(self, ip, port_info, os_info, domain, cdn_name):
         self.ip = ip
         self.port_info_list = port_info
@@ -76,6 +78,8 @@ class IPInfo(BaseInfo):
 
 
 class PortInfo(BaseInfo):
+    __slots__ = ('port_id', 'service_name', 'version', 'protocol', 'product')
+
     def __init__(self, port_id, service_name = "", version = "", protocol = "tcp", product=""):
         self.port_id = port_id
         self.service_name = service_name

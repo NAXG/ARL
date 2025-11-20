@@ -8,6 +8,9 @@ from io import BytesIO
 from openpyxl.styles import Font
 from app.utils import get_logger, auth
 from app import utils
+
+# 预编译正则表达式模式
+ILLEGAL_CHARACTERS_PATTERN = re.compile(r'[\000-\010]|[\013-\014]|[\016-\037]')
 from urllib.parse import quote
 
 ns = Namespace('export', description="任务报告导出接口")
@@ -247,9 +250,8 @@ class SaveTask:
         self.set_style(ws)
 
     def ignore_illegal(self, content):
-        ILLEGAL_CHARACTERS_RE = re.compile(r'[\000-\010]|[\013-\014]|[\016-\037]')
-        content = ILLEGAL_CHARACTERS_RE.sub(r'', content)
-        return content
+        """使用预编译的正则表达式清理非法字符"""
+        return ILLEGAL_CHARACTERS_PATTERN.sub(r'', str(content))  # 保持类型一致：始终为 str
 
     def build_site_xl(self):
         ws = self.wb.active
