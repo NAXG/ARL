@@ -7,7 +7,7 @@ rules:
     enabled: false
   # 路径，内置规则
   - id: path
-    enabled: false
+    enabled: true
   # URL主机部分为域名，内置规则
   - id: domain_url
     enabled: false
@@ -24,7 +24,7 @@ rules:
     pattern: \b([1-9]\d{5}(19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx])\b
   # 手机号
   - id: phone
-    enabled: false
+    enabled: true
     pattern: \b1[3-9]\d{9}\b
   # jwt token (不要修改ID)
   - id: jwt_token
@@ -136,6 +136,72 @@ rules:
   - id: app_key
     enabled: true
     pattern: \b(?:VUE|APP|REACT)_[A-Z_0-9]{1,15}_(?:KEY|PASS|PASSWORD|TOKEN|APIKEY)['"]*[:=]"(?:[A-Za-z0-9_\-]{15,50}|[a-z0-9/+]{50,100}==?)"
+  # 潜在漏洞类规则
+  - id: java_deserialization
+    enabled: true
+    pattern: javax\.faces\.ViewState
+    description: Java反序列化漏洞
+  - id: debug_parameters
+    enabled: true
+    pattern: (access=|adm=|admin=|alter=|cfg=|clone=|config=|create=|dbg=|debug=|delete=|disable=|edit=|enable=|exec=|execute=|grant=|load=|make=|modify=|rename=|reset=|root=|shell=|test=|toggl=)
+    description: 调试逻辑参数
+  - id: url_as_value
+    enabled: true
+    pattern: =(https?)(://|%3a%2f%2f)
+    description: URL作为参数值
+  - id: upload_form
+    enabled: true
+    pattern: type\=\"file\"
+    description: 文件上传表单
+  - id: dos_parameters
+    enabled: true
+    pattern: (size=|page=|num=|limit=|start=|end=|count=)
+    description: DoS参数
+  - id: passwd_file
+    enabled: true
+    pattern: /root:/bin/bash
+    description: passwd文件泄露
+  - id: win_ini_file
+    enabled: true
+    pattern: for 16-bit app
+    description: win.ini文件泄露
+  # 敏感信息类规则
+  - id: cloud_key
+    enabled: true
+    pattern: ((access)(|-|_)(key)(|-|_)(id|secret))|(LTAI[a-z0-9]{12,20})
+    description: 云密钥
+  - id: windows_path
+    enabled: true
+    pattern: ([a-zA-Z]:\\?(?:[^<>:/\\|?*]+\\?)*)([^<>:/\\|?*]+(?:\.[^<>:/\\|?*]+)?)
+    description: Windows文件路径
+  - id: password_field
+    enabled: true
+    pattern: (((|\\)(|''|")(|[\.\w]{1,32})([p](ass|wd|asswd|assword))(|[\.\w]{1,32})(|\\)(|''|")(|)(:|[=]{1,3}|!\[=]{1,2}|[\)]{0,1}\.val\()( |)(|\\)('|")([^'"]+?)(|\\)('|")(|,|\)))|((|\\)('|")([^'"]+?)(|\\)('|")(|\\)(|''|")(|)(:|[=]{1,3}|!\[=]{1,2})( |)(|[\.\w]{1,32})([p](ass|wd|asswd|assword))(|[\.\w]{1,32})(|\\)(|''|")))
+    description: 密码字段
+  - id: username_field
+    enabled: true
+    pattern: (((|\\)(|''|")(|[\.\w]{1,32})(([u](ser|name|sername))|(account)|((((create|update)((d|r)|(by|on|at)))|(creator))))(|[\.\w]{1,32})(|\\)(|''|")(|)(:|[=]{1,3}|!\[=]{1,2}|[\)]{0,1}\.val\()( |)(|\\)('|")([^'"]+?)(|\\)('|")(|,|\)))|((|\\)('|")([^'"]+?)(|\\)('|")(|\\)(|''|")(|)(:|[=]{1,3}|!\[=]{1,2})( |)(|[\.\w]{1,32})(([u](ser|name|sername))|(account)|((((create|update)((d|r)|(by|on|at)))|(creator))))(|[\.\w]{1,32})(|\\)(|''|")))
+    description: 用户名字段
+  - id: wecom_key
+    enabled: true
+    pattern: (corp)(id|secret)
+    description: 企业微信密钥
+  - id: jdbc_connection
+    enabled: true
+    pattern: jdbc:[a-z:]+://[a-z0-9\.\-_:;=/@?,&]+
+    description: JDBC连接
+  - id: authorization_header
+    enabled: true
+    pattern: ((basic [a-z0-9=:_\+\/-]{5,100})|(bearer [a-z0-9_.=:_\+\/-]{5,100}))
+    description: 认证头
+  - id: sensitive_field
+    enabled: true
+    pattern: (((|\\)(|''|")(|[\.\w]{1,32})(key|secret|token|config|auth|access|admin|ticket)(|[\.\w]{1,32})(|\\)(|''|")(|)(:|[=]{1,3}|!\[=]{1,2}|[\)]{0,1}\.val\()( |)(|\\)('|")([^'"]+?)(|\\)('|")(|,|\)))|((|\\)('|")([^'"]+?)(|\\)('|")(|\\)(|''|")(|)(:|[=]{1,3}|!\[=]{1,2})( |)(|[\.\w]{1,32})(key|secret|token|config|auth|access|admin|ticket)(|[\.\w]{1,32})(|\\)(|''|")))
+    description: 敏感字段
+  - id: mobile_field
+    enabled: true
+    pattern: (((|\\)(|''|")(|[\.\w]{1,32})(mobile|phone|sjh|shoujihao|concat)(|[\.\w]{1,32})(|\\)(|''|")(|)(:|[=]{1,3}|!\[=]{1,2}|[\)]{0,1}\.val\()( |)(|\\)('|")([^'"]+?)(|\\)('|")(|,|\)))|((|\\)('|")([^'"]+?)(|\\)('|")(|\\)(|''|")(|)(:|[=]{1,3}|!\[=]{1,2})( |)(|[\.\w]{1,32})(mobile|phone|sjh|shoujihao|concat)(|[\.\w]{1,32})(|\\)(|''|")))
+    description: 手机号字段
 
 # 排除规则， 支持字段 id, content, target , source 逻辑为 and ，如果是正则匹配，需要使用 regex: 开头
 exclude_rules:
