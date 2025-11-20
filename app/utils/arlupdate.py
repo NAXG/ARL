@@ -34,6 +34,7 @@ def create_index():
         "github_result": "github_task_id",
         "github_monitor_result": "github_scheduler_id",
         "wih": ["task_id", "record_type", "fnv_hash"],
+        "poc": "plugin_name",  # 添加POC集合的plugin_name索引
     }
     for table in index_map:
         if isinstance(index_map[table], list):

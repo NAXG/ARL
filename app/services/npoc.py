@@ -112,11 +112,17 @@ class NPoC:
             new = old.copy()
             plugin_name = old["plugin_name"]
             new["update_date"] = utils.curr_date()
-            if plugin_name in self.db_plugin_name_list:
-                continue
 
-            logger.info(f"insert {plugin_name} info to db")
-            utils.conn_db('poc').insert_one(new)
+            try:
+                # 使用upsert操作 - 存在则更新，不存在则插入
+                utils.conn_db('poc').update_one(
+                    {"plugin_name": plugin_name},
+                    {"$set": new},
+                    upsert=True
+                )
+                logger.info(f"sync {plugin_name} info to db (upsert)")
+            except Exception as e:
+                logger.error(f"sync plugin {plugin_name} failed: {e}")
 
         return True
 
