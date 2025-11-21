@@ -7,7 +7,7 @@ rules:
     enabled: false
   # 路径，内置规则
   - id: path
-    enabled: true
+    enabled: false
   # URL主机部分为域名，内置规则
   - id: domain_url
     enabled: false
