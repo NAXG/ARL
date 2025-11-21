@@ -22,7 +22,7 @@ def urlsimilar(url):
     path = url_parse.path[1:]
     if path == "":
         path = "/"
-    ext = Path(path).suffix
+    ext = os.path.splitext(path)[-1]
 
     path = re.sub(r'\b[0-9]+\b', '0', path)
     query = unquote(url_parse.query)
@@ -145,5 +145,5 @@ def verify_cert(url):
 def url_ext(url):
     url_parse = urlparse(url)
     path = url_parse.path
-    ext = Path(path).suffix
+    ext = os.path.splitext(path)[-1]
     return ext.lower()
