@@ -8,14 +8,14 @@ logger = utils.get_logger()
 
 # 浏览器启动参数常量（避免重复）
 BROWSER_ARGS = [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',
-    '--disable-gpu'
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-dev-shm-usage",
+    "--disable-gpu",
 ]
 
 # 预编译正则表达式模式
-FILENAME_CLEAN_PATTERN = re.compile(r'[^\w\-_\. ]')
+FILENAME_CLEAN_PATTERN = re.compile(r"[^\w\-_\. ]")
 
 
 class BrowserPool:
@@ -35,8 +35,7 @@ class BrowserPool:
                 # 预创建浏览器实例
                 for _ in range(self.pool_size):
                     browser = await self.playwright.chromium.launch(
-                        headless=True,
-                        args=BROWSER_ARGS
+                        headless=True, args=BROWSER_ARGS
                     )
                     self.browsers.append(browser)
 
@@ -45,9 +44,8 @@ class BrowserPool:
         async with self.lock:
             if not self.browsers:
                 # 如果池为空，创建新的浏览器实例
-                return await self.playwright.chromium.launch(
-                    headless=True,
-                    args=BROWSER_ARGS
+                return await self.playwright.chromium.launch(  # type: ignore[union-attr]
+                    headless=True, args=BROWSER_ARGS
                 )
             return self.browsers.pop()
 
@@ -60,7 +58,7 @@ class BrowserPool:
                     contexts = browser.contexts
                     for context in contexts:
                         await context.close()
-                except:
+                except Exception:
                     pass
                 self.browsers.append(browser)
 
@@ -70,7 +68,7 @@ class BrowserPool:
             for browser in self.browsers:
                 try:
                     await browser.close()
-                except:
+                except Exception:
                     pass
             self.browsers.clear()
 
@@ -91,11 +89,11 @@ class SiteScreenshot:
 
         # 截图配置参数 - 直接在代码中配置
         self.screenshot_config = {
-            'full_page': False,  # 固定大小截图，不使用全页面（与PhantomJS一致）
-            'quality': 60,  # JPEG 质量，范围 0-100，数值越大质量越高文件越大（默认60节省空间）
-            'viewport_width': 1280,  # 视口宽度（固定尺寸）
-            'viewport_height': 1024,  # 视口高度（固定尺寸）
-            'timeout': 40000  # 截图超时时间（毫秒）- 40秒
+            "full_page": False,  # 固定大小截图，不使用全页面（与PhantomJS一致）
+            "quality": 60,  # JPEG 质量，范围 0-100，数值越大质量越高文件越大（默认60节省空间）
+            "viewport_width": 1280,  # 视口宽度（固定尺寸）
+            "viewport_height": 1024,  # 视口高度（固定尺寸）
+            "timeout": 40000,  # 截图超时时间（毫秒）- 40秒
         }
 
     async def work(self, site):
@@ -103,7 +101,7 @@ class SiteScreenshot:
         async with self.semaphore:
             browser = None
             page = None
-            file_name = f'{self.capture_dir}/{self.gen_filename(site)}.jpg'
+            file_name = f"{self.capture_dir}/{self.gen_filename(site)}.jpg"
 
             try:
                 # 从池中获取浏览器实例
@@ -111,20 +109,23 @@ class SiteScreenshot:
 
                 # 创建新页面
                 page = await browser.new_page(
-                    ignore_https_errors=True,
-                    java_script_enabled=True
+                    ignore_https_errors=True, java_script_enabled=True
                 )
 
                 # 设置视口大小（直接使用配置值）
-                await page.set_viewport_size({
-                    "width": self.screenshot_config['viewport_width'],
-                    "height": self.screenshot_config['viewport_height']
-                })
+                await page.set_viewport_size(
+                    {
+                        "width": self.screenshot_config["viewport_width"],
+                        "height": self.screenshot_config["viewport_height"],
+                    }
+                )
 
                 # 设置用户代理，避免被反爬
-                await page.set_extra_http_headers({
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-                })
+                await page.set_extra_http_headers(
+                    {
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                    }
+                )
 
                 # 直接执行截图（DOM完成+50ms等待后立即截图）
                 await self._screenshot_with_load(page, file_name, site)
@@ -143,7 +144,7 @@ class SiteScreenshot:
                 if page:
                     try:
                         await page.close()
-                    except:
+                    except Exception:
                         pass
                 if browser:
                     # 归还浏览器到池中，而不是关闭
@@ -153,7 +154,7 @@ class SiteScreenshot:
         """内部方法：等待DOM完成后立即截图"""
         try:
             # 等待DOM内容加载完成，然后立即截图
-            await page.goto(site, wait_until='domcontentloaded', timeout=2500)
+            await page.goto(site, wait_until="domcontentloaded", timeout=2500)
 
             # DOM解析完成后立即截图，不额外等待
             # 确保页面基本的JavaScript执行完成
@@ -169,21 +170,23 @@ class SiteScreenshot:
         screenshot_config = self.screenshot_config
         return page.screenshot(
             path=file_name,
-            full_page=screenshot_config['full_page'],
-            type='jpeg',
-            quality=quality if quality is not None else screenshot_config['quality'],
-            timeout=5000  # 截图操作超时
+            full_page=screenshot_config["full_page"],
+            type="jpeg",
+            quality=quality if quality is not None else screenshot_config["quality"],
+            timeout=5000,  # 截图操作超时
         )
 
     def gen_filename(self, site):
         """使用预编译正则表达式生成安全的文件名"""
-        filename = site.replace('://', '_')
-        return FILENAME_CLEAN_PATTERN.sub('_', filename)
+        filename = site.replace("://", "_")
+        return FILENAME_CLEAN_PATTERN.sub("_", filename)
 
     async def run(self):
         """运行异步截图任务"""
         t1 = asyncio.get_event_loop().time()
-        logger.info(f"start screen shot {len(self.sites)} (pool_size={self.pool_size}, concurrency={self.concurrency})")
+        logger.info(
+            f"start screen shot {len(self.sites)} (pool_size={self.pool_size}, concurrency={self.concurrency})"
+        )
 
         # 创建截图目录
         os.makedirs(self.capture_dir, 0o777, True)
@@ -213,7 +216,9 @@ def site_screenshot(sites, concurrency=3, capture_dir="./", pool_size=1):
         capture_dir: 截图保存目录
         pool_size: 浏览器池大小（默认5，建议不超过并发数）
     """
-    s = SiteScreenshot(sites, concurrency=concurrency, capture_dir=capture_dir, pool_size=pool_size)
+    s = SiteScreenshot(
+        sites, concurrency=concurrency, capture_dir=capture_dir, pool_size=pool_size
+    )
 
     # 检查是否在事件循环中
     try:
