@@ -28,8 +28,15 @@ from .ip import (
     get_ip_city as get_ip_city,
     get_ip_type as get_ip_type,
 )
-from .arl import arl_domain as arl_domain, get_asset_domain_by_id as get_asset_domain_by_id
-from .time import curr_date as curr_date, time2date as time2date, curr_date_obj as curr_date_obj
+from .arl import (
+    arl_domain as arl_domain,
+    get_asset_domain_by_id as get_asset_domain_by_id,
+)
+from .time import (
+    curr_date as curr_date,
+    time2date as time2date,
+    curr_date_obj as curr_date_obj,
+)
 from .url import (
     rm_similar_url as rm_similar_url,
     get_hostname as get_hostname,
@@ -40,7 +47,10 @@ from .url import (
 )
 from .cert import get_cert as get_cert
 from .arlupdate import arl_update as arl_update
-from .cdn import get_cdn_name_by_cname as get_cdn_name_by_cname, get_cdn_name_by_ip as get_cdn_name_by_ip
+from .cdn import (
+    get_cdn_name_by_cname as get_cdn_name_by_cname,
+    get_cdn_name_by_ip as get_cdn_name_by_ip,
+)
 from .device import device_info as device_info
 from .cron import check_cron as check_cron, check_cron_interval as check_cron_interval
 from .query_loader import load_query_plugins as load_query_plugins
@@ -48,10 +58,8 @@ from .query_loader import load_query_plugins as load_query_plugins
 
 def _normalize_cmd(cmd):
     if isinstance(cmd, (list, tuple)):
-        cmd_str = " ".join(str(part) for part in cmd)
-    else:
-        cmd_str = str(cmd)
-    return shlex.split(cmd_str)
+        return [str(part) for part in cmd]
+    return shlex.split(str(cmd))
 
 
 def load_file(path):
@@ -61,27 +69,30 @@ def load_file(path):
 
 def exec_system(cmd, **kwargs):
     cmd_args = _normalize_cmd(cmd)
-    timeout = kwargs.pop('timeout', 4 * 60 * 60)
+    timeout = kwargs.pop("timeout", 4 * 60 * 60)
 
-    completed = subprocess.run(cmd_args, timeout=timeout, check=False, close_fds=True, **kwargs)
+    completed = subprocess.run(
+        cmd_args, timeout=timeout, check=False, close_fds=True, **kwargs
+    )
 
     return completed
 
 
 def check_output(cmd, **kwargs):
     cmd_args = _normalize_cmd(cmd)
-    timeout = kwargs.pop('timeout', 4 * 60 * 60)
+    timeout = kwargs.pop("timeout", 4 * 60 * 60)
 
-    if 'stdout' in kwargs:
-        raise ValueError('stdout argument not allowed, it will be overridden.')
+    if "stdout" in kwargs:
+        raise ValueError("stdout argument not allowed, it will be overridden.")
 
-    output = subprocess.run(cmd_args, stdout=subprocess.PIPE, timeout=timeout, check=False,
-               **kwargs).stdout
+    output = subprocess.run(
+        cmd_args, stdout=subprocess.PIPE, timeout=timeout, check=False, **kwargs
+    ).stdout
     return output
 
 
 def random_choices(k=6):
-    return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
+    return "".join(random.choices(string.ascii_lowercase + string.digits, k=k))
 
 
 def gen_md5(s):
@@ -90,11 +101,15 @@ def gen_md5(s):
 
 def init_logger():
     handler = colorlog.StreamHandler()
-    handler.setFormatter(colorlog.ColoredFormatter(
-        fmt = '%(log_color)s[%(asctime)s] [%(levelname)s] '
-              '[%(threadName)s] [%(filename)s:%(lineno)d] %(message)s', datefmt = "%Y-%m-%d %H:%M:%S"))
+    handler.setFormatter(
+        colorlog.ColoredFormatter(
+            fmt="%(log_color)s[%(asctime)s] [%(levelname)s] "
+            "[%(threadName)s] [%(filename)s:%(lineno)d] %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+    )
 
-    logger = colorlog.getLogger('arlv2')
+    logger = colorlog.getLogger("arlv2")
 
     logger.setLevel(logging.INFO)
     logger.addHandler(handler)
@@ -102,15 +117,15 @@ def init_logger():
 
 
 def get_logger():
-    if 'celery' in sys.argv[0]:
+    if "celery" in sys.argv[0]:
         task_logger = get_task_logger(__name__)
         return task_logger
 
-    logger = logging.getLogger('arlv2')
+    logger = logging.getLogger("arlv2")
     if not logger.handlers:
         init_logger()
 
-    return logging.getLogger('arlv2')
+    return logging.getLogger("arlv2")
 
 
 def get_ip(domain, log_flag=True):
@@ -118,9 +133,9 @@ def get_ip(domain, log_flag=True):
     logger = get_logger()
     ips = []
     try:
-        answers = dns.resolver.resolve(domain, 'A')
+        answers = dns.resolver.resolve(domain, "A")
         for rdata in answers:
-            if rdata.address == '0.0.0.1':
+            if rdata.address == "0.0.0.1":
                 continue
             ips.append(rdata.address)
     except dns.resolver.NXDOMAIN as e:
@@ -138,7 +153,7 @@ def get_cname(domain, log_flag=True):
     logger = get_logger()
     cnames = []
     try:
-        answers = dns.resolver.resolve(domain, 'CNAME')
+        answers = dns.resolver.resolve(domain, "CNAME")
         for rdata in answers:
             cnames.append(str(rdata.target).strip(".").lower())
     except dns.resolver.NoAnswer as e:
@@ -153,12 +168,8 @@ def get_cname(domain, log_flag=True):
 def domain_parsed(domain, fail_silently=True):
     domain = domain.strip()
     try:
-        res = get_tld(domain, fix_protocol=True,  as_object=True)
-        item = {
-            "subdomain": res.subdomain,
-            "domain":res.domain,
-            "fld": res.fld
-        }
+        res = get_tld(domain, fix_protocol=True, as_object=True)
+        item = {"subdomain": res.subdomain, "domain": res.domain, "fld": res.fld}
         return item
     except Exception as e:
         if not fail_silently:
@@ -173,9 +184,9 @@ def get_fld(d):
 
 
 def gen_filename(site):
-    filename = site.replace('://', '_')
+    filename = site.replace("://", "_")
 
-    return re.sub(r'[^\w\-_\\. ]', '_', filename)
+    return re.sub(r"[^\w\-_\\. ]", "_", filename)
 
 
 def build_ret(error, data):
@@ -213,7 +224,7 @@ def kill_child_process(pid):
 
 def exit_gracefully(signum, frame):
     logger = get_logger()
-    logger.info(f'Receive signal {signum} frame {frame}')
+    logger.info(f"Receive signal {signum} frame {frame}")
     pid = os.getpid()
     kill_child_process(pid)
     parent = psutil.Process(pid)
@@ -233,15 +244,15 @@ def is_valid_exclude_ports(exclude_ports):
     """
     检查 nmap 中的排除端口范围是否合法
     """
-    port_pattern = r'(\d+(-\d+)?,?)+'
+    port_pattern = r"(\d+(-\d+)?,?)+"
 
     match = re.fullmatch(port_pattern, exclude_ports)
 
     if match:
-        parts = exclude_ports.split(',')
+        parts = exclude_ports.split(",")
         for part in parts:
-            if '-' in part:
-                start, end = map(int, part.split('-'))
+            if "-" in part:
+                start, end = map(int, part.split("-"))
                 if start > end or not (0 <= start <= 65535) or not (0 <= end <= 65535):
                     return False
             else:
@@ -252,7 +263,15 @@ def is_valid_exclude_ports(exclude_ports):
         return False
 
 
-from .user import user_login as user_login, user_login_header as user_login_header, auth as auth, user_logout as user_logout, change_pass as change_pass  # noqa: E402
+from .user import (
+    user_login as user_login,
+    user_login_header as user_login_header,
+    auth as auth,
+    user_logout as user_logout,
+    change_pass as change_pass,
+)  # noqa: E402
 from .push import message_push as message_push  # noqa: E402
-from .fingerprint import parse_human_rule as parse_human_rule, transform_rule_map as transform_rule_map  # noqa: E402
-
+from .fingerprint import (
+    parse_human_rule as parse_human_rule,
+    transform_rule_map as transform_rule_map,
+)  # noqa: E402

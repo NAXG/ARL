@@ -47,13 +47,13 @@ class Conf:
     TEMP_DIR = tempfile.gettempdir()
 
     """HTTP AUTH TOKEN"""
-    HTTP_API_AUTH_TOKEN = ''
+    HTTP_API_AUTH_TOKEN = ""
 
     """HTTP API TEST"""
     HTTP_API_AUTH_ENABLE = False
 
     """HTTP API HOST"""
-    HTTP_API_HOST = '127.0.0.1'
+    HTTP_API_HOST = "127.0.0.1"
 
     """HTTP API PORT"""
     HTTP_API_PORT = 8080
@@ -62,28 +62,32 @@ class Conf:
     SYSTEM_BINARY_DIR = os.path.join(PROJECT_DIRECTORY, "external")
 
     """JNDI LISTENER PATH"""
-    JNDI_LISTENER_PATH = os.path.join(SYSTEM_BINARY_DIR, "jndi_listener-1.0-SNAPSHOT-all.jar")
+    JNDI_LISTENER_PATH = os.path.join(
+        SYSTEM_BINARY_DIR, "jndi_listener-1.0-SNAPSHOT-all.jar"
+    )
 
     """MARSHALSEC JAR PATH"""
-    MARSHALSEC_PATH = os.path.join(SYSTEM_BINARY_DIR, "marshalsec-0.0.3-SNAPSHOT-all.jar")
+    MARSHALSEC_PATH = os.path.join(
+        SYSTEM_BINARY_DIR, "marshalsec-0.0.3-SNAPSHOT-all.jar"
+    )
 
     """RMI LISTEN PORT"""
     JNDI_RMI_PORT = 1097
 
     """RMI HOST, PUBLIC_IP """
-    JNDI_HOST = '127.0.0.1'
+    JNDI_HOST = "127.0.0.1"
 
     """RMI HTTP SERVER PORT"""
     JNDI_HTTP_PORT = 8000
 
     """RMI PAYLOAD"""
     RMI_PAYLOAD = {
-        'antServlet': 'ant',
-        'tomcat': '',
-        'tomcatServlet': 'yay',
-        'tomcatFilter': '',
-        'springController': 'yay',
-        'springInterceptor': ''
+        "antServlet": "ant",
+        "tomcat": "",
+        "tomcatServlet": "yay",
+        "tomcatFilter": "",
+        "springController": "yay",
+        "springInterceptor": "",
     }
 
     """JNDI LISTENER PAYLOAD INFO"""
@@ -121,7 +125,9 @@ class Conf:
     SHELL_PLATFORM_PORT = 80
 
     """Supported Reverse Shell Plugins List"""
-    SUPPORT_SHELL_PLUGINS_FILE = os.path.join(SYSTEM_BINARY_DIR, 'Usable_Reverse_Shell_Plugins.txt')
+    SUPPORT_SHELL_PLUGINS_FILE = os.path.join(
+        SYSTEM_BINARY_DIR, "Usable_Reverse_Shell_Plugins.txt"
+    )
 
 
 def load_yaml_config():
@@ -131,41 +137,40 @@ def load_yaml_config():
     else:
         return {}
 
-    f = open(filename, encoding='utf-8')
-    config = yaml.safe_load(f)
+    with open(filename, encoding="utf-8") as f:
+        config = yaml.safe_load(f)
     return config
 
 
 yml_config = load_yaml_config()
 
-if yml_config.get('jndi'):
-    if yml_config['jndi'].get('host'):
-        Conf.JNDI_HOST = yml_config['jndi']['host']
+if yml_config.get("jndi"):
+    if yml_config["jndi"].get("host"):
+        Conf.JNDI_HOST = yml_config["jndi"]["host"]
 
-    if yml_config['jndi'].get('port'):
-        Conf.JNDI_RMI_PORT = int(yml_config['jndi']['port'])
+    if yml_config["jndi"].get("port"):
+        Conf.JNDI_RMI_PORT = int(yml_config["jndi"]["port"])
 
-    if yml_config['jndi'].get('http-port'):
-        Conf.JNDI_HTTP_PORT = int(yml_config['jndi']['http-port'])
+    if yml_config["jndi"].get("http-port"):
+        Conf.JNDI_HTTP_PORT = int(yml_config["jndi"]["http-port"])
 
-if yml_config.get('http'):
-    if yml_config['http'].get('host'):
-        Conf.HTTP_API_HOST = yml_config['http']['host']
+if yml_config.get("http"):
+    if yml_config["http"].get("host"):
+        Conf.HTTP_API_HOST = yml_config["http"]["host"]
 
-    if yml_config['http'].get('port'):
-        Conf.HTTP_API_PORT = int(yml_config['http']['port'])
+    if yml_config["http"].get("port"):
+        Conf.HTTP_API_PORT = int(yml_config["http"]["port"])
 
-    if yml_config['http'].get('auth_token'):
-        Conf.HTTP_API_AUTH_TOKEN = yml_config['http']['auth_token']
+    if yml_config["http"].get("auth_token"):
+        Conf.HTTP_API_AUTH_TOKEN = yml_config["http"]["auth_token"]
 
-    if yml_config['http'].get('auth_enabled'):
-        Conf.HTTP_API_AUTH_ENABLE = yml_config['http']['auth_enabled']
+    if yml_config["http"].get("auth_enabled"):
+        Conf.HTTP_API_AUTH_ENABLE = yml_config["http"]["auth_enabled"]
 
 
 if yml_config.get("shell_manager"):
-    if yml_config['shell_manager'].get('host'):
+    if yml_config["shell_manager"].get("host"):
         Conf.SHELL_PLATFORM_IP = yml_config["shell_manager"]["host"]
 
-    if yml_config['shell_manager'].get('port'):
+    if yml_config["shell_manager"].get("port"):
         Conf.SHELL_PLATFORM_PORT = int(yml_config["shell_manager"]["port"])
-

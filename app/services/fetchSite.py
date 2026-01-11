@@ -31,10 +31,9 @@ class FetchSite(BaseThread):
             self.http_timeout = (10.1, 30.1)
 
     def fetch_fingerprint(self, item, content):
-        """保持 favicon_hash 类型一致（始终为 str）"""
-        # 保持类型一致：favicon_hash 始终为 str
-        favicon_hash_raw = item["favicon"].get("hash", 0)
-        favicon_hash = str(favicon_hash_raw)  # 统一转换为 str 类型
+        favicon = item.get("favicon") or {}
+        favicon_hash_raw = favicon.get("hash", 0)
+        favicon_hash = str(favicon_hash_raw)
 
         result = fetch_fingerprint(
             content=content,

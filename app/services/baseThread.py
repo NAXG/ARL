@@ -37,7 +37,7 @@ class BaseThread:
             self.semaphore.release()
 
     def _run(self):
-        deque = collections.deque(maxlen=5000)
+        threads = []
         cnt = 0
 
         for target in self.targets:
@@ -52,15 +52,13 @@ class BaseThread:
 
             self.semaphore.acquire()
             t1 = threading.Thread(target=self._work, args=(target,))
-            # 可以快速结束程序
             t1.daemon = True
             t1.start()
 
-            deque.append(t1)
+            threads.append(t1)
 
-        for t in list(deque):
-            while t.is_alive():
-                time.sleep(0.2)
+        for t in threads:
+            t.join()
 
 
 class ThreadMap(BaseThread):
