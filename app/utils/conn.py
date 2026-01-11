@@ -33,11 +33,14 @@ def http_req(url, method="get", **kwargs):
 
 
 class ConnMongo:
-    def __new__(self):
-        if not hasattr(self, "instance"):
-            self.instance = super().__new__(self)
-            self.instance.conn = MongoClient(Config.MONGO_URL)
-        return self.instance
+    instance: "ConnMongo"
+    conn: MongoClient
+
+    def __new__(cls):
+        if not hasattr(cls, "instance"):
+            cls.instance = super().__new__(cls)
+            cls.instance.conn = MongoClient(Config.MONGO_URL)
+        return cls.instance
 
 
 def conn_db(collection, db_name=None):

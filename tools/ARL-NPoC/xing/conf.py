@@ -56,7 +56,7 @@ class Conf:
     HTTP_API_HOST = "127.0.0.1"
 
     """HTTP API PORT"""
-    HTTP_API_PORT = 8080
+    HTTP_API_PORT: int = 8080
 
     """EXTERNAL BINARY DIRECTORY"""
     SYSTEM_BINARY_DIR = os.path.join(PROJECT_DIRECTORY, "external")
@@ -72,13 +72,13 @@ class Conf:
     )
 
     """RMI LISTEN PORT"""
-    JNDI_RMI_PORT = 1097
+    JNDI_RMI_PORT: int = 1097
 
     """RMI HOST, PUBLIC_IP """
     JNDI_HOST = "127.0.0.1"
 
     """RMI HTTP SERVER PORT"""
-    JNDI_HTTP_PORT = 8000
+    JNDI_HTTP_PORT: int = 8000
 
     """RMI PAYLOAD"""
     RMI_PAYLOAD = {
@@ -122,7 +122,7 @@ class Conf:
     SHELL_PLATFORM_IP = "127.0.0.1"
 
     """Reverse Shell Platform Port"""
-    SHELL_PLATFORM_PORT = 80
+    SHELL_PLATFORM_PORT: int = 80
 
     """Supported Reverse Shell Plugins List"""
     SUPPORT_SHELL_PLUGINS_FILE = os.path.join(
