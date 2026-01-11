@@ -1,6 +1,7 @@
 from app import utils
-from app.modules import  DomainInfo
+from app.modules import DomainInfo
 from .baseThread import BaseThread
+
 logger = utils.get_logger()
 
 
@@ -9,7 +10,7 @@ class ResolverDomain(BaseThread):
         super().__init__(domains, concurrency=concurrency)
         self.resolver_map = {}
 
-    '''
+    """
     {
         "api.baike.baidu.com":[
             "180.97.93.62",
@@ -23,14 +24,15 @@ class ResolverDomain(BaseThread):
             "180.101.49.11"
         ]
     }
-    '''
-    def work(self, domain):
-        curr_domain = domain
-        if isinstance(domain, dict):
-            curr_domain = domain.get("domain")
+    """
 
-        elif isinstance(domain, DomainInfo):
-            curr_domain = domain.domain
+    def work(self, target):
+        curr_domain = target
+        if isinstance(target, dict):
+            curr_domain = target.get("domain")
+
+        elif isinstance(target, DomainInfo):
+            curr_domain = target.domain
 
         if not curr_domain:
             return

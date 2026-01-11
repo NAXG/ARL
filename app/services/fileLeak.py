@@ -13,13 +13,14 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logger = utils.get_logger()
 
 min_length = 100
-max_length = 50*1024
+max_length = 50 * 1024
 read_timeout = 60
 bool_ratio = 0.8
 concurrency_count = 6
 
+
 class URL:
-    __slots__ = ('url', 'payload', '_scope', '_path')
+    __slots__ = ("url", "payload", "_scope", "_path")
 
     def __init__(self, url, payload):
         self.url = url
@@ -38,7 +39,6 @@ class URL:
 
     def __hash__(self):
         return hash(self.url)
-
 
     def __str__(self):
         return self.url
@@ -69,8 +69,9 @@ class URL:
 
         return self._path
 
+
 class HTTPReq:
-    def __init__(self, url: URL , read_timeout = 60, max_length = 50*1024):
+    def __init__(self, url: URL, read_timeout=60, max_length=50 * 1024):
         self.url = url
         self.read_timeout = read_timeout
         self.max_length = max_length
@@ -79,8 +80,8 @@ class HTTPReq:
         self.content = None
 
     def req(self):
-        content = b''
-        conn = utils.http_req(self.url.url, 'get', timeout=(3, 6), stream=True)
+        content = b""
+        conn = utils.http_req(self.url.url, "get", timeout=(3, 6), stream=True)
         self.conn = conn
         start_time = time.time()
         for data in conn.iter_content(chunk_size=512):
@@ -91,7 +92,7 @@ class HTTPReq:
                 break
 
         self.status_code = conn.status_code
-        self.content = content[:self.max_length]
+        self.content = content[: self.max_length]
 
         content_len = self.conn.headers.get("Content-Length", len(self.content))
         self.conn.headers["Content-Length"] = content_len
@@ -99,8 +100,6 @@ class HTTPReq:
         conn.close()
 
         return self.status_code, self.content
-
-
 
 
 class Page:
@@ -115,7 +114,16 @@ class Page:
         self._location_url = None
         self._is_back_up_path = None
         self._is_back_up_page = None
-        self.back_up_suffix_list = [".tar", ".tar.gz", ".zip", ".rar", ".7z", ".bz2", ".gz", ".war"]
+        self.back_up_suffix_list = [
+            ".tar",
+            ".tar.gz",
+            ".zip",
+            ".rar",
+            ".7z",
+            ".bz2",
+            ".gz",
+            ".war",
+        ]
 
     def __eq__(self, other):
         if isinstance(other, Page):
@@ -129,9 +137,11 @@ class Page:
                 self_new_url = urljoin(self.url.url, self_new_url)
                 other_new_url = urljoin(other.url.url, other_new_url)
 
-                if self_new_url.endswith(self.url.payload+ "/"):
+                if self_new_url.endswith(self.url.payload + "/"):
                     if other_new_url.endswith(other.url.payload + "/"):
-                        if not self.url.payload.endswith("/") and not other.url.payload.endswith("/"):
+                        if not self.url.payload.endswith(
+                            "/"
+                        ) and not other.url.payload.endswith("/"):
                             return False
 
                 self_new_path = urlparse(self_new_url).path
@@ -142,7 +152,9 @@ class Page:
 
                 if urlparse(self_new_url).netloc == urlparse(other_new_url).netloc:
                     if path1 == path2 and self_new_path.endswith("$AAAA$/"):
-                        if not self.url.payload.endswith("/") and not other.url.payload.endswith("/"):
+                        if not self.url.payload.endswith(
+                            "/"
+                        ) and not other.url.payload.endswith("/"):
                             return False
 
                 if path1 == path2:
@@ -158,16 +170,20 @@ class Page:
                 self.times += 1
                 return True
 
-            min_len_content = min(len(self_content),  len(other_content))
-            if abs(len(self_content) - len(other_content)) >= max(500, int(min_len_content*0.1)):
+            min_len_content = min(len(self_content), len(other_content))
+            if abs(len(self_content) - len(other_content)) >= max(
+                500, int(min_len_content * 0.1)
+            ):
                 return False
 
             if len(self.title) > 2 and self.title == other.title:
                 return True
 
-            quick_ratio = difflib.SequenceMatcher(None, self_content, other_content).quick_ratio()
+            quick_ratio = difflib.SequenceMatcher(
+                None, self_content, other_content
+            ).quick_ratio()
             if quick_ratio >= bool_ratio:
-                self.times +=1
+                self.times += 1
                 return True
             else:
                 return False
@@ -187,13 +203,12 @@ class Page:
         if self._location_url is None:
             location = self.raw_req.conn.headers.get("Location", "")
             new_url = urljoin(self.url.url, location)
-            self._location_url =  new_url.split("?")[0]
+            self._location_url = new_url.split("?")[0]
 
         return self._location_url
 
     def is_302(self):
         return self.status_code in [301, 302, 307, 308]
-
 
     @property
     def title(self) -> str:
@@ -230,7 +245,7 @@ class Page:
         return msg
 
     def __repr__(self):
-        return "<Page> "+ self.__str__()
+        return "<Page> " + self.__str__()
 
     def dump_json(self):
         item = {
@@ -245,16 +260,27 @@ class Page:
 
 class FileLeak(BaseThread):
     def __init__(self, target, urls, concurrency=8):
-        super().__init__(urls, concurrency = concurrency)
+        super().__init__(urls, concurrency=concurrency)
         self.target = target.rstrip("/") + "/"
         self.urls = urls
         self.path_404 = "not_found_2222_111"
         self.page404_set = set()
         self.page200_set = set()
         self.page200_code_list = [200, 301, 302, 500]
-        self.page404_title = ["404", "不存在", "错误", "403", "禁止访问", "请求含有不合法的参数"]
-        self.page404_title.extend(["网络防火墙", "访问拦截", "由于安全原因JSP功能默认关闭"])
-        self.page404_content = [b'<script>document.getElementById("a-link").click();</script>']
+        self.page404_title = [
+            "404",
+            "不存在",
+            "错误",
+            "403",
+            "禁止访问",
+            "请求含有不合法的参数",
+        ]
+        self.page404_title.extend(
+            ["网络防火墙", "访问拦截", "由于安全原因JSP功能默认关闭"]
+        )
+        self.page404_content = [
+            b'<script>document.getElementById("a-link").click();</script>'
+        ]
         self.location404 = ["/auth/login/", "error.html"]
         self.page_all = []
         self.error_times = 0
@@ -262,12 +288,11 @@ class FileLeak(BaseThread):
         self.skip_302 = False
         self.location_404_url = set()
 
-    def work(self, url):
+    def work(self, target):
         if self.error_times >= 20:
             return
-        req = self.http_req(url)
+        req = self.http_req(target)
         page = Page(req)
-
 
         if self.record_page:
             self.page_all.append(page)
@@ -278,7 +303,6 @@ class FileLeak(BaseThread):
 
         if page not in self.page404_set:
             self.page200_set.add(page)
-
 
     def build_404_page(self):
         url_404 = URL(self.target + self.path_404, self.path_404)
@@ -291,7 +315,9 @@ class FileLeak(BaseThread):
         if page_404.is_302():
             self.location_404_url.add(page_404.location_url)
 
-        if page_404.is_302() and page_404.location_url.endswith(page_404.url.payload + "/"):
+        if page_404.is_302() and page_404.location_url.endswith(
+            page_404.url.payload + "/"
+        ):
             self.skip_302 = True
 
     def run(self):
@@ -367,12 +393,13 @@ class FileLeak(BaseThread):
                 page_404 = Page(self.http_req(url_404))
                 self.page404_set.add(page_404)
 
-                if page_404.is_302() and page_404.location_url.endswith(page_404.url.payload + "/"):
+                if page_404.is_302() and page_404.location_url.endswith(
+                    page_404.url.payload + "/"
+                ):
                     self.page404_set.add(page)
                     self.skip_302 = True
 
         self.page200_set -= self.page404_set
-
 
     def gen_check_url(self, url: URL):
         payload = url.payload
@@ -403,11 +430,9 @@ class FileLeak(BaseThread):
 
         return [end_check_url]
 
+
 def normal_url(url):
-    scheme_map = {
-        'http': 80,
-        "https": 443
-    }
+    scheme_map = {"http": 80, "https": 443}
     o = urlparse(url)
 
     scheme = o.scheme
@@ -419,7 +444,6 @@ def normal_url(url):
 
     if o.path == "":
         path = "/"
-
 
     if o.port == scheme_map[o.scheme] or o.port is None:
         ret_url = f"{scheme}://{hostname}{path}"
@@ -433,26 +457,39 @@ def normal_url(url):
     return ret_url
 
 
- 
-
-
-
-
 class GenBackDicts:
     def __init__(self, url):
         self.target = normal_url(url)
-        self.suffixs = [".tar", ".tar.gz", ".zip", ".rar", ".7z", ".bz2", ".gz", "_bak.rar", ".war"]
+        self.suffixs = [
+            ".tar",
+            ".tar.gz",
+            ".zip",
+            ".rar",
+            ".7z",
+            ".bz2",
+            ".gz",
+            "_bak.rar",
+            ".war",
+        ]
         self.backup_path_deep = 7
         self.dymaic_dicts_deep = 5
         self.path = urlparse(self.target).path
-
 
     def gen_dict_from_domain(self):
         result = []
         res = get_tld(self.target, as_object=True, fail_silently=True)
         if res:
-            result = [x for x in [str(res.parsed_url.netloc).split(":")[0], res.fld, res.subdomain,
-                                 res.domain] + res.subdomain.split(".") if x != ""]
+            result = [
+                x
+                for x in [
+                    str(res.parsed_url.netloc).split(":")[0],
+                    res.fld,
+                    res.subdomain,
+                    res.domain,
+                ]
+                + res.subdomain.split(".")
+                if x != ""
+            ]
 
         return set(result)
 
@@ -466,21 +503,20 @@ class GenBackDicts:
     def gen_dict_from_path(self):
         out = []
         dirs = os.path.dirname(self.path).split("/")
-        if len(dirs)> 1 and dirs[-1]:
+        if len(dirs) > 1 and dirs[-1]:
             out = self.gen_backup_dicts([dirs[-1]])
         return out
-
 
     def gen(self):
         ret = set()
         names = self.gen_dict_from_domain()
 
-        for x in  self.gen_backup_dicts(names):
+        for x in self.gen_backup_dicts(names):
             ret.add(URL(urljoin(self.target, x), x))
 
-        for x in  self.gen_dict_from_path():
+        for x in self.gen_dict_from_path():
             ret.add(URL(urljoin(self.target, x), x))
-            ret.add(URL(urljoin(self.target, "./../"+ x), x))
+            ret.add(URL(urljoin(self.target, "./../" + x), x))
 
         return ret
 
@@ -497,18 +533,18 @@ class GenURL:
             u = URL(f"{target}/{d.strip()}", d.strip())
             self.urls.add(u)
 
-    def gen(self, flag = True):
+    def gen(self, flag=True):
         if urlparse(self.target).path == "/":
             self.dicts |= GenBackDicts(self.target).gen_dict_from_domain()
 
         self.build_urls()
         if flag:
-            self.urls |=  GenBackDicts(self.target).gen()
+            self.urls |= GenBackDicts(self.target).gen()
 
         return self.urls
 
 
-def file_leak(targets, dicts, gen_dict = True) -> list[Page]:
+def file_leak(targets, dicts, gen_dict=True) -> list[Page]:
     all_gen_url = set()
     map_url = dict()
 
@@ -541,4 +577,3 @@ def file_leak(targets, dicts, gen_dict = True) -> list[Page]:
             logger.exception(e)
 
     return ret
-

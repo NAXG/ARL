@@ -21,18 +21,15 @@ class AssetSiteCompare(BaseThread):
         self.mutex = threading.Lock()
         self.site_change_map = {}
 
-    def work(self, site):
-        if is_black_asset_site(site):
-            logger.debug(f"{site} in black asset site")
+    def work(self, target):
+        if is_black_asset_site(target):
+            logger.debug(f"{target} in black asset site")
             return
 
-        conn = utils.http_req(site)
-        item = {
-            "title": utils.get_title(conn.content),
-            "status": conn.status_code
-        }
+        conn = utils.http_req(target)
+        item = {"title": utils.get_title(conn.content), "status": conn.status_code}
         with self.mutex:
-            self.new_site_info_map[site] = item
+            self.new_site_info_map[target] = item
 
     def compare(self):
         site_info_list = asset_site.find_site_info_by_scope_id(scope_id=self._scope_id)
@@ -86,11 +83,7 @@ class AssetSiteMonitor:
         asset_site_id = old_site_info["_id"]
 
         if curr_status != old_status:
-            item = {
-                "site": curr_site,
-                "status": curr_status,
-                "old_status": old_status
-            }
+            item = {"site": curr_site, "status": curr_status, "old_status": old_status}
             logger.info(f"{curr_site} status {old_status} => {curr_status}")
 
             self.update_asset_site(asset_site_id, site_info)
@@ -105,11 +98,7 @@ class AssetSiteMonitor:
         asset_site_id = old_site_info["_id"]
 
         if curr_title != old_title:
-            item = {
-                "site": curr_site,
-                "title": curr_title,
-                "old_title": old_title
-            }
+            item = {"site": curr_site, "title": curr_title, "old_title": old_title}
 
             logger.info(f"{curr_site} title {old_title} => {curr_title}")
 
@@ -152,9 +141,7 @@ class AssetSiteMonitor:
 
     # 对新发现的资产分组站点进行删除操作并添加一条新的数据
     def update_asset_site(self, asset_id, site_info):
-        query = {
-            "_id": asset_id
-        }
+        query = {"_id": asset_id}
         copy_site_info = site_info.copy()
         copy_site_info["scope_id"] = self.scope_id
         curr_date = utils.curr_date_obj()
@@ -168,7 +155,7 @@ class AssetSiteMonitor:
         html = ""
         style = 'style="border: 0.5pt solid; font-size: 14px;"'
 
-        table_start = '''<table style="border-collapse: collapse;">
+        table_start = """<table style="border-collapse: collapse;">
                     <thead>
                         <tr>
                             <th style="border: 0.5pt solid;">编号</th>
@@ -177,24 +164,24 @@ class AssetSiteMonitor:
                             <th style="border: 0.5pt solid;">当前状态码</th>
                         </tr>
                     </thead>
-                    <tbody>\n'''
+                    <tbody>\n"""
         html += table_start
 
         rows = [
-            f'<tr><td {style}> {i + 1} </td><td {style}> {item["site"]} </td><td {style}>'
-            f'{item["old_status"]}</td> <td {style}> {item["status"]} </td></tr>\n'
+            f"<tr><td {style}> {i + 1} </td><td {style}> {item['site']} </td><td {style}>"
+            f"{item['old_status']}</td> <td {style}> {item['status']} </td></tr>\n"
             for i, item in enumerate(self.status_change_list[:10])
         ]
-        html += ''.join(rows)
+        html += "".join(rows)
 
-        html += '</tbody></table>'
+        html += "</tbody></table>"
         return html
 
     def build_title_html_report(self):
         html = ""
         style = 'style="border: 0.5pt solid; font-size: 14px;"'
 
-        table_start = '''<table style="border-collapse: collapse;">
+        table_start = """<table style="border-collapse: collapse;">
                     <thead>
                         <tr>
                             <th style="border: 0.5pt solid;">编号</th>
@@ -203,22 +190,23 @@ class AssetSiteMonitor:
                             <th style="border: 0.5pt solid;">当前标题</th>
                         </tr>
                     </thead>
-                    <tbody>\n'''
+                    <tbody>\n"""
         html += table_start
 
         rows = [
             (
-                lambda t, o: f'<tr><td {style}> {i + 1} </td><td {style}> {item["site"]} </td><td {style}>'
-                f'{o}</td> <td {style}> {t} </td></tr>\n'
+                lambda t,
+                o: f"<tr><td {style}> {i + 1} </td><td {style}> {item['site']} </td><td {style}>"
+                f"{o}</td> <td {style}> {t} </td></tr>\n"
             )(
-                item["title"].replace('>', "&#x3e;").replace('<', "&#x3c;"),
-                item["old_title"].replace('>', "&#x3e;").replace('<', "&#x3c;")
+                item["title"].replace(">", "&#x3e;").replace("<", "&#x3c;"),
+                item["old_title"].replace(">", "&#x3e;").replace("<", "&#x3c;"),
             )
             for i, item in enumerate(self.title_change_list[:10])
         ]
-        html += ''.join(rows)
+        html += "".join(rows)
 
-        html += '</tbody></table>'
+        html += "</tbody></table>"
         return html
 
     def build_html_report(self):
@@ -238,7 +226,7 @@ class AssetSiteMonitor:
 
     def build_status_markdown_report(self):
         markdown = "状态码变化\n\n"
-        markdown += ''.join(
+        markdown += "".join(
             f"{i + 1}. [{item['site']}]({item['site']})  {item['old_status']} => {item['status']} \n"
             for i, item in enumerate(self.status_change_list[:5])
         )
@@ -246,7 +234,7 @@ class AssetSiteMonitor:
 
     def build_title_markdown_report(self):
         markdown = "标题变化\n\n"
-        markdown += ''.join(
+        markdown += "".join(
             f"{i + 1}. [{item['site']}]({item['site']})  {item['old_title']} => {item['title']} \n"
             for i, item in enumerate(self.title_change_list[:5])
         )
@@ -297,8 +285,7 @@ class Domain2SiteMonitor:
         logger.info(f"load {len(domains)} domain, scope_id:{self.scope_id}")
 
         have_domain_site_list = [
-            utils.get_hostname(site).split(":")[0]
-            for site in sites
+            utils.get_hostname(site).split(":")[0] for site in sites
         ]
 
         no_domain_site_list = set(domains) - set(have_domain_site_list)
@@ -340,11 +327,12 @@ class Domain2SiteMonitor:
             curr_date = utils.curr_date_obj()
             site_info["save_date"] = curr_date
             site_info["update_date"] = curr_date
-            utils.conn_db('asset_site').insert_one(site_info)
+            utils.conn_db("asset_site").insert_one(site_info)
         logger.info(f"save asset_site {len(self.site_info_list)} to {self.scope_id}")
 
     def build_report(self):
         from app.utils.push import dict2table, dict2dingding_mark
+
         info_list = []
         tr_cnt = 0
         for site_info in self.site_info_list:
@@ -353,10 +341,10 @@ class Domain2SiteMonitor:
                 continue
 
             info = {
-                "站点": site_info['site'],
-                "标题": site_info['title'],
-                "状态码": site_info['status'],
-                "页面长度": site_info['body_length']
+                "站点": site_info["site"],
+                "标题": site_info["title"],
+                "状态码": site_info["status"],
+                "页面长度": site_info["body_length"],
             }
             info_list.append(info)
 

@@ -4,6 +4,7 @@ import time
 import requests.exceptions
 from lxml import etree
 from app import utils
+
 logger = utils.get_logger()
 
 
@@ -13,7 +14,7 @@ class BaseThread:
         self.semaphore = threading.Semaphore(concurrency)
         self.targets = targets
 
-    def work(self, site):
+    def work(self, target):
         raise NotImplementedError()
 
     def _work(self, url):
@@ -72,14 +73,14 @@ class ThreadMap(BaseThread):
         self._fun = fun
         self._result_map = {}
 
-    def work(self, item):
+    def work(self, target):
         if self._arg:
-            result = self._fun(item, self._arg)
+            result = self._fun(target, self._arg)
         else:
-            result = self._fun(item)
+            result = self._fun(target)
 
         if result:
-            self._result_map[str(item)] = result
+            self._result_map[str(target)] = result
 
     def run(self):
         self._run()
@@ -89,5 +90,3 @@ class ThreadMap(BaseThread):
 def thread_map(fun, items, arg=None, concurrency=6):
     t = ThreadMap(fun=fun, items=items, arg=arg, concurrency=concurrency)
     return t.run()
-
-

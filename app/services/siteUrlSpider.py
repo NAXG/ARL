@@ -112,17 +112,28 @@ class SiteURLSpider:
         self.done_url_list = URLSimilarList()
         self.deep_num = deep_num
         self.all_url_list = URLSimilarList()
-        self.max_url = max(60, len(entry_urls)*6)
+        self.max_url = max(60, len(entry_urls) * 6)
         self.scope_url = entry_urls[0]
 
-        self.tagMap = [{'name': 'a', 'attr': 'href', 'type': URLTYPE.document},
-                       {'name': 'form', 'attr': 'action', 'type': URLTYPE.document},
-                       {'name': 'iframe', 'attr': 'src', 'type': URLTYPE.document},
-                       #{'name': 'script', 'attr': 'src', 'type': URLTYPE.js},
-                       #{'name': 'link', 'attr': 'href', 'type': URLTYPE.css}
-                       ]
+        self.tagMap = [
+            {"name": "a", "attr": "href", "type": URLTYPE.document},
+            {"name": "form", "attr": "action", "type": URLTYPE.document},
+            {"name": "iframe", "attr": "src", "type": URLTYPE.document},
+            # {'name': 'script', 'attr': 'src', 'type': URLTYPE.js},
+            # {'name': 'link', 'attr': 'href', 'type': URLTYPE.css}
+        ]
 
-        self.ignore_ext = [".pdf", ".xls", ".xlsx", ".doc", ".docx", ".ppt", ".pptx", ".zip", ".rar"]
+        self.ignore_ext = [
+            ".pdf",
+            ".xls",
+            ".xlsx",
+            ".doc",
+            ".docx",
+            ".ppt",
+            ".pptx",
+            ".zip",
+            ".rar",
+        ]
         self.ignore_ext.extend([".png", ".jpg", ".gif", ".js", ".css", ".ico"])
 
     def get_urls(self, entry_url):
@@ -142,7 +153,9 @@ class SiteURLSpider:
                     return URLSimilarList()
 
                 url_info = URLInfo(entry_url, _url, URLTYPE.document)
-                if utils.same_netloc(entry_url, _url) and (url_info not in self.done_url_list):
+                if utils.same_netloc(entry_url, _url) and (
+                    url_info not in self.done_url_list
+                ):
                     entry_url = _url
                     logger.info(f"[{len(self.done_url_list)}] req 302 = > {entry_url}")
                     conn = utils.http_req(_url)
@@ -156,9 +169,9 @@ class SiteURLSpider:
             dom = pq(html)
             ret_url = URLSimilarList()
             for tag in self.tagMap:
-                items = dom(tag['name']).items()
+                items = dom(tag["name"]).items()
                 for i in items:
-                    _url = urljoin(entry_url, i.attr(tag['attr'])).strip()
+                    _url = urljoin(entry_url, i.attr(tag["attr"])).strip()
                     _url = utils.normal_url(_url)
                     if _url is None:
                         continue
@@ -206,10 +219,10 @@ class SiteURLSpiderThread(BaseThread):
         self.site_url_map = {}
         self.deep_num = deep_num
 
-    def work(self, entry_urls):
-        # entry_urls 是一个数组，第一个是当前站点
-        site = entry_urls[0]
-        self.site_url_map[site] = site_spider(entry_urls, self.deep_num)
+    def work(self, target):
+        # target 是一个数组，第一个是当前站点
+        site = target[0]
+        self.site_url_map[site] = site_spider(target, self.deep_num)
 
     def run(self):
         t1 = time.time()
@@ -239,13 +252,3 @@ def site_spider(entry_url, deep_num=3):
             ret.append(x.crawl_url)
 
     return ret
-
-
-
-
-
-
-
-
-
-

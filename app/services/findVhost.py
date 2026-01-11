@@ -33,10 +33,15 @@ class Page:
             if abs(len(self.title) - len(other.title)) >= 3:
                 return False
 
-            if self.status_code == 200 and abs(self.body_length - other.body_length) <= 3:
+            if (
+                self.status_code == 200
+                and abs(self.body_length - other.body_length) <= 3
+            ):
                 return True
 
-            quick_ratio = difflib.SequenceMatcher(None, self.content, other.content).quick_ratio()
+            quick_ratio = difflib.SequenceMatcher(
+                None, self.content, other.content
+            ).quick_ratio()
             return quick_ratio > bool_ratio
         else:
             return False
@@ -56,7 +61,7 @@ class Page:
             "domain": self.domain,
             "body_length": self.body_length,
             "title": self.title,
-            "status_code": self.status_code
+            "status_code": self.status_code,
         }
         return json.dumps(item, ensure_ascii=False)
 
@@ -66,7 +71,7 @@ class Page:
             "domain": self.domain,
             "body_length": self.body_length,
             "title": self.title,
-            "status_code": self.status_code
+            "status_code": self.status_code,
         }
         return item
 
@@ -87,21 +92,24 @@ class BruteVhost(BaseThread):
 
     def brute_domain(self, domain):
         try:
-            headers = {
-                "Host": f"{domain}"
-            }
+            headers = {"Host": f"{domain}"}
             res = http_req(self.url_ip, headers=headers, timeout=(3, 6))
             content = res.content.replace(domain.encode(), b"")
             res_type = res.headers.get("Content-Type", "")
-            page = Page(url=self.url_ip, domain=domain, content=content,
-                        status_code=res.status_code, content_type=res_type)
+            page = Page(
+                url=self.url_ip,
+                domain=domain,
+                content=content,
+                status_code=res.status_code,
+                content_type=res_type,
+            )
             return page
         except Exception as e:
             logger.debug(f"{self.url_ip} {domain} {str(e)}")
             if isinstance(e, (ConnectTimeout, ReadTimeout)):
                 self.error_cnt += 1
 
-    def work(self, domain):
+    def work(self, target):
         if self.error_cnt >= 10:
             if not self.print_skip_warning_flag:
                 logger.warning(f"skip {self.url_ip}")
@@ -111,14 +119,14 @@ class BruteVhost(BaseThread):
 
         self.cnt += 1
         if self.cnt % 20 == 1:
-            logger.debug(f"[{self.cnt}/{self.total_cnt}] >>> {self.url_ip} {domain}")
+            logger.debug(f"[{self.cnt}/{self.total_cnt}] >>> {self.url_ip} {target}")
 
-        page = self.brute_domain(domain)
+        page = self.brute_domain(target)
         if not page:
             return
 
         # 针对性处理下
-        if '百度一下' in page.title:
+        if "百度一下" in page.title:
             return
 
         if page.status_code not in [301, 302, 200]:
@@ -142,7 +150,12 @@ class BruteVhost(BaseThread):
             self.success_set.add(page)
 
     def run(self):
-        domain_404_list = [self.ip, "not123abc" + self.domains[0], "wfaz.zljhaz.com", "n0ta." + self.domains[0]]
+        domain_404_list = [
+            self.ip,
+            "not123abc" + self.domains[0],
+            "wfaz.zljhaz.com",
+            "n0ta." + self.domains[0],
+        ]
         logger.debug(f">> build 404 page {self.scheme}://{self.ip}")
         for item in domain_404_list:
             page = self.brute_domain(item)
@@ -159,8 +172,7 @@ class BruteVhost(BaseThread):
 def brute_vhost(ip, args):
     domains, scheme = args
     logger.info(f"brute_vhost >>> ip: {ip}, domain: {len(domains)}, scheme: {scheme}")
-    brute = BruteVhost(ip=ip, domains=domains, scheme=scheme,
-                       concurrency=8)
+    brute = BruteVhost(ip=ip, domains=domains, scheme=scheme, concurrency=8)
     return brute.run()
 
 
@@ -170,7 +182,9 @@ def find_vhost(ips, domains):
     same_set = set()
 
     for scheme in target_scheme:
-        result_map = thread_map(brute_vhost, items=ips, arg=(domains, scheme), concurrency=3)
+        result_map = thread_map(
+            brute_vhost, items=ips, arg=(domains, scheme), concurrency=3
+        )
         for ip in result_map:
             page_set = result_map[ip]
             for page in page_set:
@@ -183,7 +197,3 @@ def find_vhost(ips, domains):
                 results.append(page.dump_json_obj())
 
     return results
-
-
-
-

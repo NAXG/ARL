@@ -1,8 +1,8 @@
-
 from app import utils
 from .baseThread import BaseThread
 
 import requests.exceptions
+
 logger = utils.get_logger()
 
 
@@ -38,22 +38,22 @@ class CheckHTTP(BaseThread):
 
         item = {
             "status": conn.status_code,
-            "content-type": conn.headers.get("Content-Type", "")
+            "content-type": conn.headers.get("Content-Type", ""),
         }
 
         return item
 
-    def work(self, url):
+    def work(self, target):
         try:
-            out = self.check(url)
+            out = self.check(target)
             if out is not None:
-                self.checkout_map[url] = out
+                self.checkout_map[target] = out
 
         except requests.exceptions.RequestException:
             pass
 
         except Exception as e:
-            logger.warning(f"error on url {url}")
+            logger.warning(f"error on url {target}")
             logger.warning(e)
 
     def run(self):

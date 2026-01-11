@@ -18,7 +18,7 @@ class WebAnalyze(BaseThread):
         super().__init__(sites, concurrency=concurrency)
         self.analyze_map = {}
 
-    def work(self, site):
+    def work(self, target):
         # 使用局部变量优化频繁调用的函数（移到 try 块外避免 NameError）
         analyze_func = analyze
         logger_debug = logger.debug
@@ -29,10 +29,10 @@ class WebAnalyze(BaseThread):
             # Full scan requires Firefox browser for better detection
             # The analyze function returns a dictionary where keys are URLs
             # and values are dictionaries of detected technologies.
-            results = analyze_func(url=site, threads=2, scan_type="balanced")
+            results = analyze_func(url=target, threads=2, scan_type="balanced")
 
             # 使用推导式替代循环构建列表（PEP 709 优化）
-            site_results = results.get(site, {})
+            site_results = results.get(target, {})
             apps = (
                 [
                     {
@@ -57,12 +57,12 @@ class WebAnalyze(BaseThread):
                 else []
             )
 
-            self.analyze_map[site] = apps
-            logger_debug(f"WebAnalyze successful for {site}")
+            self.analyze_map[target] = apps
+            logger_debug(f"WebAnalyze successful for {target}")
 
         except Exception as exc:
-            logger_warning(f"WebAnalyze failed on {site}: {exc}")
-            self.analyze_map[site] = []
+            logger_warning(f"WebAnalyze failed on {target}: {exc}")
+            self.analyze_map[target] = []
 
     def run(self):
         t1 = time.time()
