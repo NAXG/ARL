@@ -47,7 +47,6 @@ def get_ip_domain_list(target):
 
 
 def build_task_data(task_name, task_target, task_type, task_tag, options):
-
     # 检查是不是IP ,域名任务等
     avail_task_type = [TaskType.IP, TaskType.DOMAIN, TaskType.RISK_CRUISING]
     if task_type not in avail_task_type:
@@ -69,21 +68,21 @@ def build_task_data(task_name, task_target, task_type, task_tag, options):
             "domain_brute": False,
             "alt_dns": False,
             "dns_query_plugin": False,
-            "arl_search": False
+            "arl_search": False,
         }
         options_cp.update(disable_options)
 
     task_data = {
-        'name': task_name,
-        'target': task_target,
-        'start_time': '-',
-        'status': TaskStatus.WAITING,
-        'type': task_type,
+        "name": task_name,
+        "target": task_target,
+        "start_time": "-",
+        "status": TaskStatus.WAITING,
+        "type": task_type,
         "task_tag": task_tag,
-        'options': options_cp,
+        "options": options_cp,
         "end_time": "-",
         "service": [],
-        "celery_id": ""
+        "celery_id": "",
     }
 
     # 单独对风险巡航任务处理
@@ -108,7 +107,7 @@ def submit_task(task_data):
     from app import celerytask
 
     target = task_data["target"]
-    utils.conn_db('task').insert_one(task_data)
+    utils.conn_db("task").insert_one(task_data)
     task_id = str(task_data.pop("_id"))
     task_data["task_id"] = task_id
 
@@ -129,21 +128,20 @@ def submit_task(task_data):
 
     assert celery_action
 
-    task_options = {
-        "celery_action": celery_action,
-        "data": task_data
-    }
+    task_options = {"celery_action": celery_action, "data": task_data}
 
     try:
-        celery_id = celerytask.arl_task.delay(options=task_options)
+        celery_id = celerytask.arl_task.delay(options=task_options)  # type: ignore[attr-defined]
         logger.info(f"target:{target} task_id:{task_id} celery_id:{celery_id}")
 
         values = {"$set": {"celery_id": str(celery_id)}}
         task_data["celery_id"] = str(celery_id)
-        utils.conn_db('task').update_one({"_id": bson.ObjectId(task_id)}, values)
+        utils.conn_db("task").update_one({"_id": bson.ObjectId(task_id)}, values)
 
     except Exception as e:
-        utils.conn_db('task').delete_one({"_id": bson.ObjectId(task_id), "status": TaskStatus.WAITING})
+        utils.conn_db("task").delete_one(
+            {"_id": bson.ObjectId(task_id), "status": TaskStatus.WAITING}
+        )
         logger.info(f"下发失败 {target}")
         raise e
 
@@ -158,18 +156,26 @@ def submit_task_task(target, name, options):
 
     if ip_list:
         ip_target = " ".join(ip_list)
-        task_data = build_task_data(task_name=name, task_target=ip_target,
-                                    task_type=TaskType.IP, task_tag=TaskTag.TASK,
-                                    options=options)
+        task_data = build_task_data(
+            task_name=name,
+            task_target=ip_target,
+            task_type=TaskType.IP,
+            task_tag=TaskTag.TASK,
+            options=options,
+        )
 
         task_data = submit_task(task_data)
         task_data_list.append(task_data)
 
     if domain_list:
         for domain_target in domain_list:
-            task_data = build_task_data(task_name=name, task_target=domain_target,
-                                        task_type=TaskType.DOMAIN, task_tag=TaskTag.TASK,
-                                        options=options)
+            task_data = build_task_data(
+                task_name=name,
+                task_target=domain_target,
+                task_type=TaskType.DOMAIN,
+                task_tag=TaskTag.TASK,
+                options=options,
+            )
             task_data = submit_task(task_data)
             task_data_list.append(task_data)
 
@@ -180,9 +186,13 @@ def submit_task_task(target, name, options):
 def submit_risk_cruising(target, name, options):
     target_lists = target2list(target)
     task_data_list = []
-    task_data = build_task_data(task_name=name, task_target=target_lists,
-                                task_type=TaskType.RISK_CRUISING, task_tag=TaskTag.RISK_CRUISING,
-                                options=options)
+    task_data = build_task_data(
+        task_name=name,
+        task_target=target_lists,
+        task_type=TaskType.RISK_CRUISING,
+        task_tag=TaskTag.RISK_CRUISING,
+        options=options,
+    )
 
     task_data = submit_task(task_data)
     task_data_list.append(task_data)
@@ -192,24 +202,24 @@ def submit_risk_cruising(target, name, options):
 
 def submit_add_asset_site_task(task_name: str, target: list, options: dict) -> dict:
     task_data = {
-        'name': task_name,
-        'target': f"站点：{len(target)}",
-        'start_time': '-',
-        'status': TaskStatus.WAITING,
-        'type': TaskType.ASSET_SITE_ADD,
+        "name": task_name,
+        "target": f"站点：{len(target)}",
+        "start_time": "-",
+        "status": TaskStatus.WAITING,
+        "type": TaskType.ASSET_SITE_ADD,
         "task_tag": TaskTag.RISK_CRUISING,
-        'options': options,
+        "options": options,
         "end_time": "-",
         "service": [],
         "cruising_target": target,
-        "celery_id": ""
+        "celery_id": "",
     }
     task_data = submit_task(task_data)
     return task_data
 
 
 def get_task_data(task_id):
-    task_data = utils.conn_db('task').find_one({'_id': bson.ObjectId(task_id)})
+    task_data = utils.conn_db("task").find_one({"_id": bson.ObjectId(task_id)})
     return task_data
 
 

@@ -146,7 +146,7 @@ class BruteVhost(BaseThread):
 
         if page not in self.success_set:
             success = page.dump_json()
-            logger.success(f"found {success}")
+            logger.info(f"found {success}")
             self.success_set.add(page)
 
     def run(self):

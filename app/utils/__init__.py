@@ -169,7 +169,7 @@ def domain_parsed(domain, fail_silently=True):
     domain = domain.strip()
     try:
         res = get_tld(domain, fix_protocol=True, as_object=True)
-        item = {"subdomain": res.subdomain, "domain": res.domain, "fld": res.fld}
+        item = {"subdomain": res.subdomain, "domain": res.domain, "fld": res.fld}  # type: ignore[union-attr]
         return item
     except Exception as e:
         if not fail_silently:

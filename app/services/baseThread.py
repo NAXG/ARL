@@ -2,7 +2,7 @@ import threading
 import collections
 import time
 import requests.exceptions
-from lxml import etree
+from lxml import etree  # type: ignore[import-untyped]
 from app import utils
 
 logger = utils.get_logger()

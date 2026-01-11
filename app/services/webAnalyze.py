@@ -1,6 +1,6 @@
 import time
 import re
-from wappalyzer import analyze
+from wappalyzer import analyze  # type: ignore[import-not-found]
 from app import utils
 from .baseThread import BaseThread
 

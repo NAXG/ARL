@@ -482,7 +482,7 @@ class GenBackDicts:
             result = [
                 x
                 for x in [
-                    str(res.parsed_url.netloc).split(":")[0],
+                    str(res.parsed_url.netloc).split(":")[0],  # type: ignore[union-attr]
                     res.fld,
                     res.subdomain,
                     res.domain,
