@@ -53,14 +53,16 @@ class MassDNS:
 
     def mass_dns(self):
         """域名爆破"""
-        command = [self.mass_dns_bin, "-q",
-                   f"-r {self.dns_server}",
-                   "-o S",
-                   f"-w {self.mass_dns_output_path}",
-                   f"-s {self.concurrent}",
-                   self.domain_gen_output_path,
-                   "--root"
-                   ]
+        command = [
+            self.mass_dns_bin,
+            "-q",
+            "-r", self.dns_server,
+            "-o", "S",
+            "-w", self.mass_dns_output_path,
+            "-s", str(self.concurrent),
+            self.domain_gen_output_path,
+            "--root"
+        ]
 
         logger.info(" ".join(command))
         utils.exec_system(command, timeout=3600)
